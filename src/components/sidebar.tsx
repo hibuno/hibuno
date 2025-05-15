@@ -1,0 +1,232 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+ MessageCircle,
+ Search,
+ Bell,
+ Home,
+ Newspaper,
+ Menu,
+ X,
+ ImageIcon,
+ FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+// Common navigation links component that works for both mobile and desktop
+const NavigationLinks = ({
+ isMobile = false,
+ onMobileItemClick = () => {},
+}) => {
+ return (
+  <nav className="space-y-1">
+   <Link href="/" onClick={isMobile ? onMobileItemClick : undefined}>
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <Home
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+      }`}
+     />
+     <span>Dashboard</span>
+     {!isMobile && (
+      <Badge className="ml-auto text-xs bg-indigo-500 text-white hidden">
+       New
+      </Badge>
+     )}
+    </Button>
+   </Link>
+   <Link href="/blog" onClick={isMobile ? onMobileItemClick : undefined}>
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <Newspaper
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+      }`}
+     />
+     <span>Blog</span>
+     {!isMobile && (
+      <Badge className="ml-auto text-xs bg-indigo-500 text-white">New</Badge>
+     )}
+    </Button>
+   </Link>
+
+   {/* Tools Section */}
+   <div className="pt-2 pb-1">
+    <div className="text-xs text-zinc-500 px-3 py-1">Tools</div>
+   </div>
+
+   <Link
+    href="/tools/background-removal"
+    onClick={isMobile ? onMobileItemClick : undefined}
+   >
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <ImageIcon
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+      }`}
+     />
+     <span>Background Removal</span>
+    </Button>
+   </Link>
+
+   <Link
+    href="/tools/image-compression"
+    onClick={isMobile ? onMobileItemClick : undefined}
+   >
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <ImageIcon
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+      }`}
+     />
+     <span>Image Compression</span>
+    </Button>
+   </Link>
+
+   <Link
+    href="/tools/text-tools/lowercase"
+    onClick={isMobile ? onMobileItemClick : undefined}
+   >
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <FileText
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+      }`}
+     />
+     <span>Text Tools</span>
+    </Button>
+   </Link>
+  </nav>
+ );
+};
+
+export function Sidebar() {
+ const [showMobileNav, setShowMobileNav] = useState(false);
+
+ // Mobile Header (always rendered but only visible on mobile)
+ const mobileHeader = (
+  <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 border-b border-zinc-700 p-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 md:hidden">
+   <div className="flex items-center gap-1 text-white font-bold">
+    <span>hibuno</span>
+   </div>
+   <div className="flex items-center gap-2">
+    <Button
+     variant="ghost"
+     size="icon"
+     className="text-zinc-400 hover:text-white"
+    >
+     <Search className="h-5 w-5" />
+    </Button>
+    <Button
+     variant="ghost"
+     size="icon"
+     className="text-zinc-400 hover:text-white"
+    >
+     <Bell className="h-5 w-5" />
+    </Button>
+    <Button
+     variant="ghost"
+     size="icon"
+     className="text-zinc-400 hover:text-white"
+     onClick={() => setShowMobileNav(!showMobileNav)}
+    >
+     <Menu className="h-5 w-5" />
+    </Button>
+   </div>
+  </div>
+ );
+
+ // Mobile Navigation Overlay
+ const mobileNav = showMobileNav && (
+  <div className="fixed inset-0 bg-black/80 z-50 backdrop-blur-sm md:hidden">
+   <div className="bg-zinc-900 h-full w-4/5 max-w-xs p-4 border-r border-zinc-700 animate-in slide-in-from-left">
+    <div className="flex justify-between items-center mb-6">
+     <div className="flex items-center gap-1 text-white font-bold">
+      <span>hibuno</span>
+     </div>
+     <Button
+      variant="ghost"
+      size="icon"
+      className="text-zinc-400 hover:text-white"
+      onClick={() => setShowMobileNav(false)}
+     >
+      <X className="h-5 w-5" />
+     </Button>
+    </div>
+
+    {/* Mobile Navigation Content */}
+    <div className="space-y-6">
+     <Button
+      variant="outline"
+      className="w-full justify-start gap-2 mb-4 bg-indigo-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
+     >
+      <MessageCircle className="h-4 w-4 text-blue-400" />
+      <span>Start new chat</span>
+     </Button>
+
+     <NavigationLinks
+      isMobile={true}
+      onMobileItemClick={() => setShowMobileNav(false)}
+     />
+    </div>
+   </div>
+  </div>
+ );
+
+ return (
+  <>
+   {/* Mobile header and navigation */}
+   {mobileHeader}
+   {mobileNav}
+
+   {/* Desktop Sidebar - Hidden on mobile */}
+   <div className="hidden md:block w-64 border-r border-zinc-700 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-800 overflow-y-auto hide-scrollbar fixed h-screen z-30">
+    <div className="p-4">
+     <div className="flex items-center mb-6">
+      <div className="flex items-center gap-1 text-white font-bold">
+       <span>hibuno</span>
+      </div>
+      <div className="flex ml-auto gap-1">
+       <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 text-zinc-400 hover:text-white"
+       >
+        <Bell className="h-4 w-4" />
+       </Button>
+      </div>
+     </div>
+
+     <Button
+      variant="outline"
+      className="w-full justify-start gap-2 mb-6 bg-indigo-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
+     >
+      <MessageCircle className="h-4 w-4 text-blue-400" />
+      <span>Start new chat</span>
+     </Button>
+
+     <div className="space-y-6">
+      <NavigationLinks />
+     </div>
+    </div>
+   </div>
+  </>
+ );
+}
