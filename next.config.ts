@@ -8,10 +8,18 @@ const nextConfig = {
 				hostname: 'images.pexels.com',
 				pathname: '/**',
 			},
+			{
+				protocol: 'https',
+				hostname: 'xoytxbycb99a1cp5.public.blob.vercel-storage.com',
+				pathname: '/**',
+			}
 		],
 	},
 	experimental: {
-		esmExternals: 'loose'
+		esmExternals: 'loose',
+		serverActions: {
+			bodySizeLimit: '5mb',
+		},
 	},
 	// Configure webpack to properly handle WebAssembly modules
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

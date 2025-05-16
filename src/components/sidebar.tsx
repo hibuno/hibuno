@@ -99,6 +99,23 @@ const NavigationLinks = ({
    </Link>
 
    <Link
+    href="/tools/image-analysis"
+    onClick={isMobile ? onMobileItemClick : undefined}
+   >
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <ImageIcon
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+      }`}
+     />
+     <span>Image Analysis</span>
+    </Button>
+   </Link>
+
+   <Link
     href="/tools/text-tools/lowercase"
     onClick={isMobile ? onMobileItemClick : undefined}
    >

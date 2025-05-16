@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Urbanist } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const urbanist = Urbanist({
@@ -91,11 +93,17 @@ export default function RootLayout({
     >
      {children}
     </ThemeProvider>
-    <script
-     defer
-     src="https://cloud.umami.is/script.js"
-     data-website-id="ec4cffd4-b6b3-4560-baa5-99ada5122ed1"
-    ></script>
+    {process.env.NEXT_ENV === "production" && (
+     <>
+      <script
+       defer
+       src="https://cloud.umami.is/script.js"
+       data-website-id="ec4cffd4-b6b3-4560-baa5-99ada5122ed1"
+      ></script>
+      <SpeedInsights />
+      <Analytics />
+     </>
+    )}
    </body>
   </html>
  );
