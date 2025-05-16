@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 // Common navigation links component that works for both mobile and desktop
 const NavigationLinks = ({
@@ -124,7 +125,7 @@ export function Sidebar() {
  const mobileHeader = (
   <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 border-b border-zinc-700 p-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 md:hidden">
    <div className="flex items-center gap-1 text-white font-bold">
-    <span>hibuno</span>
+    <Image src="/logo.svg" alt="Logo" width={86} height={24} />
    </div>
    <div className="flex items-center gap-2">
     <Button
@@ -159,7 +160,7 @@ export function Sidebar() {
    <div className="bg-zinc-900 h-full w-4/5 max-w-xs p-4 border-r border-zinc-700 animate-in slide-in-from-left">
     <div className="flex justify-between items-center mb-6">
      <div className="flex items-center gap-1 text-white font-bold">
-      <span>hibuno</span>
+      <Image src="/logo.svg" alt="Logo" width={86} height={24} />
      </div>
      <Button
       variant="ghost"
@@ -201,7 +202,7 @@ export function Sidebar() {
     <div className="p-4">
      <div className="flex items-center mb-6">
       <div className="flex items-center gap-1 text-white font-bold">
-       <span>hibuno</span>
+       <Image src="/logo.svg" alt="Logo" width={92} height={24} />
       </div>
       <div className="flex ml-auto gap-1">
        <Button
