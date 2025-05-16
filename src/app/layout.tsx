@@ -84,7 +84,7 @@ export default function RootLayout({
 }) {
  return (
   <html lang="en" suppressHydrationWarning>
-   <body className={`${urbanist.variable} antialiased font-sans`}>
+   <body className={`${urbanist.variable} antialiased font-sans pt-16 md:pt-0`}>
     <ThemeProvider
      attribute="class"
      defaultTheme="dark"

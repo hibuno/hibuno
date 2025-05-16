@@ -471,14 +471,14 @@ export default function TextToolsClient({ tool }: { tool: string }) {
 
  return (
   <>
-   <Card className="bg-zinc-800 border-zinc-700 shadow-md">
-    <CardHeader>
+   <Card className="bg-zinc-800 border-zinc-700 shadow-md py-4 gap-2">
+    <CardHeader className="py-0 px-4">
      <CardTitle className="text-sm font-medium flex items-center">
       <FileText className="h-4 w-4 mr-2 text-zinc-400" />
       {showSecondaryInput ? "First Text" : "Input Text"}
      </CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="py-0 px-4">
      <Textarea
       placeholder="Enter or paste your text here..."
       className="min-h-[180px] bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500 text-sm"
@@ -507,49 +507,53 @@ export default function TextToolsClient({ tool }: { tool: string }) {
     </Card>
    )}
 
-   <div className="flex flex-wrap items-center bg-zinc-800/80 border border-zinc-700 rounded-md shadow-sm p-2 text-xs text-zinc-400 justify-between">
-    <Button onClick={() => transformText(tool)}>
-     Run{" "}
-     {tool
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")}
+   <div className="flex flex-col md:flex-row gap-4 mb-4">
+    <Button 
+      onClick={() => transformText(tool)}
+      className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 rounded-md shadow-md transition-colors"
+    >
+      Run{" "}
+      {tool
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")}
     </Button>
-    <div className="flex items-center gap-1">
-     <div className="flex gap-3">
-      <div className="flex items-center gap-1">
-       <span className="text-zinc-500">Chars:</span>
-       <span className="text-violet-400 font-medium">{stats.totalChars}</span>
+    
+    <div className="flex flex-wrap items-center bg-zinc-800/80 border border-zinc-700 rounded-md shadow-sm p-2 text-xs text-zinc-400 w-full md:flex-1">
+      <div className="flex flex-wrap gap-3 w-full justify-between md:justify-around">
+        <div className="flex items-center gap-1">
+          <span className="text-zinc-500">Chars:</span>
+          <span className="text-violet-400 font-medium">{stats.totalChars}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-zinc-500">No Spaces:</span>
+          <span className="text-violet-400 font-medium">
+            {stats.charsExcludingSpaces}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-zinc-500">Words:</span>
+          <span className="text-violet-400 font-medium">{stats.words}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-zinc-500">Sentences:</span>
+          <span className="text-violet-400 font-medium">{stats.sentences}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-zinc-500">Paragraphs:</span>
+          <span className="text-violet-400 font-medium">{stats.paragraphs}</span>
+        </div>
       </div>
-      <div className="flex items-center gap-1">
-       <span className="text-zinc-500">No Spaces:</span>
-       <span className="text-violet-400 font-medium">
-        {stats.charsExcludingSpaces}
-       </span>
-      </div>
-      <div className="flex items-center gap-1">
-       <span className="text-zinc-500">Words:</span>
-       <span className="text-violet-400 font-medium">{stats.words}</span>
-      </div>
-      <div className="flex items-center gap-1">
-       <span className="text-zinc-500">Sentences:</span>
-       <span className="text-violet-400 font-medium">{stats.sentences}</span>
-      </div>
-      <div className="flex items-center gap-1">
-       <span className="text-zinc-500">Paragraphs:</span>
-       <span className="text-violet-400 font-medium">{stats.paragraphs}</span>
-      </div>
-     </div>
     </div>
    </div>
-   <Card className="bg-zinc-800 border-zinc-700 shadow-md">
-    <CardHeader>
+   <Card className="bg-zinc-800 border-zinc-700 shadow-md py-4 gap-2">
+    <CardHeader className="py-0 px-4">
      <CardTitle className="text-sm font-medium flex items-center">
       <FileText className="h-4 w-4 mr-2 text-zinc-400" />
       Result
      </CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="py-0 px-4">
      {isProcessing ? (
       <div className="flex justify-center py-6">
        <Loader2 className="h-5 w-5 animate-spin text-violet-500" />

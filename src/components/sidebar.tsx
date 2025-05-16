@@ -66,6 +66,23 @@ const NavigationLinks = ({
    </div>
 
    <Link
+    href="/tools/image-analysis"
+    onClick={isMobile ? onMobileItemClick : undefined}
+   >
+    <Button
+     variant="ghost"
+     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+    >
+     <ImageIcon
+      className={`h-4 w-4 ${
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+      }`}
+     />
+     <span>Metadata & AI Checker</span>
+    </Button>
+   </Link>
+
+   <Link
     href="/tools/background-removal"
     onClick={isMobile ? onMobileItemClick : undefined}
    >
@@ -96,23 +113,6 @@ const NavigationLinks = ({
       }`}
      />
      <span>Image Compression</span>
-    </Button>
-   </Link>
-
-   <Link
-    href="/tools/image-analysis"
-    onClick={isMobile ? onMobileItemClick : undefined}
-   >
-    <Button
-     variant="ghost"
-     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
-    >
-     <ImageIcon
-      className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-      }`}
-     />
-     <span>Image Analysis</span>
     </Button>
    </Link>
 

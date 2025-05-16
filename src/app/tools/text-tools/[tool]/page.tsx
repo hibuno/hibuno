@@ -102,25 +102,25 @@ export default async function TextToolsPage({
        </Link>
        <h1 className="text-xl font-bold flex items-center">
         <Type className="h-5 w-5 mr-2 text-zinc-400" />
-        Text Tools
+        {(textTools[tool].title || "").replace(/\|.+/, "")}
        </h1>
       </div>
      </div>
 
      <div className="space-y-4">
-      <Card className="bg-zinc-800 border-zinc-700 mt-6">
-       <CardHeader>
+      <TextToolsClient tool={tool} />
+      <Card className="bg-zinc-800 border-zinc-700 mt-4 gap-2 py-4">
+       <CardHeader className="px-4">
         <CardTitle className="text-lg font-medium">
          About {textTools[tool].title}
         </CardTitle>
        </CardHeader>
-       <CardContent>
+       <CardContent className="px-4">
         <div className="space-y-4 text-sm text-zinc-400">
          <p>{textTools[tool].description}</p>
         </div>
        </CardContent>
       </Card>
-      <TextToolsClient tool={tool} />
      </div>
     </div>
    </div>

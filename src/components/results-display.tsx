@@ -1025,9 +1025,10 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
        </div>
 
        <div className="bg-background text-muted-foreground p-4 rounded-lg font-medium">
-        The color palette is extracted using Sightengine&apos;s image analysis.
-        It identifies the dominant color, accent colors, and other significant
-        colors in the image. You can click on any color to copy its hex code.
+        The color palette is extracted using Sightengine&apos;s Metadata & AI
+        Checker. It identifies the dominant color, accent colors, and other
+        significant colors in the image. You can click on any color to copy its
+        hex code.
        </div>
       </div>
      )}

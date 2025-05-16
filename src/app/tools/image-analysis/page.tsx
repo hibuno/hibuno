@@ -9,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/sidebar";
 
 export const metadata: Metadata = {
- title: "Image Analysis Tool - Hibuno",
+ title: "Metadata & AI Checker Tool - Hibuno",
  description:
-  "Analyze images with our free AI-powered image analysis tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+  "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
  keywords: [
-  "image analysis",
+  "Metadata & AI Checker",
   "EXIF data",
   "AI detection",
   "color analysis",
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
  ],
  authors: [{ name: "Hibuno Team" }],
  openGraph: {
-  title: "Image Analysis Tool - Hibuno",
+  title: "Metadata & AI Checker Tool - Hibuno",
   description:
-   "Analyze images with our free AI-powered image analysis tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+   "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
   type: "website",
   url: "/tools/image-analysis",
   siteName: "Hibuno",
@@ -34,19 +34,19 @@ export const metadata: Metadata = {
     url: "/og-tools-image-analysis.jpg",
     width: 1200,
     height: 630,
-    alt: "Hibuno Image Analysis Tool",
+    alt: "Hibuno Metadata & AI Checker Tool",
    },
   ],
  },
  twitter: {
   card: "summary_large_image",
-  title: "Image Analysis Tool - Hibuno",
+  title: "Metadata & AI Checker Tool - Hibuno",
   description:
-   "Analyze images with our free AI-powered image analysis tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+   "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
   images: [
    {
     url: "/og-tools-image-analysis.jpg",
-    alt: "Hibuno Image Analysis Tool",
+    alt: "Hibuno Metadata & AI Checker Tool",
    },
   ],
  },
@@ -56,7 +56,9 @@ export default function ImageAnalysisPage() {
  return (
   <Suspense
    fallback={
-    <div className="p-12 text-center">Loading image analysis tool...</div>
+    <div className="p-12 text-center">
+     Loading Metadata & AI Checker tool...
+    </div>
    }
   >
    <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
@@ -79,7 +81,7 @@ export default function ImageAnalysisPage() {
        </Link>
        <h1 className="text-xl font-bold flex items-center">
         <ImageIcon className="h-5 w-5 mr-2 text-zinc-400" />
-        Image Analysis
+        Metadata & AI Checker
        </h1>
       </div>
      </div>
@@ -102,7 +104,7 @@ export default function ImageAnalysisPage() {
        <Card className="bg-zinc-900 border-zinc-700">
         <CardContent>
          <p className="text-zinc-400 text-sm mt-1">
-          Comprehensive image analysis
+          Comprehensive Metadata & AI Checker
          </p>
          <div className="mt-3 flex flex-wrap gap-2">
           <div className="flex items-center space-x-2">
@@ -138,7 +140,7 @@ export default function ImageAnalysisPage() {
      <Card className="bg-zinc-800 border-zinc-700 mt-6">
       <CardHeader>
        <CardTitle className="text-lg font-medium">
-        About Image Analysis
+        About Metadata & AI Checker
        </CardTitle>
       </CardHeader>
       <CardContent>

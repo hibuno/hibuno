@@ -1,4 +1,4 @@
-// Sightengine API integration for image analysis
+// Sightengine API integration for Metadata & AI Checker
 
 /**
  * Analyzes an image using the Sightengine API
