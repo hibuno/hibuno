@@ -23,15 +23,15 @@ export async function generateMetadata({
  if (!analysis) {
   return {
    title: "Image Not Found - Hibuno",
-   description: "The requested Metadata & AI Checker could not be found.",
+   description: "The requested AI Image Validator could not be found.",
   };
  }
 
  return {
-  title: `${analysis.filename} Analysis - Hibuno Metadata & AI Checker Tool`,
+  title: `${analysis.filename} Analysis - Hibuno AI Image Validator Tool`,
   description: `View detailed analysis of ${analysis.filename} including EXIF data, AI detection, and color information.`,
   openGraph: {
-   title: `Metadata & AI Checker Results - ${analysis.filename}`,
+   title: `AI Image Validator Results - ${analysis.filename}`,
    description: `View detailed analysis of ${analysis.filename} including EXIF data, AI detection, and color information.`,
    type: "website",
    url: `/tools/image-analysis/${(await params).id}`,
@@ -70,7 +70,7 @@ export default async function ResultsPage({ params }: PageProps) {
        </Link>
        <h1 className="text-xl font-bold flex items-center">
         <Camera className="h-5 w-5 mr-2 text-zinc-400" />
-        Metadata & AI Checker Results
+        AI Image Validator Results
        </h1>
       </div>
      </div>

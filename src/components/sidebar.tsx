@@ -78,7 +78,7 @@ const NavigationLinks = ({
        !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
-     <span>Metadata & AI Checker</span>
+     <span>AI Image Validator</span>
     </Button>
    </Link>
 

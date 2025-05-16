@@ -1,6 +1,6 @@
 "use server"
 
-import { put, del } from "@vercel/blob"
+import { put, del, list } from "@vercel/blob"
 import { revalidatePath } from "next/cache"
 import { v4 as uuidv4 } from "uuid"
 import { extractExifData } from "./exif"
@@ -22,10 +22,15 @@ export async function uploadImage(formData: FormData) {
 
 		// Generate a unique ID for the image
 		const id = uuidv4()
+		
+		// Add timestamp to the filename for expiration tracking
+		const timestamp = Date.now()
+		const filename = `${timestamp}_${id}`
 
-		// Upload to Vercel Blob with expiration (3 hours)
-		const blob = await put(`images/${id}`, file, {
+		// Upload to Vercel Blob with timestamp in filename
+		const blob = await put(`images/${filename}`, file, {
 			access: "public",
+			cacheControlMaxAge: 10800,
 			addRandomSuffix: false,
 		})
 
@@ -76,16 +81,17 @@ export async function uploadImage(formData: FormData) {
 		console.log("Storing analysis JSON:", analysisJson.substring(0, 100) + "...")
 
 		// Make sure we're using the correct content type for JSON
-		await put(`analysis/${id}.json`, analysisJson, {
+		await put(`analysis/${filename}.json`, analysisJson, {
 			access: "public",
 			addRandomSuffix: false,
 			contentType: "application/json",
+			cacheControlMaxAge: 10800,
 		})
 
 		// Log the URL where we're storing the analysis
 		const baseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || ""
 		const formattedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`
-		console.log("Analysis stored at:", `${formattedBaseUrl}analysis/${id}.json`)
+		console.log("Analysis stored at:", `${formattedBaseUrl}analysis/${filename}.json`)
 
 		return {
 			success: true,
@@ -103,11 +109,25 @@ export async function uploadImage(formData: FormData) {
 
 export async function getImageAnalysis(id: string) {
 	try {
-		// Construct the URL properly using the environment variable
-		const baseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || ""
-		// Make sure the URL ends with a slash if needed
-		const formattedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`
-		const url = `${formattedBaseUrl}analysis/${id}.json`
+		// First, try to find the analysis file with the timestamp prefix
+		const listResult = await list({
+			prefix: `analysis/`,
+			limit: 100,
+		})
+		
+		// Find the file that ends with the provided ID
+		const analysisFile = listResult.blobs.find(blob => {
+			const filename = blob.pathname.split('/').pop() || ''
+			return filename.endsWith(`${id}.json`)
+		})
+		
+		if (!analysisFile) {
+			console.error(`Analysis file for ID ${id} not found`)
+			return null
+		}
+		
+		// Use the URL from the found file
+		const url = analysisFile.url
 
 		console.log("Fetching analysis from:", url)
 
@@ -143,9 +163,37 @@ export async function getImageAnalysis(id: string) {
 
 export async function deleteImage(id: string) {
 	try {
-		// Delete both the image and analysis files from Vercel Blob
-		await del(`images/${id}`)
-		await del(`analysis/${id}.json`)
+		// Find the files with the timestamp prefix that match the ID
+		const imagesResult = await list({
+			prefix: 'images/',
+			limit: 100,
+		})
+		
+		const analysisResult = await list({
+			prefix: 'analysis/',
+			limit: 100,
+		})
+		
+		// Find the image file that contains the ID
+		const imageFile = imagesResult.blobs.find(blob => {
+			const filename = blob.pathname.split('/').pop() || ''
+			return filename.includes(id)
+		})
+		
+		// Find the analysis file that contains the ID
+		const analysisFile = analysisResult.blobs.find(blob => {
+			const filename = blob.pathname.split('/').pop() || ''
+			return filename.includes(id)
+		})
+		
+		// Delete the files if found
+		if (imageFile) {
+			await del(imageFile.url)
+		}
+		
+		if (analysisFile) {
+			await del(analysisFile.url)
+		}
 
 		revalidatePath("/")
 		return { success: true }
@@ -154,6 +202,59 @@ export async function deleteImage(id: string) {
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : "An unknown error occurred",
+		}
+	}
+}
+
+/**
+ * Deletes files older than the specified hours
+ * @param hours Number of hours after which files should be deleted
+ */
+export async function deleteOldFiles(hours: number = 3) {
+	try {
+		const currentTime = Date.now()
+		const expirationTime = currentTime - (hours * 60 * 60 * 1000) // Convert hours to milliseconds
+		let cursor: string | undefined
+		let deletedCount = 0
+		
+		do {
+			// List all blobs with pagination
+			const listResult = await list({
+				cursor,
+				limit: 100,
+			})
+			
+			// Filter blobs that are older than the expiration time
+			const blobsToDelete = listResult.blobs.filter(blob => {
+				const pathname = blob.pathname
+				// Extract timestamp from filename (assuming format: timestamp_id.ext)
+				const filename = pathname.split('/').pop() || ''
+				const timestampStr = filename.split('_')[0]
+				
+				if (!timestampStr || isNaN(Number(timestampStr))) {
+					return false // Skip files without proper timestamp format
+				}
+				
+				const timestamp = Number(timestampStr)
+				return timestamp < expirationTime
+			})
+			
+			// Delete the filtered blobs
+			if (blobsToDelete.length > 0) {
+				await del(blobsToDelete.map(blob => blob.url))
+				deletedCount += blobsToDelete.length
+			}
+			
+			cursor = listResult.cursor
+		} while (cursor)
+		
+		console.log(`Deleted ${deletedCount} expired files`)
+		return { success: true, deletedCount }
+	} catch (error) {
+		console.error("Error deleting old files:", error)
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "An unknown error occurred"
 		}
 	}
 }

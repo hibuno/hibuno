@@ -9,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/sidebar";
 
 export const metadata: Metadata = {
- title: "Metadata & AI Checker Tool - Hibuno",
+ title: "AI Image Validator Tool - Hibuno",
  description:
-  "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+  "Analyze images with our free AI-powered AI Image Validator tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
  keywords: [
-  "Metadata & AI Checker",
+  "AI Image Validator",
   "EXIF data",
   "AI detection",
   "color analysis",
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
  ],
  authors: [{ name: "Hibuno Team" }],
  openGraph: {
-  title: "Metadata & AI Checker Tool - Hibuno",
+  title: "AI Image Validator Tool - Hibuno",
   description:
-   "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+   "Analyze images with our free AI-powered AI Image Validator tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
   type: "website",
   url: "/tools/image-analysis",
   siteName: "Hibuno",
@@ -34,19 +34,19 @@ export const metadata: Metadata = {
     url: "/og-tools-image-analysis.jpg",
     width: 1200,
     height: 630,
-    alt: "Hibuno Metadata & AI Checker Tool",
+    alt: "Hibuno AI Image Validator Tool",
    },
   ],
  },
  twitter: {
   card: "summary_large_image",
-  title: "Metadata & AI Checker Tool - Hibuno",
+  title: "AI Image Validator Tool - Hibuno",
   description:
-   "Analyze images with our free AI-powered Metadata & AI Checker tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
+   "Analyze images with our free AI-powered AI Image Validator tool. Extract EXIF data, detect AI-generated content, and get detailed color information.",
   images: [
    {
     url: "/og-tools-image-analysis.jpg",
-    alt: "Hibuno Metadata & AI Checker Tool",
+    alt: "Hibuno AI Image Validator Tool",
    },
   ],
  },
@@ -56,9 +56,7 @@ export default function ImageAnalysisPage() {
  return (
   <Suspense
    fallback={
-    <div className="p-12 text-center">
-     Loading Metadata & AI Checker tool...
-    </div>
+    <div className="p-12 text-center">Loading AI Image Validator tool...</div>
    }
   >
    <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
@@ -81,7 +79,7 @@ export default function ImageAnalysisPage() {
        </Link>
        <h1 className="text-xl font-bold flex items-center">
         <ImageIcon className="h-5 w-5 mr-2 text-zinc-400" />
-        Metadata & AI Checker
+        AI Image Validator
        </h1>
       </div>
      </div>
@@ -104,7 +102,7 @@ export default function ImageAnalysisPage() {
        <Card className="bg-zinc-900 border-zinc-700">
         <CardContent>
          <p className="text-zinc-400 text-sm mt-1">
-          Comprehensive Metadata & AI Checker
+          Comprehensive AI Image Validator
          </p>
          <div className="mt-3 flex flex-wrap gap-2">
           <div className="flex items-center space-x-2">
@@ -140,7 +138,7 @@ export default function ImageAnalysisPage() {
      <Card className="bg-zinc-800 border-zinc-700 mt-6">
       <CardHeader>
        <CardTitle className="text-lg font-medium">
-        About Metadata & AI Checker
+        About AI Image Validator
        </CardTitle>
       </CardHeader>
       <CardContent>
