@@ -30,8 +30,12 @@ export default async function BlogPostPage({
  const allPosts = await getAllPosts();
  const relatedPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
 
- // Serialize the MDX content
- const mdxSource = await serialize(post.content);
+ // Serialize the MDX content with proper options for SSR
+ const mdxSource = await serialize(post.content, {
+  mdxOptions: {
+   development: process.env.NODE_ENV === 'development',
+  },
+ });
 
  return (
   <Suspense fallback={<div className="p-12 text-center">Loading post...</div>}>

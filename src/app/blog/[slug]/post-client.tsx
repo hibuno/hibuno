@@ -8,8 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { PostMeta } from "@/lib/mdx";
-import { MDXRemote } from "next-mdx-remote";
+import dynamic from "next/dynamic";
 import { ArrowLeft, Clock, ChevronUp } from "lucide-react";
+
+// Dynamically import MDXRemote to avoid SSR issues
+const MDXRemote = dynamic(() => import("next-mdx-remote").then(mod => mod.MDXRemote), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-zinc-800 h-96 rounded-md"></div>
+});
 
 interface PostClientProps {
  post: PostMeta;
@@ -111,7 +117,9 @@ export default function PostClient({
 
       {/* Article Content */}
       <div className="prose prose-invert prose-zinc text-justify !max-w-none mb-10">
-       <MDXRemote {...mdxSource} />
+       <div className="prose prose-invert prose-zinc max-w-none">
+        <MDXRemote {...mdxSource} />
+       </div>
       </div>
 
       {/* Related Articles */}

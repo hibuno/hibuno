@@ -10,6 +10,9 @@ const nextConfig = {
 			},
 		],
 	},
+	experimental: {
+		esmExternals: 'loose'
+	},
 	// Configure webpack to properly handle WebAssembly modules
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	webpack: (config: any) => {

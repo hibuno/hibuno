@@ -86,6 +86,7 @@ export function useImageQueue(
     setTimeout(processNextInQueue, 0);
    }
   },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   [options, outputType, setImages]
  );
 

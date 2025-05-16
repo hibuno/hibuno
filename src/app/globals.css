@@ -1,7 +1,6 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark mode styles */
 
 :root {
 	--radius: 0.625rem;
@@ -72,7 +71,8 @@
 	--sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
-@theme inline {
+/* Theme variables */
+:root {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -112,10 +112,12 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		border-color: var(--border);
+		outline-color: color-mix(in oklch, var(--ring), transparent 50%);
 	}
 
 	body {
-		@apply bg-background text-foreground;
+		background-color: var(--background);
+		color: var(--foreground);
 	}
 }
