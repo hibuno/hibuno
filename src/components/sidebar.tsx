@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
- Radar,
  Search,
  Bell,
  Home,
@@ -15,14 +14,55 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { textTools } from "@/lib/text-tools";
+
+// Define image tools data structure similar to textTools for consistency
+const imageTools = {
+ "image-analysis": {
+  title: "AI Image Validator",
+  path: "/tools/image-analysis",
+ },
+ "background-removal": {
+  title: "Background Removal",
+  path: "/tools/background-removal",
+ },
+ "image-compression": {
+  title: "Image Compression",
+  path: "/tools/image-compression",
+ },
+};
 
 // Common navigation links component that works for both mobile and desktop
 const NavigationLinks = ({
  isMobile = false,
  onMobileItemClick = () => {},
+ searchQuery = "",
 }) => {
+ // Filter image tools based on search query
+ const filteredImageTools = useMemo(() => {
+  if (!searchQuery) return Object.entries(imageTools);
+  const query = searchQuery.toLowerCase();
+  return Object.entries(imageTools).filter(([, tool]) =>
+   tool.title.toLowerCase().includes(query)
+  );
+ }, [searchQuery]);
+
+ // Filter text tools based on search query
+ const filteredTextTools = useMemo(() => {
+  if (!searchQuery) return Object.entries(textTools);
+  const query = searchQuery.toLowerCase();
+  return Object.entries(textTools).filter(([, tool]) => {
+   const title = tool.title.replace(/\|.+/, "").trim();
+   return title.toLowerCase().includes(query);
+  });
+ }, [searchQuery]);
+
+ // Determine if we should show sections based on filtered results
+ const showImageSection = filteredImageTools.length > 0;
+ const showTextSection = filteredTextTools.length > 0;
+
  return (
   <nav className="space-y-1">
    <Link href="/" onClick={isMobile ? onMobileItemClick : undefined}>
@@ -61,91 +101,77 @@ const NavigationLinks = ({
    </Link>
 
    {/* Image Section */}
-   <div className="pt-2 pb-1">
-    <div className="text-xs text-zinc-500 px-3 py-1">Image</div>
-   </div>
+   {showImageSection && (
+    <>
+     <div className="pt-2 pb-1">
+      <div className="text-xs text-zinc-500 px-3 py-1">Image</div>
+     </div>
 
-   <Link
-    href="/tools/image-analysis"
-    onClick={isMobile ? onMobileItemClick : undefined}
-   >
-    <Button
-     variant="ghost"
-     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
-    >
-     <ImageIcon
-      className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-      }`}
-     />
-     <span>AI Image Validator</span>
-    </Button>
-   </Link>
-
-   <Link
-    href="/tools/background-removal"
-    onClick={isMobile ? onMobileItemClick : undefined}
-   >
-    <Button
-     variant="ghost"
-     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
-    >
-     <ImageIcon
-      className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-      }`}
-     />
-     <span>Background Removal</span>
-    </Button>
-   </Link>
-
-   <Link
-    href="/tools/image-compression"
-    onClick={isMobile ? onMobileItemClick : undefined}
-   >
-    <Button
-     variant="ghost"
-     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
-    >
-     <ImageIcon
-      className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-      }`}
-     />
-     <span>Image Compression</span>
-    </Button>
-   </Link>
+     {filteredImageTools.map(([key, tool]) => (
+      <Link
+       key={key}
+       href={tool.path}
+       onClick={isMobile ? onMobileItemClick : undefined}
+      >
+       <Button
+        variant="ghost"
+        className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+       >
+        <ImageIcon
+         className={`h-4 w-4 ${
+          !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+         }`}
+        />
+        <span>{tool.title}</span>
+       </Button>
+      </Link>
+     ))}
+    </>
+   )}
 
    {/* Text Section */}
-   <div className="pt-2 pb-1">
-    <div className="text-xs text-zinc-500 px-3 py-1">Text</div>
-   </div>
+   {showTextSection && (
+    <>
+     <div className="pt-2 pb-1">
+      <div className="text-xs text-zinc-500 px-3 py-1">Text Utilities</div>
+     </div>
 
-   {Object.keys(textTools).map((tool) => (
-    <Link
-     key={tool}
-     href={`/tools/text-tools/${tool}`}
-     onClick={isMobile ? onMobileItemClick : undefined}
-    >
-     <Button
-      variant="ghost"
-      className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
-     >
-      <FileText
-       className={`h-4 w-4 ${
-        !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-       }`}
-      />
-      <span>{(textTools[tool].title || "").replace(/\|.+/, "")}</span>
-     </Button>
-    </Link>
-   ))}
+     {filteredTextTools.map(([tool, details]) => (
+      <Link
+       key={tool}
+       href={`/tools/text-tools/${tool}`}
+       onClick={isMobile ? onMobileItemClick : undefined}
+      >
+       <Button
+        variant="ghost"
+        className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+       >
+        <FileText
+         className={`h-4 w-4 ${
+          !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+         }`}
+        />
+        <span>{(details.title || "").replace(/\|.+/, "")}</span>
+       </Button>
+      </Link>
+     ))}
+    </>
+   )}
+
+   {filteredImageTools.length === 0 &&
+    filteredTextTools.length === 0 &&
+    searchQuery && (
+     <div className="text-zinc-400 text-center text-xs p-4 border border-zinc-700	rounded-lg mt-4">
+      No tools found matching &quot;{searchQuery}&quot;
+     </div>
+    )}
   </nav>
  );
 };
 
 export function Sidebar() {
  const [showMobileNav, setShowMobileNav] = useState(false);
+ const [searchQuery, setSearchQuery] = useState("");
 
  // Mobile Header (always rendered but only visible on mobile)
  const mobileHeader = (
@@ -200,17 +226,21 @@ export function Sidebar() {
 
     {/* Mobile Navigation Content */}
     <div className="space-y-6">
-     <Button
-      variant="outline"
-      className="w-full justify-start gap-2 mb-4 bg-violet-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
-     >
-      <Radar className="h-4 w-4 text-violet-400" />
-      <span>What&apos;s new?</span>
-     </Button>
+     <div className="relative mb-4">
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" />
+      <Input
+       type="text"
+       placeholder="Search tools..."
+       className="pl-9 bg-zinc-800/50 border-zinc-700 text-zinc-200 placeholder:text-zinc-500"
+       value={searchQuery}
+       onChange={(e) => setSearchQuery(e.target.value)}
+      />
+     </div>
 
      <NavigationLinks
       isMobile={true}
       onMobileItemClick={() => setShowMobileNav(false)}
+      searchQuery={searchQuery}
      />
     </div>
    </div>
@@ -241,16 +271,19 @@ export function Sidebar() {
       </div>
      </div>
 
-     <Button
-      variant="outline"
-      className="w-full justify-start gap-2 mb-6 bg-violet-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
-     >
-      <Radar className="h-4 w-4 text-violet-400" />
-      <span>What&apos;s new?</span>
-     </Button>
+     <div className="relative mb-6">
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" />
+      <Input
+       type="text"
+       placeholder="Search tools..."
+       className="pl-9 bg-zinc-800/50 border-zinc-700 text-zinc-200 placeholder:text-zinc-500"
+       value={searchQuery}
+       onChange={(e) => setSearchQuery(e.target.value)}
+      />
+     </div>
 
      <div className="space-y-6">
-      <NavigationLinks />
+      <NavigationLinks searchQuery={searchQuery} />
      </div>
     </div>
    </div>

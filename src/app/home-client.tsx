@@ -22,8 +22,8 @@ const toolCategories = [
    "Powerful text manipulation utilities for all your content needs",
   icon: "📝",
   usage: "12/30 Tools Used",
-  color: "bg-violet-100",
-  textColor: "text-violet-900",
+  color: "bg-indigo-500/30",
+  textColor: "text-white",
   link: "/tools/text-tools/lowercase",
  },
  {
@@ -32,8 +32,8 @@ const toolCategories = [
   description: "Browser-based image processing with no uploads required",
   icon: "🖼️",
   usage: "5/15 Tools Used",
-  color: "bg-emerald-100",
-  textColor: "text-emerald-900",
+  color: "bg-lime-500/30",
+  textColor: "text-white",
   link: "/tools/image-compression",
  },
  {
@@ -42,8 +42,8 @@ const toolCategories = [
   description: "New tools being developed for your needs",
   icon: "🚀",
   usage: "0/5 Tools Used",
-  color: "bg-purple-100",
-  textColor: "text-purple-900",
+  color: "bg-pink-500/30",
+  textColor: "text-white",
   link: "/blog",
  },
 ];
@@ -172,9 +172,9 @@ export default function HomeClient() {
           <div className="font-medium">{category.title}</div>
           <Button
            asChild
-           variant="ghost"
+           variant="outline"
            size="sm"
-           className="mt-2 p-0 h-auto"
+           className="mt-2 py-1.5 h-auto"
            onClick={() => trackCategoryClick(category.id, category.title)}
           >
            <Link href={category.link} className="flex items-center text-xs">
@@ -222,38 +222,6 @@ export default function HomeClient() {
             </div>
             <ChevronRight className="h-5 w-5 text-zinc-500 ml-auto" />
            </Link>
-          </CardContent>
-         </Card>
-        ))}
-       </div>
-      </div>
-
-      {/* Recent Blog Posts */}
-      <div>
-       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Recent Updates</h2>
-        <Button
-         asChild
-         variant="ghost"
-         size="sm"
-         className="text-zinc-400 hover:text-zinc-200"
-        >
-         <Link href="/blog" className="flex items-center">
-          View All <ChevronRight className="h-4 w-4 ml-1" />
-         </Link>
-        </Button>
-       </div>
-       <div className="space-y-4">
-        {recentPosts.map((post, index) => (
-         <Card key={index} className="bg-zinc-800 border-zinc-700">
-          <CardContent className="p-4">
-           <div className="text-xs text-zinc-400 mb-1">{post.date}</div>
-           <Link href={post.link} onClick={() => trackBlogClick(post.title)}>
-            <h3 className="font-medium text-zinc-200 hover:text-white transition-colors">
-             {post.title}
-            </h3>
-           </Link>
-           <p className="text-sm text-zinc-400 mt-1">{post.excerpt}</p>
           </CardContent>
          </Card>
         ))}
@@ -347,6 +315,38 @@ export default function HomeClient() {
         </div>
        </CardContent>
       </Card>
+
+      {/* Recent Blog Posts */}
+      <div>
+       <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Recent Updates</h2>
+        <Button
+         asChild
+         variant="ghost"
+         size="sm"
+         className="text-zinc-400 hover:text-zinc-200"
+        >
+         <Link href="/blog" className="flex items-center">
+          View All <ChevronRight className="h-4 w-4 ml-1" />
+         </Link>
+        </Button>
+       </div>
+       <div className="space-y-4">
+        {recentPosts.map((post, index) => (
+         <Card key={index} className="bg-zinc-800 border-zinc-700">
+          <CardContent className="p-4">
+           <div className="text-xs text-zinc-400 mb-1">{post.date}</div>
+           <Link href={post.link} onClick={() => trackBlogClick(post.title)}>
+            <h3 className="font-medium text-zinc-200 hover:text-white transition-colors">
+             {post.title}
+            </h3>
+           </Link>
+           <p className="text-sm text-zinc-400 mt-1">{post.excerpt}</p>
+          </CardContent>
+         </Card>
+        ))}
+       </div>
+      </div>
      </div>
     </div>
    </div>
