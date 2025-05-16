@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Urbanist } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const urbanist = Urbanist({
@@ -93,6 +94,8 @@ export default function RootLayout({
     >
      {children}
     </ThemeProvider>
+    <Toaster />
+    {/* Load Umami analytics in all environments for testing */}
     {process.env.NEXT_ENV === "production" && (
      <>
       <script

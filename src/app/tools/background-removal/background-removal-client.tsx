@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import * as ort from "onnxruntime-web";
+import { trackFeatureUsage, FeatureCategory } from "@/lib/analytics";
 
 export default function BackgroundRemovalClient() {
  const [file, setFile] = useState<File | null>(null);
@@ -44,7 +45,16 @@ export default function BackgroundRemovalClient() {
   setProcessedImageUrl(null);
   setProcessedSize(null);
   setError(null);
+
+  // Track file upload event
+  trackFeatureUsage(
+   FeatureCategory.BACKGROUND_REMOVAL,
+   "upload",
+   "image",
+   acceptedFile.size
+  );
  };
+
  const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
    const img = new window.Image();
@@ -222,9 +232,28 @@ export default function BackgroundRemovalClient() {
    const base64Data = processedDataUrl.split(",")[1];
    const processedSizeApprox = Math.ceil((base64Data.length * 3) / 4);
    setProcessedSize(processedSizeApprox);
+
+   // Track successful background removal
+   const compressionRatio = originalSize
+    ? (1 - processedSizeApprox / originalSize) * 100
+    : 0;
+   trackFeatureUsage(
+    FeatureCategory.BACKGROUND_REMOVAL,
+    "process",
+    "remove_background_success",
+    Math.round(compressionRatio)
+   );
   } catch (err) {
    console.error(err);
    setError(err instanceof Error ? err.message : "An unknown error occurred");
+
+   // Track error in background removal
+   trackFeatureUsage(
+    FeatureCategory.BACKGROUND_REMOVAL,
+    "error",
+    "remove_background_failed",
+    err instanceof Error ? err.message : "unknown_error"
+   );
   } finally {
    setIsProcessing(false);
    setIsLoadingModel(false);
@@ -297,7 +326,7 @@ export default function BackgroundRemovalClient() {
            {isProcessing ? (
             <>
              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-             {isLoadingModel ? 'Loading model...' : 'Processing...'}
+             {isLoadingModel ? "Loading model..." : "Processing..."}
             </>
            ) : (
             <>

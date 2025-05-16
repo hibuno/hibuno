@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
 
 // Text statistics interface
 interface TextStats {
@@ -314,6 +315,61 @@ export default function TextToolsClient({ tool }: { tool: string }) {
   },
  };
 
+ // Copy output text to clipboard
+ const handleCopyToClipboard = () => {
+  if (!outputText.trim()) return;
+
+  navigator.clipboard
+   .writeText(outputText)
+   .then(() => {
+    toast({
+     title: "Copied to clipboard",
+     description: "The transformed text has been copied to your clipboard.",
+     duration: 2000,
+    });
+   })
+   .catch((error) => {
+    console.error("Failed to copy text:", error);
+    toast({
+     title: "Copy failed",
+     description: "Could not copy text to clipboard.",
+     variant: "destructive",
+     duration: 2000,
+    });
+   });
+ };
+
+ // Download output text as a file
+ const handleDownload = () => {
+  if (!outputText.trim()) return;
+
+  try {
+   const blob = new Blob([outputText], { type: "text/plain" });
+   const url = URL.createObjectURL(blob);
+   const a = document.createElement("a");
+   a.href = url;
+   a.download = `${tool}-output.txt`;
+   document.body.appendChild(a);
+   a.click();
+   document.body.removeChild(a);
+   URL.revokeObjectURL(url);
+
+   toast({
+    title: "Download started",
+    description: "Your file is being downloaded.",
+    duration: 2000,
+   });
+  } catch (error) {
+   console.error("Failed to download text:", error);
+   toast({
+    title: "Download failed",
+    description: "Could not download the text file.",
+    variant: "destructive",
+    duration: 2000,
+   });
+  }
+ };
+
  // Transform text based on transformation type
  const transformText = (transformType: string) => {
   if (!inputText.trim()) {
@@ -508,42 +564,42 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    )}
 
    <div className="flex flex-col md:flex-row gap-4 mb-4">
-    <Button 
-      onClick={() => transformText(tool)}
-      className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 rounded-md shadow-md transition-colors"
+    <Button
+     onClick={() => transformText(tool)}
+     className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 rounded-md shadow-md transition-colors"
     >
-      Run{" "}
-      {tool
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")}
+     Run{" "}
+     {tool
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")}
     </Button>
-    
+
     <div className="flex flex-wrap items-center bg-zinc-800/80 border border-zinc-700 rounded-md shadow-sm p-2 text-xs text-zinc-400 w-full md:flex-1">
-      <div className="flex flex-wrap gap-3 w-full justify-between md:justify-around">
-        <div className="flex items-center gap-1">
-          <span className="text-zinc-500">Chars:</span>
-          <span className="text-violet-400 font-medium">{stats.totalChars}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-zinc-500">No Spaces:</span>
-          <span className="text-violet-400 font-medium">
-            {stats.charsExcludingSpaces}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-zinc-500">Words:</span>
-          <span className="text-violet-400 font-medium">{stats.words}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-zinc-500">Sentences:</span>
-          <span className="text-violet-400 font-medium">{stats.sentences}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-zinc-500">Paragraphs:</span>
-          <span className="text-violet-400 font-medium">{stats.paragraphs}</span>
-        </div>
+     <div className="flex flex-wrap gap-3 w-full justify-between md:justify-around">
+      <div className="flex items-center gap-1">
+       <span className="text-zinc-500">Chars:</span>
+       <span className="text-violet-400 font-medium">{stats.totalChars}</span>
       </div>
+      <div className="flex items-center gap-1">
+       <span className="text-zinc-500">No Spaces:</span>
+       <span className="text-violet-400 font-medium">
+        {stats.charsExcludingSpaces}
+       </span>
+      </div>
+      <div className="flex items-center gap-1">
+       <span className="text-zinc-500">Words:</span>
+       <span className="text-violet-400 font-medium">{stats.words}</span>
+      </div>
+      <div className="flex items-center gap-1">
+       <span className="text-zinc-500">Sentences:</span>
+       <span className="text-violet-400 font-medium">{stats.sentences}</span>
+      </div>
+      <div className="flex items-center gap-1">
+       <span className="text-zinc-500">Paragraphs:</span>
+       <span className="text-violet-400 font-medium">{stats.paragraphs}</span>
+      </div>
+     </div>
     </div>
    </div>
    <Card className="bg-zinc-800 border-zinc-700 shadow-md py-4 gap-2">
@@ -563,11 +619,35 @@ export default function TextToolsClient({ tool }: { tool: string }) {
        {diffHighlightedOutput}
       </div>
      ) : (
-      <Textarea
-       className="min-h-[180px] bg-zinc-900 border-zinc-700 text-zinc-200 text-sm"
-       value={outputText}
-       readOnly
-      />
+      <div className="relative">
+       <Textarea
+        className="min-h-[180px] bg-zinc-900 border-zinc-700 text-zinc-200 text-sm"
+        value={outputText}
+        readOnly
+       />
+       {outputText && (
+        <div className="absolute top-2 right-2 flex gap-2">
+         <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-zinc-800 hover:bg-zinc-700"
+          onClick={handleCopyToClipboard}
+          title="Copy to clipboard"
+         >
+          <Copy className="h-4 w-4 text-zinc-400" />
+         </Button>
+         <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-zinc-800 hover:bg-zinc-700"
+          onClick={handleDownload}
+          title="Download as text file"
+         >
+          <Download className="h-4 w-4 text-zinc-400" />
+         </Button>
+        </div>
+       )}
+      </div>
      )}
     </CardContent>
    </Card>

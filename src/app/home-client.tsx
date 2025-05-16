@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/sidebar";
+import { trackFeatureUsage, FeatureCategory } from "@/lib/analytics";
+import { useEffect } from "react";
 
 // Tool categories with their features
 const toolCategories = [
@@ -87,6 +89,32 @@ const recentPosts = [
 ];
 
 export default function HomeClient() {
+ // Track page view when component mounts
+ useEffect(() => {
+  // Track home page view
+  trackFeatureUsage(FeatureCategory.HOME, "view", "home_page");
+ }, []);
+
+ // Function to track tool category clicks
+ const trackCategoryClick = (categoryId: string, categoryTitle: string) => {
+  trackFeatureUsage(
+   FeatureCategory.HOME,
+   "click",
+   `category_${categoryId}`,
+   categoryTitle
+  );
+ };
+
+ // Function to track popular tool clicks
+ const trackToolClick = (toolTitle: string) => {
+  trackFeatureUsage(FeatureCategory.HOME, "click", "popular_tool", toolTitle);
+ };
+
+ // Function to track blog post clicks
+ const trackBlogClick = (postTitle: string) => {
+  trackFeatureUsage(FeatureCategory.HOME, "click", "blog_post", postTitle);
+ };
+
  return (
   <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
    {/* Sidebar */}
@@ -111,6 +139,14 @@ export default function HomeClient() {
         <Button
          asChild
          className="bg-white text-violet-900 hover:bg-violet-100"
+         onClick={() =>
+          trackFeatureUsage(
+           FeatureCategory.HOME,
+           "click",
+           "cta_button",
+           "Try Our Tools"
+          )
+         }
         >
          <Link href="/tools/text-tools/lowercase">Try Our Tools</Link>
         </Button>
@@ -134,7 +170,13 @@ export default function HomeClient() {
           <div className="text-2xl mb-2">{category.icon}</div>
           <div className="text-xs mb-1">{category.usage}</div>
           <div className="font-medium">{category.title}</div>
-          <Button asChild variant="ghost" size="sm" className="mt-2 p-0 h-auto">
+          <Button
+           asChild
+           variant="ghost"
+           size="sm"
+           className="mt-2 p-0 h-auto"
+           onClick={() => trackCategoryClick(category.id, category.title)}
+          >
            <Link href={category.link} className="flex items-center text-xs">
             Explore <ChevronRight className="h-3 w-3 ml-1" />
            </Link>
@@ -166,7 +208,11 @@ export default function HomeClient() {
           className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700/50 transition-colors"
          >
           <CardContent className="p-4">
-           <Link href={tool.link} className="flex items-start">
+           <Link
+            href={tool.link}
+            className="flex items-start"
+            onClick={() => trackToolClick(tool.title)}
+           >
             <div className="bg-violet-900/20 p-2 rounded-full mr-4">
              {tool.icon}
             </div>
@@ -202,7 +248,7 @@ export default function HomeClient() {
          <Card key={index} className="bg-zinc-800 border-zinc-700">
           <CardContent className="p-4">
            <div className="text-xs text-zinc-400 mb-1">{post.date}</div>
-           <Link href={post.link}>
+           <Link href={post.link} onClick={() => trackBlogClick(post.title)}>
             <h3 className="font-medium text-zinc-200 hover:text-white transition-colors">
              {post.title}
             </h3>
@@ -297,39 +343,6 @@ export default function HomeClient() {
          <div>
           <h3 className="text-sm font-medium text-zinc-200">No Installation</h3>
           <p className="text-xs text-zinc-400">Use directly in your browser</p>
-         </div>
-        </div>
-       </CardContent>
-      </Card>
-
-      {/* Usage Stats */}
-      <Card className="bg-zinc-800 border-zinc-700">
-       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Usage Statistics</CardTitle>
-       </CardHeader>
-       <CardContent>
-        <div className="space-y-2">
-         <div className="flex justify-between text-sm">
-          <span className="text-zinc-400">Text Tools</span>
-          <span className="text-zinc-200">65%</span>
-         </div>
-         <div className="w-full bg-zinc-700 h-2 rounded-full overflow-hidden">
-          <div
-           className="bg-violet-500 h-2 rounded-full"
-           style={{ width: "65%" }}
-          ></div>
-         </div>
-        </div>
-        <div className="space-y-2 mt-3">
-         <div className="flex justify-between text-sm">
-          <span className="text-zinc-400">Image Tools</span>
-          <span className="text-zinc-200">35%</span>
-         </div>
-         <div className="w-full bg-zinc-700 h-2 rounded-full overflow-hidden">
-          <div
-           className="bg-emerald-500 h-2 rounded-full"
-           style={{ width: "35%" }}
-          ></div>
          </div>
         </div>
        </CardContent>
