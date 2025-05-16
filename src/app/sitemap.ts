@@ -57,6 +57,10 @@ const getTextToolPages = () => {
 		'extract-emails',
 		'extract-urls',
 		'extract-numbers',
+		'word-frequency',
+		'base64-encode',
+		'base64-decode',
+		'compare-texts',
 	];
 
 	return textTools.map(tool => ({

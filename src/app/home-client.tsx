@@ -20,8 +20,8 @@ const toolCategories = [
    "Powerful text manipulation utilities for all your content needs",
   icon: "📝",
   usage: "12/30 Tools Used",
-  color: "bg-indigo-100",
-  textColor: "text-indigo-900",
+  color: "bg-violet-100",
+  textColor: "text-violet-900",
   link: "/tools/text-tools/lowercase",
  },
  {
@@ -98,26 +98,26 @@ export default function HomeClient() {
      {/* Left Column */}
      <div className="md:col-span-2 space-y-6">
       {/* Hero Section */}
-      <div className="bg-indigo-900 rounded-xl p-6 flex items-center">
+      <div className="bg-violet-900 rounded-xl p-6 flex items-center">
        <div className="flex-1">
         <h1 className="text-2xl font-bold text-white">Welcome to Hibuno!</h1>
         <h2 className="text-2xl font-bold text-white mb-1">
          Free Web Tools Dashboard
         </h2>
-        <p className="text-indigo-200 mb-4">
+        <p className="text-violet-200 mb-4">
          All tools run directly in your browser - your data never leaves your
          device.
         </p>
         <Button
          asChild
-         className="bg-white text-indigo-900 hover:bg-indigo-100"
+         className="bg-white text-violet-900 hover:bg-violet-100"
         >
          <Link href="/tools/text-tools/lowercase">Try Our Tools</Link>
         </Button>
        </div>
        <div className="hidden md:block">
-        <div className="w-32 h-32 flex items-center justify-center bg-indigo-800 rounded-lg">
-         <FileText className="w-16 h-16 text-indigo-200" />
+        <div className="w-32 h-32 flex items-center justify-center bg-violet-800 rounded-lg">
+         <FileText className="w-16 h-16 text-violet-200" />
         </div>
        </div>
       </div>
@@ -167,7 +167,7 @@ export default function HomeClient() {
          >
           <CardContent className="p-4">
            <Link href={tool.link} className="flex items-start">
-            <div className="bg-indigo-900/20 p-2 rounded-full mr-4">
+            <div className="bg-violet-900/20 p-2 rounded-full mr-4">
              {tool.icon}
             </div>
             <div>
@@ -269,8 +269,8 @@ export default function HomeClient() {
        </CardHeader>
        <CardContent className="space-y-3">
         <div className="flex items-start">
-         <div className="bg-indigo-900/20 p-1 rounded-full mr-3">
-          <Check className="h-4 w-4 text-indigo-400" />
+         <div className="bg-violet-900/20 p-1 rounded-full mr-3">
+          <Check className="h-4 w-4 text-violet-400" />
          </div>
          <div>
           <h3 className="text-sm font-medium text-zinc-200">100% Free</h3>
@@ -280,8 +280,8 @@ export default function HomeClient() {
          </div>
         </div>
         <div className="flex items-start">
-         <div className="bg-indigo-900/20 p-1 rounded-full mr-3">
-          <Check className="h-4 w-4 text-indigo-400" />
+         <div className="bg-violet-900/20 p-1 rounded-full mr-3">
+          <Check className="h-4 w-4 text-violet-400" />
          </div>
          <div>
           <h3 className="text-sm font-medium text-zinc-200">Privacy First</h3>
@@ -291,8 +291,8 @@ export default function HomeClient() {
          </div>
         </div>
         <div className="flex items-start">
-         <div className="bg-indigo-900/20 p-1 rounded-full mr-3">
-          <Check className="h-4 w-4 text-indigo-400" />
+         <div className="bg-violet-900/20 p-1 rounded-full mr-3">
+          <Check className="h-4 w-4 text-violet-400" />
          </div>
          <div>
           <h3 className="text-sm font-medium text-zinc-200">No Installation</h3>
@@ -315,7 +315,7 @@ export default function HomeClient() {
          </div>
          <div className="w-full bg-zinc-700 h-2 rounded-full overflow-hidden">
           <div
-           className="bg-indigo-500 h-2 rounded-full"
+           className="bg-violet-500 h-2 rounded-full"
            style={{ width: "65%" }}
           ></div>
          </div>

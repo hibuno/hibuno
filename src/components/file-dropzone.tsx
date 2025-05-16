@@ -66,7 +66,7 @@ export function FileDropzone({
 
  const removeFile = (fileToRemove?: File) => {
   if (fileToRemove) {
-   setFiles(files.filter(file => file !== fileToRemove));
+   setFiles(files.filter((file) => file !== fileToRemove));
   } else {
    setFiles([]);
   }
@@ -89,8 +89,8 @@ export function FileDropzone({
      {...getRootProps()}
      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
       isDragActive
-       ? "border-blue-500 bg-blue-500/10"
-       : "border-zinc-700 bg-zinc-800/50 hover:border-blue-500/50 hover:bg-blue-500/5"
+       ? "border-violet-500 bg-violet-500/10"
+       : "border-zinc-700 bg-zinc-800/50 hover:border-violet-500/50 hover:bg-violet-500/5"
      }`}
     >
      <input {...getInputProps()} />
@@ -116,13 +116,16 @@ export function FileDropzone({
        Clear All
       </Button>
      </div>
-     
+
      <div className="space-y-2 max-h-48 overflow-y-auto">
       {files.map((file, index) => (
-       <div key={index} className="flex items-center justify-between bg-zinc-800 rounded p-2">
+       <div
+        key={index}
+        className="flex items-center justify-between bg-zinc-800 rounded p-2"
+       >
         <div className="flex items-center">
-         <div className="p-2 rounded-md bg-blue-500/20 mr-3">
-          <FileIcon className="h-4 w-4 text-blue-400" />
+         <div className="p-2 rounded-md bg-violet-500/20 mr-3">
+          <FileIcon className="h-4 w-4 text-violet-400" />
          </div>
          <div>
           <p className="text-sm font-medium text-zinc-300 truncate max-w-[200px]">
@@ -144,14 +147,16 @@ export function FileDropzone({
        </div>
       ))}
      </div>
-     
+
      {multiple && (
-      <div 
+      <div
        {...getRootProps()}
-       className="mt-2 border border-dashed rounded-lg p-2 text-center cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/5"
+       className="mt-2 border border-dashed rounded-lg p-2 text-center cursor-pointer hover:border-violet-500/50 hover:bg-violet-500/5"
       >
        <input {...getInputProps()} />
-       <p className="text-xs text-zinc-500">Drop more files or click to browse</p>
+       <p className="text-xs text-zinc-500">
+        Drop more files or click to browse
+       </p>
       </div>
      )}
     </div>

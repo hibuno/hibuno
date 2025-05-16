@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
- MessageCircle,
+ Radar,
  Search,
  Bell,
  Home,
@@ -30,12 +30,12 @@ const NavigationLinks = ({
     >
      <Home
       className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
      <span>Dashboard</span>
      {!isMobile && (
-      <Badge className="ml-auto text-xs bg-indigo-500 text-white hidden">
+      <Badge className="ml-auto text-xs bg-violet-500 text-white hidden">
        New
       </Badge>
      )}
@@ -48,12 +48,12 @@ const NavigationLinks = ({
     >
      <Newspaper
       className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
      <span>Blog</span>
      {!isMobile && (
-      <Badge className="ml-auto text-xs bg-indigo-500 text-white">New</Badge>
+      <Badge className="ml-auto text-xs bg-violet-500 text-white">New</Badge>
      )}
     </Button>
    </Link>
@@ -73,7 +73,7 @@ const NavigationLinks = ({
     >
      <ImageIcon
       className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
      <span>Background Removal</span>
@@ -90,7 +90,7 @@ const NavigationLinks = ({
     >
      <ImageIcon
       className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
      <span>Image Compression</span>
@@ -107,7 +107,7 @@ const NavigationLinks = ({
     >
      <FileText
       className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-blue-400 transition-colors" : ""
+       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
       }`}
      />
      <span>Text Tools</span>
@@ -175,10 +175,10 @@ export function Sidebar() {
     <div className="space-y-6">
      <Button
       variant="outline"
-      className="w-full justify-start gap-2 mb-4 bg-indigo-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
+      className="w-full justify-start gap-2 mb-4 bg-violet-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
      >
-      <MessageCircle className="h-4 w-4 text-blue-400" />
-      <span>Start new chat</span>
+      <Radar className="h-4 w-4 text-violet-400" />
+      <span>What&apos;s new?</span>
      </Button>
 
      <NavigationLinks
@@ -216,10 +216,10 @@ export function Sidebar() {
 
      <Button
       variant="outline"
-      className="w-full justify-start gap-2 mb-6 bg-indigo-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
+      className="w-full justify-start gap-2 mb-6 bg-violet-600/10 border-zinc-700 hover:bg-zinc-700 text-zinc-200"
      >
-      <MessageCircle className="h-4 w-4 text-blue-400" />
-      <span>Start new chat</span>
+      <Radar className="h-4 w-4 text-violet-400" />
+      <span>What&apos;s new?</span>
      </Button>
 
      <div className="space-y-6">

@@ -12,10 +12,15 @@ import dynamic from "next/dynamic";
 import { ArrowLeft, Clock, ChevronUp } from "lucide-react";
 
 // Dynamically import MDXRemote to avoid SSR issues
-const MDXRemote = dynamic(() => import("next-mdx-remote").then(mod => mod.MDXRemote), {
+const MDXRemote = dynamic(
+ () => import("next-mdx-remote").then((mod) => mod.MDXRemote),
+ {
   ssr: false,
-  loading: () => <div className="animate-pulse bg-zinc-800 h-96 rounded-md"></div>
-});
+  loading: () => (
+   <div className="animate-pulse bg-zinc-800 h-96 rounded-md"></div>
+  ),
+ }
+);
 
 interface PostClientProps {
  post: PostMeta;
@@ -83,7 +88,7 @@ export default function PostClient({
          className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-60"></div>
-        <Badge className="absolute top-4 left-4 bg-indigo-500 text-white border-0">
+        <Badge className="absolute top-4 left-4 bg-violet-500 text-white border-0">
          {post.category || "General"}
         </Badge>
        </div>
@@ -126,7 +131,7 @@ export default function PostClient({
       {relatedPosts.length > 0 && (
        <div className="mb-10 mt-6 border-t border-zinc-700 pt-6">
         <h3 className="text-xl font-semibold mb-6">
-         <span className="bg-indigo-400 bg-clip-text text-transparent">
+         <span className="bg-violet-400 bg-clip-text text-transparent">
           Related Articles
          </span>
         </h3>
@@ -134,7 +139,7 @@ export default function PostClient({
         <div className="grid md:grid-cols-2 gap-6">
          {relatedPosts.map((relatedPost) => (
           <Link href={`/blog/${relatedPost.slug}`} key={relatedPost.slug}>
-           <article className="rounded-lg overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-blue-700/50 transition-all duration-300 flex flex-col group">
+           <article className="rounded-lg overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-violet-700/50 transition-all duration-300 flex flex-col group">
             <div className="relative h-40 overflow-hidden">
              <Image
               src={relatedPost.featuredImage || "/placeholder.svg"}
@@ -145,7 +150,7 @@ export default function PostClient({
              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-60"></div>
             </div>
             <div className="p-4 flex-1 flex flex-col">
-             <h4 className="text-base font-semibold mb-2 group-hover:text-blue-400 transition-colors">
+             <h4 className="text-base font-semibold mb-2 group-hover:text-violet-400 transition-colors">
               {relatedPost.title}
              </h4>
              <p className="text-zinc-400 text-xs mb-3 flex-1 line-clamp-2">
@@ -198,25 +203,23 @@ export default function PostClient({
 
     {/* Footer */}
     <footer className="border-t border-zinc-800 py-6">
-     <div className="container mx-auto px-4">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-       <div className="text-zinc-400 text-sm">
-        © 2025 hibuno. All rights reserved.
-       </div>
-       <div className="flex gap-4">
-        <Link
-         href="/privacy-policy"
-         className="text-zinc-400 hover:text-white text-sm"
-        >
-         Privacy Policy
-        </Link>
-        <Link
-         href="/terms-of-service"
-         className="text-zinc-400 hover:text-white text-sm"
-        >
-         Terms of Service
-        </Link>
-       </div>
+     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="text-zinc-400 text-sm">
+       © 2025 hibuno. All rights reserved.
+      </div>
+      <div className="flex gap-4">
+       <Link
+        href="/privacy-policy"
+        className="text-zinc-400 hover:text-white text-sm"
+       >
+        Privacy Policy
+       </Link>
+       <Link
+        href="/terms-of-service"
+        className="text-zinc-400 hover:text-white text-sm"
+       >
+        Terms of Service
+       </Link>
       </div>
      </div>
     </footer>

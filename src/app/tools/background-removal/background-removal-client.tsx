@@ -27,6 +27,7 @@ export default function BackgroundRemovalClient() {
  const [originalSize, setOriginalSize] = useState<number | null>(null);
  const [processedSize, setProcessedSize] = useState<number | null>(null);
  const [isProcessing, setIsProcessing] = useState(false);
+ const [isLoadingModel, setIsLoadingModel] = useState(false);
  const [error, setError] = useState<string | null>(null);
 
  // Constants for image processing
@@ -98,12 +99,14 @@ export default function BackgroundRemovalClient() {
 
    // Initialize ONNX runtime session with the selected model
    // Using only WASM execution provider for better compatibility
+   setIsLoadingModel(true);
    const sessionModel = await ort.InferenceSession.create(
     `/models/remove-background-silueta.onnx`,
     {
      executionProviders: ["wasm"],
     }
    );
+   setIsLoadingModel(false);
 
    // Load and process the image
    const originalImage = await loadImage(originalImageUrl);
@@ -224,6 +227,7 @@ export default function BackgroundRemovalClient() {
    setError(err instanceof Error ? err.message : "An unknown error occurred");
   } finally {
    setIsProcessing(false);
+   setIsLoadingModel(false);
   }
  };
 
@@ -287,13 +291,13 @@ export default function BackgroundRemovalClient() {
          <div className="mt-4">
           <Button
            onClick={handleRemoveBackground}
-           className="w-full bg-indigo-600 hover:bg-indigo-700"
+           className="w-full bg-violet-600 hover:bg-violet-700"
            disabled={isProcessing}
           >
            {isProcessing ? (
             <>
              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-             Processing...
+             {isLoadingModel ? 'Loading model...' : 'Processing...'}
             </>
            ) : (
             <>
@@ -320,7 +324,7 @@ export default function BackgroundRemovalClient() {
        <CardContent className="p-4">
         <div>
          <div className="flex">
-          <Info className="h-5 w-5 text-indigo-400 mr-2 mt-0.5" />
+          <Info className="h-5 w-5 text-violet-400 mr-2 mt-0.5" />
           <p className="text-zinc-300 font-medium">Processing Results</p>
          </div>
          <p className="text-zinc-400 text-sm mt-1">
@@ -421,7 +425,7 @@ export default function BackgroundRemovalClient() {
           </div>
 
           <Button
-           className="w-full bg-indigo-600 hover:bg-indigo-700"
+           className="w-full bg-violet-600 hover:bg-violet-700"
            onClick={handleDownload}
           >
            <Download className="h-4 w-4 mr-2" />

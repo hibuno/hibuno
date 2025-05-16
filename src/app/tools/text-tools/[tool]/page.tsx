@@ -192,6 +192,28 @@ export default async function TextToolsPage({
    description:
     "Extract all numbers from text with our free Number Extractor tool. This numeric utility identifies and compiles integers, decimals, percentages, and numerical values with or without formatting. Ideal for financial analysis, data processing, statistical work, extracting measurements, prices, dates, phone numbers, or any quantitative information from documents, reports, or web content.",
   },
+  
+  // New tools
+  "word-frequency": {
+   title: "Word Frequency Counter | Word Usage Analyzer",
+   description:
+    "Analyze word usage patterns with our free Word Frequency Counter. This tool counts and ranks all words in your text by frequency of occurrence, helping you identify the most common terms and language patterns. Perfect for content analysis, SEO keyword research, linguistic studies, readability assessment, and identifying overused words in your writing. Get instant insights into your text's vocabulary distribution.",
+  },
+  "base64-encode": {
+   title: "Base64 Encoder | Text to Base64 Converter",
+   description:
+    "Convert plain text to Base64 with our free online encoder. This tool transforms any text into Base64 format, commonly used for encoding binary data within HTML, CSS, JSON, XML, and email attachments. Useful for developers working with APIs, embedding images in CSS, or safely transmitting data that might contain special characters across systems with different character encoding requirements.",
+  },
+  "base64-decode": {
+   title: "Base64 Decoder | Base64 to Text Converter",
+   description:
+    "Convert Base64 encoded strings back to readable text with our free online decoder. This tool decodes Base64 formatted data commonly used in web applications, emails, and data transfer protocols. Essential for developers debugging encoded data, extracting information from APIs, or working with encoded content in HTML, CSS, or JavaScript files. Simply paste your Base64 string to reveal the original text.",
+  },
+  "compare-texts": {
+   title: "Text Comparison Tool | Text Diff Analyzer",
+   description:
+    "Compare two texts and highlight differences with our free Text Comparison Tool. This diff analyzer identifies line-by-line variations between documents, showing additions, deletions, and modifications with color-coded highlighting. Perfect for comparing document versions, code changes, contract revisions, or any situation where you need to identify what changed between two text samples. Get clear, visual results instantly.",
+  },
  };
 
  return (

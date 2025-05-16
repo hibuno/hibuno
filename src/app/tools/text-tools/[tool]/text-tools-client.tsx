@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
  FileText,
  Loader2,
@@ -11,6 +11,10 @@ import {
  Filter,
  Search,
  Type,
+ Lock,
+ Unlock,
+ DiffIcon,
+ Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +29,7 @@ interface TextStats {
  sentences: number;
  paragraphs: number;
  lines: number;
+ wordFrequency?: Record<string, number>;
 }
 
 export default function TextToolsClient({ tool }: { tool: string }) {
@@ -32,9 +37,12 @@ export default function TextToolsClient({ tool }: { tool: string }) {
  const [inputText, setInputText] = useState<string>("");
  const [outputText, setOutputText] = useState<string>("");
  const [isProcessing, setIsProcessing] = useState(false);
+ const [secondaryInputText, setSecondaryInputText] = useState<string>("");
+ const [showSecondaryInput, setShowSecondaryInput] = useState(false);
+ const [diffHighlightedOutput, setDiffHighlightedOutput] = useState<React.ReactNode>(null);
 
  // Calculate text statistics
- const calculateStats = useCallback((text: string): TextStats => {
+ const calculateStats = useCallback((text: string, includeWordFrequency: boolean = false): TextStats => {
   const totalChars = text.length;
   const charsExcludingSpaces = text.replace(/\s/g, "").length;
   const words = text.trim()
@@ -48,7 +56,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    : 0;
   const lines = text.trim() ? text.split(/\n/).length : 0;
 
-  return {
+  const stats: TextStats = {
    totalChars,
    charsExcludingSpaces,
    words,
@@ -56,6 +64,24 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    paragraphs,
    lines,
   };
+
+  // Calculate word frequency if requested
+  if (includeWordFrequency && text.trim()) {
+   const wordFrequency: Record<string, number> = {};
+   const wordArray = text.toLowerCase().trim().split(/\s+/).filter(Boolean);
+   
+   wordArray.forEach(word => {
+    // Remove punctuation from words
+    const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    if (cleanWord) {
+     wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1;
+    }
+   });
+   
+   stats.wordFrequency = wordFrequency;
+  }
+
+  return stats;
  }, []);
 
  const stats = calculateStats(inputText);
@@ -106,6 +132,13 @@ export default function TextToolsClient({ tool }: { tool: string }) {
   emails: (input: string) => string;
   urls: (input: string) => string;
   numbers: (input: string) => string;
+  wordFrequency: (input: string) => string;
+ }
+
+ interface AdvancedTransformations {
+  base64Encode: (input: string) => string;
+  base64Decode: (input: string) => string;
+  compareTexts: (input: string, secondInput: string) => string;
  }
 
  interface TextTransformations {
@@ -114,6 +147,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
   lines: LineTransformations;
   cleaning: CleaningTransformations;
   extraction: ExtractionTransformations;
+  advanced: AdvancedTransformations;
  }
 
  // Text transformation functions - organized by category
@@ -239,7 +273,57 @@ export default function TextToolsClient({ tool }: { tool: string }) {
     const numbers = input.match(numberRegex) || [];
     return numbers.join("\n");
    },
+   wordFrequency: (input: string) => {
+    const stats = calculateStats(input, true);
+    if (!stats.wordFrequency) return "No words found";
+    
+    // Sort words by frequency (highest first)
+    const sortedWords = Object.entries(stats.wordFrequency)
+      .sort((a, b) => b[1] - a[1])
+      .map(([word, count]) => `${word}: ${count}`)
+      .join("\n");
+    
+    return sortedWords;
+   },
   },
+  
+  // Advanced transformations
+  advanced: {
+   base64Encode: (input: string) => {
+    try {
+     return btoa(input);
+    } catch {
+     return "Error encoding to Base64. Make sure your text contains only valid characters.";
+    }
+   },
+   base64Decode: (input: string) => {
+    try {
+     return atob(input);
+    } catch {
+     return "Error decoding from Base64. Make sure your input is valid Base64 encoded text.";
+    }
+   },
+   compareTexts: (input: string, secondInput: string) => {
+    // Simple diff implementation - returns a description of differences
+    const lines1 = input.split('\n');
+    const lines2 = secondInput.split('\n');
+    
+    let result = '';
+    const maxLines = Math.max(lines1.length, lines2.length);
+    
+    for (let i = 0; i < maxLines; i++) {
+     const line1 = i < lines1.length ? lines1[i] : '';
+     const line2 = i < lines2.length ? lines2[i] : '';
+     
+     if (line1 !== line2) {
+      result += `Line ${i+1}:\n- ${line1}\n+ ${line2}\n\n`;
+     }
+    }
+    
+    return result || 'The texts are identical';
+   },
+  },
+
  };
 
  // Transform text based on transformation type
@@ -330,6 +414,47 @@ export default function TextToolsClient({ tool }: { tool: string }) {
      case "extract-numbers":
       transformed = textTransformations.extraction.numbers(inputText);
       break;
+     case "word-frequency":
+      transformed = textTransformations.extraction.wordFrequency(inputText);
+      break;
+      
+     // Advanced transformations
+     case "base64-encode":
+      transformed = textTransformations.advanced.base64Encode(inputText);
+      break;
+     case "base64-decode":
+      transformed = textTransformations.advanced.base64Decode(inputText);
+      break;
+     case "compare-texts":
+      transformed = textTransformations.advanced.compareTexts(inputText, secondaryInputText);
+      
+      // Create highlighted diff view
+      const lines1 = inputText.split('\n');
+      const lines2 = secondaryInputText.split('\n');
+      const maxLines = Math.max(lines1.length, lines2.length);
+      
+      const diffElements = [];
+      for (let i = 0; i < maxLines; i++) {
+       const line1 = i < lines1.length ? lines1[i] : '';
+       const line2 = i < lines2.length ? lines2[i] : '';
+       
+       if (line1 !== line2) {
+        diffElements.push(
+         <div key={`diff-${i}`} className="mb-2 p-2 bg-zinc-800 rounded-md">
+          <div className="text-xs text-zinc-400 mb-1">Line {i+1}:</div>
+          <div className="bg-red-900/20 p-1 rounded mb-1 text-red-200">- {line1}</div>
+          <div className="bg-green-900/20 p-1 rounded text-green-200">+ {line2}</div>
+         </div>
+        );
+       }
+      }
+      
+      setDiffHighlightedOutput(
+       diffElements.length > 0 ? 
+       <div className="space-y-1">{diffElements}</div> : 
+       <div className="text-green-400 p-2">The texts are identical</div>
+      );
+      break;
     }
 
     setOutputText(transformed);
@@ -341,13 +466,19 @@ export default function TextToolsClient({ tool }: { tool: string }) {
   }, 300);
  };
 
+ // Effect to show/hide secondary input based on tool type
+ useEffect(() => {
+  setShowSecondaryInput(tool === 'compare-texts');
+  setDiffHighlightedOutput(null);
+ }, [tool]);
+
  return (
   <>
    <Card className="bg-zinc-800 border-zinc-700 shadow-md">
     <CardHeader>
      <CardTitle className="text-sm font-medium flex items-center">
       <FileText className="h-4 w-4 mr-2 text-zinc-400" />
-      Input Text
+      {showSecondaryInput ? 'First Text' : 'Input Text'}
      </CardTitle>
     </CardHeader>
     <CardContent>
@@ -359,6 +490,25 @@ export default function TextToolsClient({ tool }: { tool: string }) {
      />
     </CardContent>
    </Card>
+   
+   {showSecondaryInput && (
+    <Card className="bg-zinc-800 border-zinc-700 shadow-md mt-4">
+     <CardHeader>
+      <CardTitle className="text-sm font-medium flex items-center">
+       <FileText className="h-4 w-4 mr-2 text-zinc-400" />
+       Second Text
+      </CardTitle>
+     </CardHeader>
+     <CardContent>
+      <Textarea
+       placeholder="Enter or paste your second text here for comparison..."
+       className="min-h-[180px] bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500 text-sm"
+       value={secondaryInputText}
+       onChange={(e) => setSecondaryInputText(e.target.value)}
+      />
+     </CardContent>
+    </Card>
+   )}
 
    <div className="flex flex-wrap items-center bg-zinc-800/80 border border-zinc-700 rounded-md shadow-sm p-2 text-xs text-zinc-400 justify-between">
     <Button onClick={() => transformText(tool)}>
@@ -372,25 +522,25 @@ export default function TextToolsClient({ tool }: { tool: string }) {
      <div className="flex gap-3">
       <div className="flex items-center gap-1">
        <span className="text-zinc-500">Chars:</span>
-       <span className="text-indigo-400 font-medium">{stats.totalChars}</span>
+       <span className="text-violet-400 font-medium">{stats.totalChars}</span>
       </div>
       <div className="flex items-center gap-1">
        <span className="text-zinc-500">No Spaces:</span>
-       <span className="text-indigo-400 font-medium">
+       <span className="text-violet-400 font-medium">
         {stats.charsExcludingSpaces}
        </span>
       </div>
       <div className="flex items-center gap-1">
        <span className="text-zinc-500">Words:</span>
-       <span className="text-indigo-400 font-medium">{stats.words}</span>
+       <span className="text-violet-400 font-medium">{stats.words}</span>
       </div>
       <div className="flex items-center gap-1">
        <span className="text-zinc-500">Sentences:</span>
-       <span className="text-indigo-400 font-medium">{stats.sentences}</span>
+       <span className="text-violet-400 font-medium">{stats.sentences}</span>
       </div>
       <div className="flex items-center gap-1">
        <span className="text-zinc-500">Paragraphs:</span>
-       <span className="text-indigo-400 font-medium">{stats.paragraphs}</span>
+       <span className="text-violet-400 font-medium">{stats.paragraphs}</span>
       </div>
      </div>
     </div>
@@ -405,7 +555,11 @@ export default function TextToolsClient({ tool }: { tool: string }) {
     <CardContent>
      {isProcessing ? (
       <div className="flex justify-center py-6">
-       <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+       <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
+      </div>
+     ) : tool === 'compare-texts' && diffHighlightedOutput ? (
+      <div className="min-h-[180px] bg-zinc-900 border border-zinc-700 rounded-md p-3 text-zinc-200 text-sm overflow-auto">
+       {diffHighlightedOutput}
       </div>
      ) : (
       <Textarea
@@ -601,6 +755,42 @@ export default function TextToolsClient({ tool }: { tool: string }) {
        >
         <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Remove
         Punctuation
+       </Button>
+      </Link>
+      <Link href={`/tools/text-tools/word-frequency`}>
+       <Button
+        variant="ghost"
+        size="sm"
+        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
+       >
+        <Hash className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Word Frequency
+       </Button>
+      </Link>
+      <Link href={`/tools/text-tools/base64-encode`}>
+       <Button
+        variant="ghost"
+        size="sm"
+        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
+       >
+        <Lock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Base64 Encode
+       </Button>
+      </Link>
+      <Link href={`/tools/text-tools/base64-decode`}>
+       <Button
+        variant="ghost"
+        size="sm"
+        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
+       >
+        <Unlock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Base64 Decode
+       </Button>
+      </Link>
+      <Link href={`/tools/text-tools/compare-texts`}>
+       <Button
+        variant="ghost"
+        size="sm"
+        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
+       >
+        <DiffIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Compare Texts
        </Button>
       </Link>
      </div>

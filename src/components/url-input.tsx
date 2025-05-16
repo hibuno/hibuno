@@ -65,10 +65,10 @@ export function UrlInput({
       value={url}
       onChange={(e) => setUrl(e.target.value)}
       placeholder={placeholder}
-      className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-blue-500"
+      className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-violet-500"
      />
     </div>
-    <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+    <Button type="submit" className="bg-violet-600 hover:bg-violet-700">
      <ArrowRight className="h-4 w-4" />
     </Button>
    </form>

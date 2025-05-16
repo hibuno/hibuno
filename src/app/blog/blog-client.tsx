@@ -137,7 +137,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
        <Input
         type="text"
         placeholder="Search articles..."
-        className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-blue-500"
+        className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-violet-500"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
        />
@@ -222,7 +222,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
             <Checkbox
              id={`category-${category}`}
              checked={selectedCategories.includes(category)}
-             className="border-zinc-600 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+             className="border-zinc-600 data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
             />
             <label
              htmlFor={`category-${category}`}
@@ -248,7 +248,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
       <Input
        type="text"
        placeholder="Search articles..."
-       className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-blue-500"
+       className="pl-9 bg-zinc-800/50 border-zinc-700 focus:border-violet-500"
        value={searchQuery}
        onChange={(e) => setSearchQuery(e.target.value)}
       />
@@ -261,52 +261,70 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
        </button>
       )}
      </div>
-     
+
      {/* Active filters display */}
-     {(selectedCategories.length > 0 || sortOption !== "newest" || searchQuery) && (
+     {(selectedCategories.length > 0 ||
+      sortOption !== "newest" ||
+      searchQuery) && (
       <div className="flex flex-wrap gap-2 items-center">
        <span className="text-xs text-zinc-400">Active filters:</span>
-       
+
        {searchQuery && (
-        <Badge variant="outline" className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1">
+        <Badge
+         variant="outline"
+         className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1"
+        >
          <Search className="h-3 w-3" />
          {searchQuery}
-         <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-white">
+         <button
+          onClick={() => setSearchQuery("")}
+          className="ml-1 hover:text-white"
+         >
           <X className="h-3 w-3" />
          </button>
         </Badge>
        )}
-       
+
        {sortOption !== "newest" && (
-        <Badge variant="outline" className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1">
+        <Badge
+         variant="outline"
+         className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1"
+        >
          {sortOption === "oldest" && <Calendar className="h-3 w-3" />}
          {sortOption === "a-z" && <SortAsc className="h-3 w-3" />}
          {sortOption === "z-a" && <SortDesc className="h-3 w-3" />}
          {sortOption === "oldest" && "Oldest First"}
          {sortOption === "a-z" && "A-Z"}
          {sortOption === "z-a" && "Z-A"}
-         <button onClick={() => setSortOption("newest")} className="ml-1 hover:text-white">
+         <button
+          onClick={() => setSortOption("newest")}
+          className="ml-1 hover:text-white"
+         >
           <X className="h-3 w-3" />
          </button>
         </Badge>
        )}
-       
-       {selectedCategories.map(category => (
-        <Badge key={category} variant="outline" className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1">
+
+       {selectedCategories.map((category) => (
+        <Badge
+         key={category}
+         variant="outline"
+         className="bg-zinc-800 text-zinc-300 border-zinc-700 flex items-center gap-1 text-xs py-1"
+        >
          <Tag className="h-3 w-3" />
          {category}
-         <button 
-          onClick={() => toggleCategory(category)} 
+         <button
+          onClick={() => toggleCategory(category)}
           className="ml-1 hover:text-white"
          >
           <X className="h-3 w-3" />
          </button>
         </Badge>
        ))}
-       
-       <Button 
-        variant="ghost" 
-        size="sm" 
+
+       <Button
+        variant="ghost"
+        size="sm"
         className="text-xs text-zinc-400 hover:text-white py-1 h-auto"
         onClick={clearFilters}
        >
@@ -320,7 +338,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
     {featuredPosts.length > 0 && (
      <section className="mb-12">
       <h2 className="text-xl font-semibold mb-6 flex items-center">
-       <span className="bg-indigo-400 bg-clip-text text-transparent">
+       <span className="bg-violet-400 bg-clip-text text-transparent">
         Featured Articles
        </span>
       </h2>
@@ -328,7 +346,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
        {featuredPosts.map((post) => (
         <Link href={`/blog/${post.slug}`} key={post.slug}>
-         <article className="rounded-xl overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-blue-700/50 transition-all duration-300 h-full flex flex-col group">
+         <article className="rounded-xl overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-violet-700/50 transition-all duration-300 h-full flex flex-col group">
           <div className="relative h-48 overflow-hidden">
            <Image
             src={post.featuredImage || "/placeholder.svg"}
@@ -337,12 +355,12 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
            />
            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-60"></div>
-           <Badge className="absolute top-3 left-3 bg-indigo-500 text-white border-0">
+           <Badge className="absolute top-3 left-3 bg-violet-500 text-white border-0">
             {post.category}
            </Badge>
           </div>
           <div className="p-5 flex-1 flex flex-col">
-           <h3 className="text-lg font-semibold mb-2 group-hover:text-blue-400 transition-colors">
+           <h3 className="text-lg font-semibold mb-2 group-hover:text-violet-400 transition-colors">
             {post.title}
            </h3>
            <p className="text-zinc-400 text-sm mb-4 flex-1">{post.excerpt}</p>
@@ -382,7 +400,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
     {regularPosts.length > 0 && (
      <section>
       <h2 className="text-xl font-semibold mb-6">
-       <span className="bg-indigo-400 bg-clip-text text-transparent">
+       <span className="bg-violet-400 bg-clip-text text-transparent">
         All Articles
        </span>
       </h2>
@@ -390,7 +408,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
        {regularPosts.map((post) => (
         <Link href={`/blog/${post.slug}`} key={post.slug}>
-         <article className="rounded-lg overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-blue-700/50 transition-all duration-300 h-full flex flex-col group">
+         <article className="rounded-lg overflow-hidden border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-800/70 hover:border-violet-700/50 transition-all duration-300 h-full flex flex-col group">
           <div className="relative h-40 overflow-hidden">
            <Image
             src={post.featuredImage || "/placeholder.svg"}
@@ -404,7 +422,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
            </Badge>
           </div>
           <div className="p-4 flex-1 flex flex-col">
-           <h3 className="text-base font-semibold mb-2 group-hover:text-blue-400 transition-colors">
+           <h3 className="text-base font-semibold mb-2 group-hover:text-violet-400 transition-colors">
             {post.title}
            </h3>
            <p className="text-zinc-400 text-xs mb-3 flex-1 line-clamp-2">
@@ -440,9 +458,11 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
     {filteredPosts.length === 0 && (
      <div className="text-center py-12">
       <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-      <p className="text-zinc-400 mb-4">Try adjusting your search criteria or filters</p>
-      <Button 
-       variant="outline" 
+      <p className="text-zinc-400 mb-4">
+       Try adjusting your search criteria or filters
+      </p>
+      <Button
+       variant="outline"
        onClick={clearFilters}
        className="bg-zinc-800/50 border-zinc-700 hover:bg-zinc-700"
       >
@@ -453,25 +473,23 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
 
     {/* Footer */}
     <footer className="border-t border-zinc-800 py-6">
-     <div className="container mx-auto px-4">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-       <div className="text-zinc-400 text-sm">
-        © 2025 hibuno. All rights reserved.
-       </div>
-       <div className="flex gap-4">
-        <Link
-         href="/privacy-policy"
-         className="text-zinc-400 hover:text-white text-sm"
-        >
-         Privacy Policy
-        </Link>
-        <Link
-         href="/terms-of-service"
-         className="text-zinc-400 hover:text-white text-sm"
-        >
-         Terms of Service
-        </Link>
-       </div>
+     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="text-zinc-400 text-sm">
+       © 2025 hibuno. All rights reserved.
+      </div>
+      <div className="flex gap-4">
+       <Link
+        href="/privacy-policy"
+        className="text-zinc-400 hover:text-white text-sm"
+       >
+        Privacy Policy
+       </Link>
+       <Link
+        href="/terms-of-service"
+        className="text-zinc-400 hover:text-white text-sm"
+       >
+        Terms of Service
+       </Link>
       </div>
      </div>
     </footer>

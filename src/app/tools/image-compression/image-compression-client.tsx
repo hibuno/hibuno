@@ -29,7 +29,7 @@ import type {
 function LoadingIndicator() {
  return (
   <div className="flex items-center justify-center p-8">
-   <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+   <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
    <span className="ml-2 text-zinc-300">
     Loading image compression tools...
    </span>
@@ -213,9 +213,9 @@ export default function ImageCompression() {
       </div>
      </div>
 
-     <div className="mt-4 p-3 bg-indigo-900/30 border border-indigo-800 rounded-md text-indigo-200">
+     <div className="mt-4 p-3 bg-violet-900/30 border border-violet-800 rounded-md text-violet-200">
       <div className="flex items-start">
-       <Info className="h-4 w-4 mr-2 mt-0.5 text-indigo-400" />
+       <Info className="h-4 w-4 mr-2 mt-0.5 text-violet-400" />
        <p className="text-xs">
         For web images, WebP is recommended for the best balance of quality and
         file size. For maximum compatibility, use JPEG for photos and PNG for
@@ -335,7 +335,7 @@ export default function ImageCompression() {
            <div className="flex gap-2 mt-4">
             {completedImages > 0 && (
              <Button
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+              className="flex-1 bg-violet-600 hover:bg-violet-700"
               onClick={handleDownloadAll}
              >
               <Download className="h-4 w-4 mr-2" />

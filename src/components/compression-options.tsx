@@ -28,7 +28,7 @@ export function CompressionOptions({
        variant={outputType === format ? "default" : "outline"}
        className={`px-3 py-1 text-xs font-medium uppercase ${
         outputType === format
-         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+         ? "bg-violet-600 hover:bg-violet-700 text-white"
          : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700"
        }`}
        onClick={() => onOutputTypeChange(format)}
@@ -43,7 +43,7 @@ export function CompressionOptions({
     <div>
      <div className="flex justify-between items-center mb-2">
       <label className="block text-sm font-medium text-zinc-300">Quality</label>
-      <span className="text-sm text-indigo-400 font-medium">
+      <span className="text-sm text-violet-400 font-medium">
        {options.quality}%
       </span>
      </div>
@@ -53,7 +53,7 @@ export function CompressionOptions({
       max="100"
       value={options.quality}
       onChange={(e) => onOptionsChange({ quality: Number(e.target.value) })}
-      className="w-full accent-indigo-500 bg-zinc-700 h-2 rounded-lg appearance-none cursor-pointer"
+      className="w-full accent-violet-500 bg-zinc-700 h-2 rounded-lg appearance-none cursor-pointer"
      />
      <div className="flex justify-between text-xs text-zinc-500 mt-1">
       <span>Smaller file</span>
