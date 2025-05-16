@@ -7,17 +7,13 @@ import {
  MapPin,
  Calendar,
  Sparkles,
- Download,
- Share2,
  Info,
- HelpCircle,
  Palette,
  Sliders,
  Aperture,
  Zap,
  Layers,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { ColorPalette } from "./color-palette";
 
 interface ResultsDisplayProps {
@@ -27,7 +23,6 @@ interface ResultsDisplayProps {
 
 export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
  const [activeTab, setActiveTab] = useState("summary");
- const { toast } = useToast();
 
  // Ensure we have valid data or provide defaults
  const safeAnalysis = {
@@ -108,34 +103,6 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
   imageProperties: analysis.imageProperties || null,
  };
 
- const handleDownload = () => {
-  // In a real app, you would implement proper download functionality
-  if (analysis.url) {
-   window.open(analysis.url, "_blank");
-
-   toast({
-    title: "Download started",
-    description: "Your image is being downloaded.",
-   });
-  } else {
-   toast({
-    title: "Download failed",
-    description: "Image URL is not available.",
-    variant: "destructive",
-   });
-  }
- };
-
- const handleShare = () => {
-  // In a real app, you would implement proper sharing functionality
-  navigator.clipboard.writeText(window.location.href);
-
-  toast({
-   title: "Link copied",
-   description: "The analysis link has been copied to your clipboard.",
-  });
- };
-
  const tabs = [
   { id: "summary", label: "Summary" },
   { id: "camera", label: "Camera" },
@@ -151,39 +118,19 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
 
  return (
   <div className="space-y-6">
-   <div className="flex justify-between items-center">
-    <h2 className="text-2xl font-bold">Analysis Results</h2>
-    <div className="flex space-x-2">
-     <button
-      onClick={handleDownload}
-      className="exifee-button py-2 px-4 text-sm flex"
-     >
-      <Download className="h-4 w-4 mr-2" />
-      Download
-     </button>
-     <button
-      onClick={handleShare}
-      className="exifee-button py-2 px-4 text-sm flex"
-     >
-      <Share2 className="h-4 w-4 mr-2" />
-      Share
-     </button>
-    </div>
-   </div>
-
-   <div className="exifee-card bg-white dark:bg-black overflow-hidden">
-    <div className="border-b-2 border-black">
+   <div className="bg-zinc-800 border-zinc-700 rounded-md overflow-hidden">
+    <div className="border-b border-zinc-700">
      <div className="flex overflow-x-auto">
       {tabs.map((tab) => (
        <button
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
-        className={`py-3 px-6 font-bold text-sm whitespace-nowrap ${
+        className={`py-3 px-6 font-medium text-sm whitespace-nowrap ${
          activeTab === tab.id
-          ? "bg-[hsl(var(--teal))] text-black"
-          : "hover:bg-gray-100 dark:hover:bg-gray-800"
+          ? "bg-background text-muted-foreground"
+          : "text-zinc-400 hover:bg-zinc-700 hover:text-muted-foreground"
         } ${
-         tab.id !== tabs[tabs.length - 1].id ? "border-r-2 border-black" : ""
+         tab.id !== tabs[tabs.length - 1].id ? "border-r border-zinc-700" : ""
         }`}
        >
         {tab.label}
@@ -192,12 +139,12 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
      </div>
     </div>
 
-    <div className="p-6 animate-fade-in">
+    <div className="p-6 animate-fade-in bg-zinc-800">
      {activeTab === "summary" && (
       <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="exifee-card bg-[hsl(var(--orange))]">
-         <div className="p-4 border-b-2 border-black">
+        <div className="rounded-md bg-zinc-700 overflow-hidden border border-zinc-600">
+         <div className="p-4 border-b border-zinc-600">
           <h3 className="text-lg font-bold flex items-center">
            <Camera className="h-5 w-5 mr-2" />
            Camera Information
@@ -236,7 +183,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
 
         <div className="exifee-card bg-[hsl(var(--purple))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <Calendar className="h-5 w-5 mr-2" />
            Capture Settings
@@ -275,7 +222,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
 
        {safeAnalysis.imageProperties && (
         <div className="exifee-card bg-[hsl(var(--mint))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <Sliders className="h-5 w-5 mr-2" />
            Image Properties
@@ -283,7 +230,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
          </div>
          <div className="p-4">
           <div className="grid grid-cols-3 gap-4">
-           <div className="bg-white rounded-lg p-4 border-2 border-black">
+           <div className="bg-background rounded-lg p-4">
             <div className="text-center">
              <div className="text-lg font-bold">
               {(safeAnalysis.imageProperties.sharpness * 100).toFixed(0)}%
@@ -291,7 +238,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
              <div className="text-sm">Sharpness</div>
             </div>
            </div>
-           <div className="bg-white rounded-lg p-4 border-2 border-black">
+           <div className="bg-background rounded-lg p-4">
             <div className="text-center">
              <div className="text-lg font-bold">
               {(safeAnalysis.imageProperties.brightness * 100).toFixed(0)}%
@@ -299,7 +246,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
              <div className="text-sm">Brightness</div>
             </div>
            </div>
-           <div className="bg-white rounded-lg p-4 border-2 border-black">
+           <div className="bg-background rounded-lg p-4">
             <div className="text-center">
              <div className="text-lg font-bold">
               {(safeAnalysis.imageProperties.contrast * 100).toFixed(0)}%
@@ -313,7 +260,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
        )}
 
        <div className="exifee-card bg-[hsl(var(--teal))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <h3 className="text-lg font-bold flex items-center">
           <Info className="h-5 w-5 mr-2" />
           Key Findings
@@ -321,42 +268,46 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
         <div className="p-4">
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg p-4 border-2 border-black exifee-shadow">
+          <div className="bg-zinc-800 rounded-md p-4 border border-zinc-700">
            <div className="flex items-center mb-2">
-            <div className="rounded-full bg-[hsl(var(--orange))] p-2 mr-3 border-2 border-black">
-             <Camera className="h-5 w-5" />
+            <div className="rounded-full bg-violet-900/50 p-2 mr-3">
+             <Camera className="h-5 w-5 text-violet-400" />
             </div>
-            <h4 className="font-bold">Camera</h4>
+            <h4 className="font-medium text-zinc-200">Camera</h4>
            </div>
-           <p className="font-medium">{safeAnalysis.exifData.camera.model}</p>
+           <p className="text-zinc-300">{safeAnalysis.exifData.camera.model}</p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border-2 border-black exifee-shadow">
+          <div className="bg-zinc-800 rounded-md p-4 border border-zinc-700">
            <div className="flex items-center mb-2">
-            <div className="rounded-full bg-[hsl(var(--purple))] p-2 mr-3 border-2 border-black">
-             <Calendar className="h-5 w-5" />
+            <div className="rounded-full bg-violet-900/50 p-2 mr-3">
+             <Calendar className="h-5 w-5 text-violet-400" />
             </div>
-            <h4 className="font-bold">Date Taken</h4>
+            <h4 className="font-medium text-zinc-200">Date Taken</h4>
            </div>
-           <p className="font-medium">
+           <p className="text-zinc-300">
             {new Date(
              safeAnalysis.exifData.exif.dateTimeOriginal
             ).toLocaleDateString()}
            </p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border-2 border-black exifee-shadow">
+          <div className="bg-zinc-800 rounded-md p-4 border border-zinc-700">
            <div className="flex items-center mb-2">
-            <div className="rounded-full bg-[hsl(var(--mint))] p-2 mr-3 border-2 border-black">
-             <Sparkles className="h-5 w-5" />
+            <div className="rounded-full bg-violet-900/50 p-2 mr-3">
+             <Sparkles className="h-5 w-5 text-violet-400" />
             </div>
-            <h4 className="font-bold">AI Detection</h4>
+            <h4 className="font-medium text-zinc-200">AI Detection</h4>
            </div>
-           <p className="font-medium">
+           <p className="text-zinc-300">
             {safeAnalysis.aiDetection.isAiGenerated ? (
-             <span className="exifee-badge bg-red-500">AI Generated</span>
+             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-200">
+              AI Generated
+             </span>
             ) : (
-             <span className="exifee-badge bg-green-500">Human Created</span>
+             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-200">
+              Human Created
+             </span>
             )}
            </p>
           </div>
@@ -365,17 +316,17 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
        </div>
 
        {safeAnalysis.colorInfo && safeAnalysis.colorInfo.dominant && (
-        <div className="exifee-card bg-[hsl(var(--coral))]">
-         <div className="p-4 border-b-2 border-black">
-          <h3 className="text-lg font-bold flex items-center">
-           <Palette className="h-5 w-5 mr-2" />
+        <div className="rounded-md bg-zinc-700 overflow-hidden border border-zinc-600">
+         <div className="p-4 border-b border-zinc-600">
+          <h3 className="text-lg font-medium flex items-center">
+           <Palette className="h-5 w-5 mr-2 text-zinc-400" />
            Color Palette
           </h3>
          </div>
          <div className="p-4">
           <div className="flex flex-wrap justify-center gap-4">
            <div
-            className="h-12 w-12 rounded-md border-2 border-black"
+            className="h-12 w-12 rounded-md border shadow-md"
             style={{ backgroundColor: safeAnalysis.colorInfo.dominant.hex }}
             title={safeAnalysis.colorInfo.dominant.hex}
            ></div>
@@ -384,7 +335,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
             safeAnalysis.colorInfo.accent.map((color: any, index: number) => (
              <div
               key={`accent-${index}`}
-              className="h-10 w-10 rounded-md border-2 border-black"
+              className="h-10 w-10 rounded-md border shadow-md"
               style={{ backgroundColor: color.hex }}
               title={color.hex}
              ></div>
@@ -396,7 +347,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
              .map((color: any, index: number) => (
               <div
                key={`other-${index}`}
-               className="h-8 w-8 rounded-md border-2 border-black"
+               className="h-8 w-8 rounded-md border shadow-md"
                style={{ backgroundColor: color.hex }}
                title={color.hex}
               ></div>
@@ -420,7 +371,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
       <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="exifee-card bg-[hsl(var(--orange))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <Camera className="h-5 w-5 mr-2" />
            Camera Details
@@ -466,8 +417,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
          </div>
         </div>
 
-        <div className="exifee-card bg-[hsl(var(--teal))]">
-         <div className="p-4 border-b-2 border-black">
+        <div className="rounded-md bg-zinc-700 overflow-hidden border border-zinc-600">
+         <div className="p-4 border-b border-zinc-600">
           <h3 className="text-lg font-bold flex items-center">
            <ImageIcon className="h-5 w-5 mr-2" />
            Image Details
@@ -507,7 +458,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="exifee-card bg-[hsl(var(--purple))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <Calendar className="h-5 w-5 mr-2" />
            Capture Settings
@@ -548,7 +499,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
 
         <div className="exifee-card bg-[hsl(var(--mint))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <MapPin className="h-5 w-5 mr-2" />
            Location Data
@@ -589,7 +540,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
 
        {safeAnalysis.imageProperties && (
         <div className="exifee-card bg-[hsl(var(--coral))]">
-         <div className="p-4 border-b-2 border-black">
+         <div className="p-4">
           <h3 className="text-lg font-bold flex items-center">
            <Sliders className="h-5 w-5 mr-2" />
            Image Properties
@@ -649,7 +600,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
      {activeTab === "advanced" && (
       <div className="space-y-6">
        <div className="exifee-card bg-[hsl(var(--teal))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <h3 className="text-lg font-bold flex items-center">
           <Aperture className="h-5 w-5 mr-2" />
           Advanced Camera Settings
@@ -657,8 +608,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
         <div className="p-4">
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <h4 className="font-bold">Exposure Settings</h4>
            </div>
            <div className="p-4">
@@ -691,8 +642,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <h4 className="font-bold">Image Adjustments</h4>
            </div>
            <div className="p-4">
@@ -729,7 +680,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
        </div>
 
        <div className="exifee-card bg-[hsl(var(--orange))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <h3 className="text-lg font-bold flex items-center">
           <Zap className="h-5 w-5 mr-2" />
           Additional Information
@@ -737,8 +688,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
         <div className="p-4">
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <h4 className="font-bold">Lens Information</h4>
            </div>
            <div className="p-4">
@@ -774,8 +725,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
           </div>
 
           {safeAnalysis.exifData.raw && (
-           <div className="exifee-card bg-white">
-            <div className="p-4 border-b-2 border-black">
+           <div className="exifee-card bg-background/30">
+            <div className="p-4">
              <h4 className="font-bold">Raw Data Sample</h4>
             </div>
             <div className="p-4">
@@ -792,7 +743,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
        </div>
 
-       <div className="bg-black text-white p-4 rounded-lg font-medium">
+       <div className="bg-background text-muted-foreground p-4 rounded-lg font-medium">
         Advanced EXIF data provides deeper insights into how the image was
         captured. This information is extracted using the exifr library, which
         can read a wide range of metadata from various image formats.
@@ -803,21 +754,18 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
      {activeTab === "exif" && (
       <div className="space-y-6">
        <div className="exifee-card bg-[hsl(var(--orange))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold flex items-center">
            <Info className="h-5 w-5 mr-2" />
            EXIF Data
           </h3>
-          <button className="rounded-full bg-white p-1 border-2 border-black">
-           <HelpCircle className="h-4 w-4" />
-          </button>
          </div>
         </div>
         <div className="p-4">
          <div className="space-y-4">
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <div className="flex items-center">
              <Camera className="h-4 w-4 mr-2" />
              <span className="font-bold">Camera Information</span>
@@ -840,8 +788,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <div className="flex items-center">
              <ImageIcon className="h-4 w-4 mr-2" />
              <span className="font-bold">Image Information</span>
@@ -864,8 +812,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <div className="flex items-center">
              <Info className="h-4 w-4 mr-2" />
              <span className="font-bold">EXIF Details</span>
@@ -890,8 +838,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <div className="flex items-center">
              <MapPin className="h-4 w-4 mr-2" />
              <span className="font-bold">GPS Information</span>
@@ -916,8 +864,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <div className="flex items-center">
              <Layers className="h-4 w-4 mr-2" />
              <span className="font-bold">Advanced Settings</span>
@@ -943,7 +891,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
        </div>
 
-       <div className="bg-black text-white p-4 rounded-lg font-medium">
+       <div className="bg-background text-muted-foreground p-4 rounded-lg font-medium">
         EXIF data is metadata embedded in image files by digital cameras and
         editing software. This data can include camera settings, date and time
         information, location data, and more. We use the exifr library to
@@ -955,7 +903,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
      {activeTab === "ai" && (
       <div className="space-y-6">
        <div className="exifee-card bg-[hsl(var(--teal))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <h3 className="text-lg font-bold flex items-center">
           <Sparkles className="h-5 w-5 mr-2" />
           AI Detection Results
@@ -963,7 +911,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
         <div className="p-4">
          <div className="space-y-6">
-          <div className="exifee-card bg-white p-6">
+          <div className="exifee-card bg-background p-6">
            <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
              <h3 className="text-2xl font-bold mb-1">
@@ -991,7 +939,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
 
           <div>
            <h3 className="text-lg font-bold mb-4">Confidence Score</h3>
-           <div className="w-full bg-white rounded-full h-6 mb-2 border-2 border-black overflow-hidden">
+           <div className="w-full bg-background rounded-full h-6 mb-2 border-black overflow-hidden">
             <div
              className={`h-full ${
               safeAnalysis.aiDetection.isAiGenerated
@@ -1009,8 +957,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-           <div className="exifee-card bg-white">
-            <div className="p-4 border-b-2 border-black">
+           <div className="exifee-card bg-background/30">
+            <div className="p-4">
              <h4 className="font-bold">Model Prediction</h4>
             </div>
             <div className="p-4">
@@ -1018,8 +966,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
             </div>
            </div>
 
-           <div className="exifee-card bg-white">
-            <div className="p-4 border-b-2 border-black">
+           <div className="exifee-card bg-background/30">
+            <div className="p-4">
              <h4 className="font-bold">Pattern Analysis</h4>
             </div>
             <div className="p-4">
@@ -1028,8 +976,8 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
            </div>
           </div>
 
-          <div className="exifee-card bg-white">
-           <div className="p-4 border-b-2 border-black">
+          <div className="exifee-card bg-background/30">
+           <div className="p-4">
             <h4 className="font-bold">Detected Inconsistencies</h4>
            </div>
            <div className="p-4">
@@ -1053,7 +1001,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
        </div>
 
-       <div className="bg-black text-white p-4 rounded-lg font-medium">
+       <div className="bg-background text-muted-foreground p-4 rounded-lg font-medium">
         Our AI detection is powered by Sightengine and based on pattern
         recognition and analysis of image characteristics. While highly
         accurate, it may not be 100% reliable in all cases as AI generation
@@ -1065,7 +1013,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
      {activeTab === "colors" && (
       <div className="space-y-6">
        <div className="exifee-card bg-[hsl(var(--coral))]">
-        <div className="p-4 border-b-2 border-black">
+        <div className="p-4">
          <h3 className="text-lg font-bold flex items-center">
           <Palette className="h-5 w-5 mr-2" />
           Color Palette
@@ -1076,7 +1024,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
         </div>
        </div>
 
-       <div className="bg-black text-white p-4 rounded-lg font-medium">
+       <div className="bg-background text-muted-foreground p-4 rounded-lg font-medium">
         The color palette is extracted using Sightengine&apos;s image analysis.
         It identifies the dominant color, accent colors, and other significant
         colors in the image. You can click on any color to copy its hex code.

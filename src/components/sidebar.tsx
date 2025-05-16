@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { textTools } from "@/lib/text-tools";
 
 // Common navigation links component that works for both mobile and desktop
 const NavigationLinks = ({
@@ -59,9 +60,9 @@ const NavigationLinks = ({
     </Button>
    </Link>
 
-   {/* Tools Section */}
+   {/* Image Section */}
    <div className="pt-2 pb-1">
-    <div className="text-xs text-zinc-500 px-3 py-1">Tools</div>
+    <div className="text-xs text-zinc-500 px-3 py-1">Image</div>
    </div>
 
    <Link
@@ -115,22 +116,30 @@ const NavigationLinks = ({
     </Button>
    </Link>
 
-   <Link
-    href="/tools/text-tools/lowercase"
-    onClick={isMobile ? onMobileItemClick : undefined}
-   >
-    <Button
-     variant="ghost"
-     className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+   {/* Text Section */}
+   <div className="pt-2 pb-1">
+    <div className="text-xs text-zinc-500 px-3 py-1">Text</div>
+   </div>
+
+   {Object.keys(textTools).map((tool) => (
+    <Link
+     key={tool}
+     href={`/tools/text-tools/${tool}`}
+     onClick={isMobile ? onMobileItemClick : undefined}
     >
-     <FileText
-      className={`h-4 w-4 ${
-       !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
-      }`}
-     />
-     <span>Text Tools</span>
-    </Button>
-   </Link>
+     <Button
+      variant="ghost"
+      className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+     >
+      <FileText
+       className={`h-4 w-4 ${
+        !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+       }`}
+      />
+      <span>{(textTools[tool].title || "").replace(/\|.+/, "")}</span>
+     </Button>
+    </Link>
+   ))}
   </nav>
  );
 };

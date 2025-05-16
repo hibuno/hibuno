@@ -3,7 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getImageAnalysis } from "@/lib/actions";
 import { ResultsDisplay } from "@/components/results-display";
-import { ArrowLeft, Download, Share2, Camera, Sparkles } from "lucide-react";
+import { ArrowLeft, Camera, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,46 +176,12 @@ export default async function ResultsPage({ params }: PageProps) {
          </div>
         </CardContent>
        </Card>
-
-       <div className="flex space-x-2">
-        <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
-         <Download className="h-4 w-4 mr-2" />
-         Download
-        </Button>
-        <Button
-         variant="outline"
-         className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white"
-        >
-         <Share2 className="h-4 w-4 mr-2" />
-         Share
-        </Button>
-       </div>
       </div>
 
       {/* Right Column - Analysis Results */}
       <div className="lg:col-span-2 space-y-6">
        <div className="bg-zinc-800 border-zinc-700 rounded-md overflow-hidden">
-        <div className="border-b border-zinc-700 flex overflow-x-auto">
-         <button className="px-4 py-2 bg-violet-600 text-white font-medium text-sm">
-          Summary
-         </button>
-         <button className="px-4 py-2 hover:bg-zinc-700 text-zinc-400 font-medium text-sm border-r border-zinc-700">
-          Camera
-         </button>
-         <button className="px-4 py-2 hover:bg-zinc-700 text-zinc-400 font-medium text-sm border-r border-zinc-700">
-          EXIF Data
-         </button>
-         <button className="px-4 py-2 hover:bg-zinc-700 text-zinc-400 font-medium text-sm border-r border-zinc-700">
-          AI Analysis
-         </button>
-         <button className="px-4 py-2 hover:bg-zinc-700 text-zinc-400 font-medium text-sm">
-          Colors
-         </button>
-        </div>
-
-        <div className="p-6">
-         <ResultsDisplay analysis={analysis} />
-        </div>
+        <ResultsDisplay analysis={analysis} />
        </div>
       </div>
      </div>

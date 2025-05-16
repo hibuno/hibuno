@@ -1,25 +1,10 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import {
- FileText,
- Loader2,
- SlidersHorizontal,
- Eraser,
- Shuffle,
- RotateCw,
- Filter,
- Search,
- Type,
- Lock,
- Unlock,
- DiffIcon,
- Hash,
-} from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
 
 // Text statistics interface
 interface TextStats {
@@ -39,50 +24,54 @@ export default function TextToolsClient({ tool }: { tool: string }) {
  const [isProcessing, setIsProcessing] = useState(false);
  const [secondaryInputText, setSecondaryInputText] = useState<string>("");
  const [showSecondaryInput, setShowSecondaryInput] = useState(false);
- const [diffHighlightedOutput, setDiffHighlightedOutput] = useState<React.ReactNode>(null);
+ const [diffHighlightedOutput, setDiffHighlightedOutput] =
+  useState<React.ReactNode>(null);
 
  // Calculate text statistics
- const calculateStats = useCallback((text: string, includeWordFrequency: boolean = false): TextStats => {
-  const totalChars = text.length;
-  const charsExcludingSpaces = text.replace(/\s/g, "").length;
-  const words = text.trim()
-   ? text.trim().split(/\s+/).filter(Boolean).length
-   : 0;
-  const sentences = text.trim()
-   ? text.split(/[.!?]+\s*/).filter(Boolean).length
-   : 0;
-  const paragraphs = text.trim()
-   ? text.split(/\n\s*\n/).filter(Boolean).length
-   : 0;
-  const lines = text.trim() ? text.split(/\n/).length : 0;
+ const calculateStats = useCallback(
+  (text: string, includeWordFrequency: boolean = false): TextStats => {
+   const totalChars = text.length;
+   const charsExcludingSpaces = text.replace(/\s/g, "").length;
+   const words = text.trim()
+    ? text.trim().split(/\s+/).filter(Boolean).length
+    : 0;
+   const sentences = text.trim()
+    ? text.split(/[.!?]+\s*/).filter(Boolean).length
+    : 0;
+   const paragraphs = text.trim()
+    ? text.split(/\n\s*\n/).filter(Boolean).length
+    : 0;
+   const lines = text.trim() ? text.split(/\n/).length : 0;
 
-  const stats: TextStats = {
-   totalChars,
-   charsExcludingSpaces,
-   words,
-   sentences,
-   paragraphs,
-   lines,
-  };
+   const stats: TextStats = {
+    totalChars,
+    charsExcludingSpaces,
+    words,
+    sentences,
+    paragraphs,
+    lines,
+   };
 
-  // Calculate word frequency if requested
-  if (includeWordFrequency && text.trim()) {
-   const wordFrequency: Record<string, number> = {};
-   const wordArray = text.toLowerCase().trim().split(/\s+/).filter(Boolean);
-   
-   wordArray.forEach(word => {
-    // Remove punctuation from words
-    const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-    if (cleanWord) {
-     wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1;
-    }
-   });
-   
-   stats.wordFrequency = wordFrequency;
-  }
+   // Calculate word frequency if requested
+   if (includeWordFrequency && text.trim()) {
+    const wordFrequency: Record<string, number> = {};
+    const wordArray = text.toLowerCase().trim().split(/\s+/).filter(Boolean);
 
-  return stats;
- }, []);
+    wordArray.forEach((word) => {
+     // Remove punctuation from words
+     const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+     if (cleanWord) {
+      wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1;
+     }
+    });
+
+    stats.wordFrequency = wordFrequency;
+   }
+
+   return stats;
+  },
+  []
+ );
 
  const stats = calculateStats(inputText);
 
@@ -276,17 +265,17 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    wordFrequency: (input: string) => {
     const stats = calculateStats(input, true);
     if (!stats.wordFrequency) return "No words found";
-    
+
     // Sort words by frequency (highest first)
     const sortedWords = Object.entries(stats.wordFrequency)
-      .sort((a, b) => b[1] - a[1])
-      .map(([word, count]) => `${word}: ${count}`)
-      .join("\n");
-    
+     .sort((a, b) => b[1] - a[1])
+     .map(([word, count]) => `${word}: ${count}`)
+     .join("\n");
+
     return sortedWords;
    },
   },
-  
+
   // Advanced transformations
   advanced: {
    base64Encode: (input: string) => {
@@ -305,25 +294,24 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    },
    compareTexts: (input: string, secondInput: string) => {
     // Simple diff implementation - returns a description of differences
-    const lines1 = input.split('\n');
-    const lines2 = secondInput.split('\n');
-    
-    let result = '';
+    const lines1 = input.split("\n");
+    const lines2 = secondInput.split("\n");
+
+    let result = "";
     const maxLines = Math.max(lines1.length, lines2.length);
-    
+
     for (let i = 0; i < maxLines; i++) {
-     const line1 = i < lines1.length ? lines1[i] : '';
-     const line2 = i < lines2.length ? lines2[i] : '';
-     
+     const line1 = i < lines1.length ? lines1[i] : "";
+     const line2 = i < lines2.length ? lines2[i] : "";
+
      if (line1 !== line2) {
-      result += `Line ${i+1}:\n- ${line1}\n+ ${line2}\n\n`;
+      result += `Line ${i + 1}:\n- ${line1}\n+ ${line2}\n\n`;
      }
     }
-    
-    return result || 'The texts are identical';
+
+    return result || "The texts are identical";
    },
   },
-
  };
 
  // Transform text based on transformation type
@@ -417,7 +405,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
      case "word-frequency":
       transformed = textTransformations.extraction.wordFrequency(inputText);
       break;
-      
+
      // Advanced transformations
      case "base64-encode":
       transformed = textTransformations.advanced.base64Encode(inputText);
@@ -426,33 +414,42 @@ export default function TextToolsClient({ tool }: { tool: string }) {
       transformed = textTransformations.advanced.base64Decode(inputText);
       break;
      case "compare-texts":
-      transformed = textTransformations.advanced.compareTexts(inputText, secondaryInputText);
-      
+      transformed = textTransformations.advanced.compareTexts(
+       inputText,
+       secondaryInputText
+      );
+
       // Create highlighted diff view
-      const lines1 = inputText.split('\n');
-      const lines2 = secondaryInputText.split('\n');
+      const lines1 = inputText.split("\n");
+      const lines2 = secondaryInputText.split("\n");
       const maxLines = Math.max(lines1.length, lines2.length);
-      
+
       const diffElements = [];
       for (let i = 0; i < maxLines; i++) {
-       const line1 = i < lines1.length ? lines1[i] : '';
-       const line2 = i < lines2.length ? lines2[i] : '';
-       
+       const line1 = i < lines1.length ? lines1[i] : "";
+       const line2 = i < lines2.length ? lines2[i] : "";
+
        if (line1 !== line2) {
         diffElements.push(
          <div key={`diff-${i}`} className="mb-2 p-2 bg-zinc-800 rounded-md">
-          <div className="text-xs text-zinc-400 mb-1">Line {i+1}:</div>
-          <div className="bg-red-900/20 p-1 rounded mb-1 text-red-200">- {line1}</div>
-          <div className="bg-green-900/20 p-1 rounded text-green-200">+ {line2}</div>
+          <div className="text-xs text-zinc-400 mb-1">Line {i + 1}:</div>
+          <div className="bg-red-900/20 p-1 rounded mb-1 text-red-200">
+           - {line1}
+          </div>
+          <div className="bg-green-900/20 p-1 rounded text-green-200">
+           + {line2}
+          </div>
          </div>
         );
        }
       }
-      
+
       setDiffHighlightedOutput(
-       diffElements.length > 0 ? 
-       <div className="space-y-1">{diffElements}</div> : 
-       <div className="text-green-400 p-2">The texts are identical</div>
+       diffElements.length > 0 ? (
+        <div className="space-y-1">{diffElements}</div>
+       ) : (
+        <div className="text-green-400 p-2">The texts are identical</div>
+       )
       );
       break;
     }
@@ -468,7 +465,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
 
  // Effect to show/hide secondary input based on tool type
  useEffect(() => {
-  setShowSecondaryInput(tool === 'compare-texts');
+  setShowSecondaryInput(tool === "compare-texts");
   setDiffHighlightedOutput(null);
  }, [tool]);
 
@@ -478,7 +475,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
     <CardHeader>
      <CardTitle className="text-sm font-medium flex items-center">
       <FileText className="h-4 w-4 mr-2 text-zinc-400" />
-      {showSecondaryInput ? 'First Text' : 'Input Text'}
+      {showSecondaryInput ? "First Text" : "Input Text"}
      </CardTitle>
     </CardHeader>
     <CardContent>
@@ -490,7 +487,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
      />
     </CardContent>
    </Card>
-   
+
    {showSecondaryInput && (
     <Card className="bg-zinc-800 border-zinc-700 shadow-md mt-4">
      <CardHeader>
@@ -557,7 +554,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
       <div className="flex justify-center py-6">
        <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
       </div>
-     ) : tool === 'compare-texts' && diffHighlightedOutput ? (
+     ) : tool === "compare-texts" && diffHighlightedOutput ? (
       <div className="min-h-[180px] bg-zinc-900 border border-zinc-700 rounded-md p-3 text-zinc-200 text-sm overflow-auto">
        {diffHighlightedOutput}
       </div>
@@ -568,232 +565,6 @@ export default function TextToolsClient({ tool }: { tool: string }) {
        readOnly
       />
      )}
-    </CardContent>
-   </Card>
-
-   <Card className="bg-zinc-800 border-zinc-700 shadow-md">
-    <CardHeader>
-     <CardTitle className="text-sm font-medium flex items-center">
-      <Type className="h-4 w-4 mr-2 text-zinc-400" />
-      Quick Text Transformations
-     </CardTitle>
-    </CardHeader>
-    <CardContent className="px-4 pt-2 pb-4">
-     <div className="flex flex-wrap gap-2">
-      <Link href={`/tools/text-tools/lowercase`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Type className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Lowercase Text
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/uppercase`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Type className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Uppercase Text
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/randomcase`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Shuffle className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Random Case
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/titlecase`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Type className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Title Case
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/invertcase`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Type className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Invert Case
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/capitalize`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Type className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Capitalize Text
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/sort-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Sort
-        Lines
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/reverse-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <RotateCw className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Reverse Text
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/shuffle-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Shuffle className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Shuffle Lines
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/number-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <FileText className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Number Lines
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/delete-empty-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Delete Empty
-        Lines
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/delete-duplicate-lines`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Filter className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Delete Duplicate
-        Lines
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/extract-emails`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Search className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Extract Emails
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/extract-urls`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Search className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Extract URLs
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/extract-numbers`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Search className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Extract Numbers
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/strip-html`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Strip HTML Tags
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/remove-duplicate-spaces`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Remove Extra
-        Spaces
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/remove-whitespace`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Remove All
-        Spaces
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/remove-punctuation`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Eraser className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Remove
-        Punctuation
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/word-frequency`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Hash className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Word Frequency
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/base64-encode`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Lock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Base64 Encode
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/base64-decode`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <Unlock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Base64 Decode
-       </Button>
-      </Link>
-      <Link href={`/tools/text-tools/compare-texts`}>
-       <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 border border-zinc-700 bg-zinc-800/30 text-zinc-300 hover:bg-zinc-700 text-xs justify-start px-2"
-       >
-        <DiffIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" /> Compare Texts
-       </Button>
-      </Link>
-     </div>
     </CardContent>
    </Card>
   </>

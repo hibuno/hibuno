@@ -57,11 +57,11 @@ export function ColorPalette({ colorInfo }: ColorPaletteProps) {
      title={`Copy ${hex}`}
     >
      {copiedColor === hex ? (
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-md">
+      <div className="absolute inset-0 flex items-center justify-center rounded-md">
        <Check className="text-white h-4 w-4" />
       </div>
      ) : (
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-md transition-all">
+      <div className="absolute inset-0 flex items-center justify-center group-hover:bg-opacity-20 rounded-md transition-all">
        <Copy className="text-white opacity-0 group-hover:opacity-100 h-4 w-4" />
       </div>
      )}

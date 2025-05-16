@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { textTools } from '@/lib/text-tools';
 
 // Define the base URL for the site
 const baseUrl = 'https://hibuno.com';
@@ -35,35 +36,9 @@ const getBlogPosts = () => {
 
 // Define all text tool pages
 const getTextToolPages = () => {
-	const textTools = [
-		'lowercase',
-		'uppercase',
-		'randomcase',
-		'titlecase',
-		'invertcase',
-		'capitalize',
-		'reverse',
-		'trim',
-		'sort-lines',
-		'reverse-lines',
-		'shuffle-lines',
-		'number-lines',
-		'delete-empty-lines',
-		'delete-duplicate-lines',
-		'remove-whitespace',
-		'remove-duplicate-spaces',
-		'remove-punctuation',
-		'strip-html',
-		'extract-emails',
-		'extract-urls',
-		'extract-numbers',
-		'word-frequency',
-		'base64-encode',
-		'base64-decode',
-		'compare-texts',
-	];
+	const tools = Object.keys(textTools);
 
-	return textTools.map(tool => ({
+	return tools.map(tool => ({
 		url: `${baseUrl}/tools/text-tools/${tool}`,
 		lastModified: new Date(),
 		changeFrequency: 'monthly' as ChangeFrequency,
