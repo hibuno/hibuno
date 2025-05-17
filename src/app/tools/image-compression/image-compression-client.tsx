@@ -11,6 +11,7 @@ import {
  Trash2,
  Layers,
 } from "lucide-react";
+import CompressionLoadingSkeleton from "./components/loading-skeleton";
 import { Sidebar } from "@/components/sidebar";
 import { CompressionOptions } from "@/components/compression-options";
 import { FileDropzone } from "@/components/file-dropzone";
@@ -255,7 +256,7 @@ export default function ImageCompression() {
     </div>
 
     {isLoading ? (
-     <Suspense fallback={<div>Loading...</div>}>
+     <Suspense fallback={<CompressionLoadingSkeleton />}>
       <LoadingIndicator />
      </Suspense>
     ) : (

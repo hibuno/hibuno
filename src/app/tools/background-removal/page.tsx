@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import BackgroundRemovalClient from "./background-removal-client";
+import BackgroundRemovalLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Background Removal Tool - Hibuno",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function BackgroundRemovalPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center">Loading background removal tool...</div>}>
+    <Suspense fallback={<BackgroundRemovalLoading />}>
       <BackgroundRemovalClient />
     </Suspense>
   );

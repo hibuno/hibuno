@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/sidebar";
 import { textTools } from "@/lib/text-tools";
+import TextToolsLoading from "./loading";
 
 export const metadata: Metadata = {
  title: "Text Tools - Hibuno | Free Online Text Manipulation",
@@ -80,7 +81,7 @@ export default async function TextToolsPage({
  const tool = (await params).tool;
  return (
   <Suspense
-   fallback={<div className="p-12 text-center">Loading text tools...</div>}
+   fallback={<TextToolsLoading />}
   >
    <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
     {/* Sidebar */}

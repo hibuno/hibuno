@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { getAllPosts } from "@/lib/mdx";
 import BlogClient from "./blog-client";
+import BlogLoading from "./loading";
 
 export const revalidate = 3600; // Revalidate at most every hour
 
@@ -19,7 +20,7 @@ export default async function BlogPage() {
 
  return (
   <Suspense
-   fallback={<div className="p-12 text-center">Loading blog posts...</div>}
+   fallback={<BlogLoading />}
   >
    <BlogClient initialPosts={enhancedPosts} />
   </Suspense>

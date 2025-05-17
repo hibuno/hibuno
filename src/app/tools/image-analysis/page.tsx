@@ -7,6 +7,7 @@ import { ArrowLeft, ImageIcon, Camera, Palette, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/sidebar";
+import ImageAnalysisLoading from "./loading";
 
 export const metadata: Metadata = {
  title: "AI Image Validator Tool - Hibuno",
@@ -55,9 +56,7 @@ export const metadata: Metadata = {
 export default function ImageAnalysisPage() {
  return (
   <Suspense
-   fallback={
-    <div className="p-12 text-center">Loading AI Image Validator tool...</div>
-   }
+   fallback={<ImageAnalysisLoading />}
   >
    <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
     {/* Sidebar */}

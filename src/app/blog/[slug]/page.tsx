@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getPostBySlug, getAllPosts } from "@/lib/mdx";
+import { getAllPosts, getPostBySlug } from "@/lib/mdx";
+import BlogPostLoading from "./loading";
 import PostClient from "./post-client";
 import { serialize } from "next-mdx-remote/serialize";
 
@@ -38,7 +39,7 @@ export default async function BlogPostPage({
  });
 
  return (
-  <Suspense fallback={<div className="p-12 text-center">Loading post...</div>}>
+  <Suspense fallback={<BlogPostLoading />}>
    <PostClient post={post} relatedPosts={relatedPosts} mdxSource={mdxSource} />
   </Suspense>
  );

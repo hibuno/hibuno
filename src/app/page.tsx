@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import HomeClient from "./home-client";
+import HomeLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Hibuno - Free Online Web Tools",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center">Loading homepage...</div>}>
+    <Suspense fallback={<HomeLoading />}>
       <HomeClient />
     </Suspense>
   );

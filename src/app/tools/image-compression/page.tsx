@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import ImageCompressionClient from "./image-compression-client";
+import ImageCompressionLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Image Compression Tool - Hibuno",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function ImageCompressionPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center">Loading image compression tool...</div>}>
+    <Suspense fallback={<ImageCompressionLoading />}>
       <ImageCompressionClient />
     </Suspense>
   );
