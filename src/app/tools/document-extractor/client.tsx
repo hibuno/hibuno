@@ -70,7 +70,7 @@ async function extractFromImage(file: File): Promise<string> {
   const { createWorker } = await import("tesseract.js");
 
   // Initialize worker
-  const worker = await createWorker("eng");
+  const worker = await createWorker(["eng", "ind"]);
 
   // Recognize text
   const { data } = await worker.recognize(file);
