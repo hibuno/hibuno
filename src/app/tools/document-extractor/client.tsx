@@ -866,7 +866,7 @@ export default function DocumentExtractorClient() {
        <p>
         The tool is designed to be easy to use, with a user-friendly interface
         that requires minimal training. Additionally, all uploads are
-        automatically deleted after 3 hours to protect your privacy.
+        automatically deleted after 1 day to protect your privacy.
        </p>
       </div>
      </CardContent>

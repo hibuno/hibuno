@@ -5,8 +5,8 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
 	try {
-		// Set the expiration time to 3 hours
-		const result = await deleteOldFiles(3)
+		// Set the expiration time to 1 day
+		const result = await deleteOldFiles(24)
 
 		// Return the result as JSON
 		return NextResponse.json(result)

@@ -7,6 +7,8 @@ import { extractExifData } from "./exif"
 import { detectAiImage } from "./ai-detection"
 import { extractColorInfo, extractImageProperties } from "./sightengine"
 
+const oneDay = 24 * 60 * 60;
+
 export async function uploadImage(formData: FormData) {
 	try {
 		const file = formData.get("image") as File
@@ -22,7 +24,7 @@ export async function uploadImage(formData: FormData) {
 
 		// Generate a unique ID for the image
 		const id = uuidv4()
-		
+
 		// Add timestamp to the filename for expiration tracking
 		const timestamp = Date.now()
 		const filename = `${timestamp}_${id}`
@@ -30,7 +32,7 @@ export async function uploadImage(formData: FormData) {
 		// Upload to Vercel Blob with timestamp in filename
 		const blob = await put(`images/${filename}`, file, {
 			access: "public",
-			cacheControlMaxAge: 10800,
+			cacheControlMaxAge: oneDay,
 			addRandomSuffix: false,
 		})
 
@@ -67,7 +69,7 @@ export async function uploadImage(formData: FormData) {
 			fileType: file.type,
 			fileSize: file.size,
 			uploadedAt: new Date().toISOString(),
-			expiresAt: new Date(Date.now() + 10800 * 1000).toISOString(),
+			expiresAt: new Date(Date.now() + oneDay * 1000).toISOString(),
 			exifData,
 			aiDetection: aiDetectionResult,
 			colorInfo,
@@ -85,7 +87,7 @@ export async function uploadImage(formData: FormData) {
 			access: "public",
 			addRandomSuffix: false,
 			contentType: "application/json",
-			cacheControlMaxAge: 10800,
+			cacheControlMaxAge: oneDay,
 		})
 
 		// Log the URL where we're storing the analysis
@@ -114,18 +116,18 @@ export async function getImageAnalysis(id: string) {
 			prefix: `analysis/`,
 			limit: 100,
 		})
-		
+
 		// Find the file that ends with the provided ID
 		const analysisFile = listResult.blobs.find(blob => {
 			const filename = blob.pathname.split('/').pop() || ''
 			return filename.endsWith(`${id}.json`)
 		})
-		
+
 		if (!analysisFile) {
 			console.error(`Analysis file for ID ${id} not found`)
 			return null
 		}
-		
+
 		// Use the URL from the found file
 		const url = analysisFile.url
 
@@ -168,29 +170,29 @@ export async function deleteImage(id: string) {
 			prefix: 'images/',
 			limit: 100,
 		})
-		
+
 		const analysisResult = await list({
 			prefix: 'analysis/',
 			limit: 100,
 		})
-		
+
 		// Find the image file that contains the ID
 		const imageFile = imagesResult.blobs.find(blob => {
 			const filename = blob.pathname.split('/').pop() || ''
 			return filename.includes(id)
 		})
-		
+
 		// Find the analysis file that contains the ID
 		const analysisFile = analysisResult.blobs.find(blob => {
 			const filename = blob.pathname.split('/').pop() || ''
 			return filename.includes(id)
 		})
-		
+
 		// Delete the files if found
 		if (imageFile) {
 			await del(imageFile.url)
 		}
-		
+
 		if (analysisFile) {
 			await del(analysisFile.url)
 		}
@@ -210,44 +212,44 @@ export async function deleteImage(id: string) {
  * Deletes files older than the specified hours
  * @param hours Number of hours after which files should be deleted
  */
-export async function deleteOldFiles(hours: number = 3) {
+export async function deleteOldFiles(hours: number = 24) {
 	try {
 		const currentTime = Date.now()
 		const expirationTime = currentTime - (hours * 60 * 60 * 1000) // Convert hours to milliseconds
 		let cursor: string | undefined
 		let deletedCount = 0
-		
+
 		do {
 			// List all blobs with pagination
 			const listResult = await list({
 				cursor,
 				limit: 100,
 			})
-			
+
 			// Filter blobs that are older than the expiration time
 			const blobsToDelete = listResult.blobs.filter(blob => {
 				const pathname = blob.pathname
 				// Extract timestamp from filename (assuming format: timestamp_id.ext)
 				const filename = pathname.split('/').pop() || ''
 				const timestampStr = filename.split('_')[0]
-				
+
 				if (!timestampStr || isNaN(Number(timestampStr))) {
 					return false // Skip files without proper timestamp format
 				}
-				
+
 				const timestamp = Number(timestampStr)
 				return timestamp < expirationTime
 			})
-			
+
 			// Delete the filtered blobs
 			if (blobsToDelete.length > 0) {
 				await del(blobsToDelete.map(blob => blob.url))
 				deletedCount += blobsToDelete.length
 			}
-			
+
 			cursor = listResult.cursor
 		} while (cursor)
-		
+
 		console.log(`Deleted ${deletedCount} expired files`)
 		return { success: true, deletedCount }
 	} catch (error) {
