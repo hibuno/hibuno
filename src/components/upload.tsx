@@ -30,7 +30,7 @@ export function Upload() {
  const saveToRecentUploads = (id: string, url: string, filename: string) => {
   try {
    // Get existing uploads
-   const storedUploads = localStorage.getItem("exifee-recent-uploads");
+   const storedUploads = localStorage.getItem("hibuno-recent-uploads");
    let uploads = [];
 
    if (storedUploads) {
@@ -51,7 +51,7 @@ export function Upload() {
    }
 
    // Save back to localStorage
-   localStorage.setItem("exifee-recent-uploads", JSON.stringify(uploads));
+   localStorage.setItem("hibuno-recent-uploads", JSON.stringify(uploads));
   } catch (error) {
    console.error("Error saving to recent uploads:", error);
   }

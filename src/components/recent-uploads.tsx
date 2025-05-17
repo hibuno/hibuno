@@ -22,7 +22,7 @@ export function RecentUploads() {
 
  useEffect(() => {
   // Get recent uploads from localStorage
-  const storedUploads = localStorage.getItem("exifee-recent-uploads");
+  const storedUploads = localStorage.getItem("hibuno-recent-uploads");
   if (storedUploads) {
    try {
     const parsedUploads = JSON.parse(storedUploads);
@@ -40,7 +40,7 @@ export function RecentUploads() {
  }, [toast]);
 
  const clearHistory = () => {
-  localStorage.removeItem("exifee-recent-uploads");
+  localStorage.removeItem("hibuno-recent-uploads");
   setRecentUploads([]);
   toast({
    title: "History cleared",
@@ -51,7 +51,7 @@ export function RecentUploads() {
  const removeItem = (id: string) => {
   const updatedUploads = recentUploads.filter((upload) => upload.id !== id);
   setRecentUploads(updatedUploads);
-  localStorage.setItem("exifee-recent-uploads", JSON.stringify(updatedUploads));
+  localStorage.setItem("hibuno-recent-uploads", JSON.stringify(updatedUploads));
   toast({
    title: "Item removed",
    description: "The image has been removed from your history.",

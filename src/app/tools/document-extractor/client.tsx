@@ -10,7 +10,7 @@ import {
  Download,
  Copy,
  ArrowLeft,
- File,
+ File as FileIcon,
  FileText,
  FileImage,
  FileSpreadsheet,
@@ -50,7 +50,7 @@ function getFileType(file: File): string {
  const type = file.type.toLowerCase();
 
  if (type.startsWith("image/")) return "image";
- if (type === "application/pdf") return "pdf";
+ if (type.includes("pdf")) return "pdf";
  if (type.includes("wordprocessingml.document")) return "docx";
  if (type.includes("spreadsheetml.sheet")) return "xlsx";
 
@@ -154,12 +154,10 @@ async function extractFromPDF(
      });
 
      // Create a File object from the Blob
-     // Using type assertion to fix TypeScript error with File constructor
-     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-     // @ts-ignore
-     const pageFile = new File([blob], `page-${i}.png`, {
+     // Using window.File to avoid naming conflicts with the File icon from lucide-react
+     const pageFile = new window.File([blob], `page-${i}.png`, {
       type: "image/png",
-     }) as File;
+     });
 
      // Upload to Vercel Blob
      const formData = new FormData();
@@ -380,11 +378,11 @@ function detectTableHeaders(grid: string[][]): boolean {
  return hasDistinctiveFirstRow;
 }
 
-export function DocumentExtractorClient() {
+export default function DocumentExtractorClient() {
  const [isProcessing, setIsProcessing] = useState(false);
  const [progress, setProgress] = useState(0);
- const [result, setResult] = useState<string | null>(null);
  const [error, setError] = useState<string | null>(null);
+ const [result, setResult] = useState<string | null>(null);
  const [pageImages, setPageImages] = useState<string[]>([]);
  const [copied, setCopied] = useState(false);
  const [downloading, setDownloading] = useState(false);
@@ -412,12 +410,17 @@ export function DocumentExtractorClient() {
    setResult(null);
    setPageImages([]);
 
-   // Store file information for UI
+   // Store file information for UI - Important: Get these values first before using them
    const detectedFileType = getFileType(file);
-   setFileType(detectedFileType);
-   setFileName(file.name);
+   const detectedFileName = file.name;
 
-   console.log(`Starting document extraction for ${file.name}`);
+   // Set state values after getting them
+   setFileType(detectedFileType);
+   setFileName(detectedFileName);
+
+   console.log(
+    `Starting document extraction for ${detectedFileName} with type ${detectedFileType}`
+   );
 
    // Process the file based on its type
    setProgress(10);
@@ -426,8 +429,8 @@ export function DocumentExtractorClient() {
    let extractedText = "";
    let pageImageUrls: string[] = [];
 
+   // First upload the original file to Vercel Blob for reference
    try {
-    // First upload the original file to Vercel Blob for reference
     const formData = new FormData();
     formData.append("file", file);
     const uploadResult = await uploadBlob(formData);
@@ -435,72 +438,144 @@ export function DocumentExtractorClient() {
     if (uploadResult.success && uploadResult.url) {
      pageImageUrls.push(uploadResult.url);
     }
-
-    // Process based on file type
-    if (fileType === "image") {
-     extractedText = await extractFromImage(file);
-    } else if (fileType === "pdf") {
-     const result = await extractFromPDF(file, (progress) => {
-      setProgress(10 + Math.floor(progress * 0.4));
-     });
-     extractedText = result.text;
-     pageImageUrls = [...pageImageUrls, ...result.images];
-    } else if (fileType === "docx") {
-     extractedText = await extractFromDOCX(file);
-    } else if (fileType === "xlsx") {
-     extractedText = await extractFromXLSX(file);
-    }
-   } catch (err) {
-    console.error("Error extracting content:", err);
-    setError(
-     `Error extracting content: ${
-      err instanceof Error ? err.message : "Unknown error"
-     }`
-    );
-    setIsProcessing(false);
-    return;
+   } catch (uploadErr) {
+    console.error("Error uploading file to blob storage:", uploadErr);
+    // Continue without the original file URL
    }
 
+   // Process based on file type
+   try {
+    if (detectedFileType === "image") {
+     try {
+      extractedText = await extractFromImage(file);
+     } catch (imageErr) {
+      console.error("Error extracting text from image:", imageErr);
+      // Continue with empty text, will be handled later
+     }
+    } else if (detectedFileType === "pdf") {
+     try {
+      const result = await extractFromPDF(file, (progress) => {
+       setProgress(10 + Math.floor(progress * 0.4));
+      });
+      extractedText = result.text;
+      pageImageUrls = [...pageImageUrls, ...result.images];
+
+      // If no text was extracted but we have page images, try OCR as a fallback
+      if (
+       (!extractedText || extractedText.trim().length === 0) &&
+       result.images.length > 0
+      ) {
+       console.log("No text extracted from PDF, trying OCR as fallback...");
+       try {
+        const ocrResult = await processScannedPDF(result.images, (progress) => {
+         setProgress(50 + Math.floor(progress * 0.3));
+        });
+        extractedText = ocrResult.text;
+       } catch (ocrErr) {
+        console.error("OCR processing failed:", ocrErr);
+        // Continue with empty text, will be handled later
+       }
+      }
+     } catch (pdfErr) {
+      console.error("Error extracting text from PDF:", pdfErr);
+      // Try to recover by treating it as a scanned PDF if we have the original file URL
+      if (pageImageUrls.length > 0) {
+       try {
+        console.log("Attempting to recover by treating as scanned document...");
+        const ocrResult = await processScannedPDF(pageImageUrls, (progress) => {
+         setProgress(50 + Math.floor(progress * 0.3));
+        });
+        extractedText = ocrResult.text;
+       } catch (ocrErr) {
+        console.error("OCR recovery failed:", ocrErr);
+        // Will be handled in the next section
+       }
+      }
+     }
+    } else if (detectedFileType === "docx") {
+     try {
+      extractedText = await extractFromDOCX(file);
+     } catch (docxErr) {
+      console.error("Error extracting text from DOCX:", docxErr);
+      // Continue with empty text, will be handled later
+     }
+    } else if (detectedFileType === "xlsx") {
+     try {
+      extractedText = await extractFromXLSX(file);
+     } catch (xlsxErr) {
+      console.error("Error extracting text from XLSX:", xlsxErr);
+      // Continue with empty text, will be handled later
+     }
+    }
+   } catch (extractionErr) {
+    console.error("Error during extraction process:", extractionErr);
+    // Continue with whatever we have
+   }
+
+   // Filter out non-image URLs
    pageImageUrls = pageImageUrls.filter((path) =>
     /\.(png|jpeg|jpg|gif|webp)$/i.test(path)
    );
 
-   setProgress(50);
+   setProgress(80);
    console.log(
-    `Extracted ${extractedText.length} characters, processing with AI...`
+    `Extracted ${
+     extractedText ? extractedText.length : 0
+    } characters, processing with AI...`
    );
 
    // Now process the extracted text with AI
    if (!extractedText || extractedText.trim().length === 0) {
-    setError(
-     "No text could be extracted from this document. Please try a different file."
-    );
+    if (pageImageUrls.length > 0) {
+     // If we have images but no text, we can still show the images
+     setPageImages(pageImageUrls);
+     setError(
+      "No text could be extracted from this document, but images were extracted. You can view them in the Pages tab."
+     );
+    } else {
+     setError(
+      "No text or images could be extracted from this document. Please try a different file."
+     );
+    }
     setIsProcessing(false);
     return;
    }
 
    // Call the server action to process with AI
-   const aiResult = await processWithAI(extractedText, pageImageUrls, fileType);
-   setProgress(100);
+   try {
+    const aiResult = await processWithAI(
+     extractedText,
+     pageImageUrls,
+     detectedFileType
+    );
+    setProgress(100);
 
-   if (!aiResult.success) {
-    console.error("AI processing failed:", aiResult.error);
-    setError(aiResult.error || "Failed to process the extracted content");
-    // Still show the markdown if available as fallback
-    if (aiResult.markdown) {
+    if (!aiResult.success) {
+     console.error("AI processing failed:", aiResult.error);
+     setError(aiResult.error || "Failed to process the extracted content");
+     // Still show the markdown if available as fallback
+     if (aiResult.markdown) {
+      setResult(aiResult.markdown);
+      setPageImages(pageImageUrls);
+     }
+    } else if (!aiResult.markdown || aiResult.markdown.trim().length === 0) {
+     console.warn("No content was processed by AI");
+     setError(
+      "AI processing could not format the extracted content. Showing raw extracted text instead."
+     );
+     setResult(extractedText);
+     setPageImages(pageImageUrls);
+    } else {
+     console.log(
+      `AI processing successful, ${aiResult.markdown.length} characters in formatted markdown`
+     );
      setResult(aiResult.markdown);
+     setPageImages(pageImageUrls);
     }
-   } else if (!aiResult.markdown || aiResult.markdown.trim().length === 0) {
-    console.warn("No content was processed by AI");
-    setError(
-     "AI processing could not format the extracted content. Showing raw extracted text instead."
-    );
+   } catch (aiErr) {
+    console.error("Error during AI processing:", aiErr);
+    setError("Error during AI processing. Showing raw extracted text instead.");
     setResult(extractedText);
-   } else {
-    console.log(
-     `AI processing successful, ${aiResult.markdown.length} characters in formatted markdown`
-    );
-    setResult(aiResult.markdown);
     setPageImages(pageImageUrls);
    }
   } catch (err) {
@@ -566,7 +641,7 @@ export function DocumentExtractorClient() {
        </Button>
       </Link>
       <h1 className="text-xl font-bold flex items-center">
-       <File className="h-5 w-5 mr-2 text-zinc-400" />
+       <FileIcon className="h-5 w-5 mr-2 text-zinc-400" />
        Content Extraction
       </h1>
      </div>
@@ -692,7 +767,7 @@ export function DocumentExtractorClient() {
     )}
 
     {result && (
-     <Card>
+     <Card className="bg-zinc-800 border-zinc-700">
       <CardHeader>
        <div className="flex justify-between items-center">
         <CardTitle>Extracted Content</CardTitle>
@@ -730,7 +805,7 @@ export function DocumentExtractorClient() {
         </TabsList>
 
         <TabsContent value="preview" className="mt-4">
-         <div className="p-4 border rounded-md bg-card prose max-w-none dark:prose-invert overflow-auto">
+         <div className="p-4 border border-zinc-700 rounded-md bg-card prose max-w-none dark:prose-invert overflow-auto">
           {result && (
            <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
           )}
@@ -738,7 +813,7 @@ export function DocumentExtractorClient() {
         </TabsContent>
 
         <TabsContent value="markdown" className="mt-4">
-         <pre className="p-4 border rounded-md bg-muted overflow-auto whitespace-pre-wrap">
+         <pre className="p-4 border border-zinc-700 rounded-md bg-muted overflow-auto whitespace-pre-wrap">
           <code>{result || ""}</code>
          </pre>
         </TabsContent>

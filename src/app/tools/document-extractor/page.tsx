@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { DocumentExtractorClient } from "./client";
 import { Metadata } from "next";
+import DocumentExtractorClient from "./client";
 import DocumentExtractorLoading from "./loading";
 
 export const metadata: Metadata = {
