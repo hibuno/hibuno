@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import TextToolsClient from "./text-tools-client";
+import TextToolsClient from "./client";
 import Link from "next/link";
 import { ArrowLeft, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,9 +80,7 @@ export default async function TextToolsPage({
 }) {
  const tool = (await params).tool;
  return (
-  <Suspense
-   fallback={<TextToolsLoading />}
-  >
+  <Suspense fallback={<TextToolsLoading />}>
    <div className="min-h-screen bg-zinc-900 text-zinc-200 flex">
     {/* Sidebar */}
     <Sidebar />

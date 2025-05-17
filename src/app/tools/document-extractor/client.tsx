@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
-import { processWithAI, uploadBlob } from "@/lib/document-extractor-actions";
+import { processWithAI, uploadBlob } from "@/lib/document";
 import { MAX_FILE_SIZE } from "@/lib/constants";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar";

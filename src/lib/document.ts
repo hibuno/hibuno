@@ -5,7 +5,6 @@ import type { ChatCompletionMessageParam } from 'openai/resources'
 import { put } from "@vercel/blob"
 import { v4 as uuidv4 } from "uuid"
 import { MAX_FILE_SIZE } from "./constants"
-import { convertToBasicMarkdown } from "./document-extractor-utils"
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -92,7 +91,7 @@ Please respond with ONLY the markdown-formatted version of this text, without an
 				markdown: basicMarkdown
 			}
 		}
-		
+
 		return {
 			success: true,
 			markdown
@@ -119,7 +118,7 @@ export async function uploadBlob(formData: FormData) {
 				error: "No file provided"
 			}
 		}
-		
+
 		// Check file size
 		if (file.size > MAX_FILE_SIZE) {
 			return {
@@ -151,4 +150,34 @@ export async function uploadBlob(formData: FormData) {
 			error: error instanceof Error ? error.message : "An unknown error occurred during file upload"
 		}
 	}
+}
+
+/**
+ * Convert text to basic markdown
+ */
+export async function convertToBasicMarkdown(text: string): Promise<string> {
+	if (!text || text.trim().length === 0) {
+		return "# Document Extraction Results\n\nNo text content could be extracted from this document."
+	}
+
+	// Split into paragraphs
+	const paragraphs = text.split(/\n\s*\n/)
+
+	// Process each paragraph
+	return paragraphs
+		.map((paragraph) => {
+			const trimmed = paragraph.trim()
+
+			// Skip empty paragraphs
+			if (!trimmed) return ""
+
+			// Check if it might be a heading (short line, ends with no punctuation)
+			if (trimmed.length < 100 && !trimmed.match(/[.,:;?!]$/)) {
+				return `## ${trimmed}\n`
+			}
+
+			// Regular paragraph
+			return trimmed + "\n\n"
+		})
+		.join("")
 }

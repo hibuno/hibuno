@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { DocumentExtractorClient } from "./document-extractor-client";
+import { DocumentExtractorClient } from "./client";
 import { Metadata } from "next";
 import DocumentExtractorLoading from "./loading";
 

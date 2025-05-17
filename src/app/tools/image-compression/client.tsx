@@ -11,7 +11,7 @@ import {
  Trash2,
  Layers,
 } from "lucide-react";
-import CompressionLoadingSkeleton from "./components/loading-skeleton";
+import CompressionLoadingSkeleton from "./loading";
 import { Sidebar } from "@/components/sidebar";
 import { CompressionOptions } from "@/components/compression-options";
 import { FileDropzone } from "@/components/file-dropzone";
