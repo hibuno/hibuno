@@ -98,7 +98,7 @@ export const textTools: Record<string, { title: string; description: string }> =
 			"Extract clean text from HTML with our free HTML Tag Stripper tool. This converter removes all HTML tags, elements, and attributes while preserving the actual content and its structure. Perfect for converting web content to plain text, cleaning CMS exports, preparing email content, extracting visible text from web pages, or cleaning text for analysis without markup interference.",
 	},
 
-	// Text extraction tools
+	// Content Extraction tools
 	"extract-emails": {
 		title: "Email Extractor | Email Address Finder",
 		description:

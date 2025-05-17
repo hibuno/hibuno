@@ -246,7 +246,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
    },
   },
 
-  // Text extraction
+  // Content Extraction
   extraction: {
    emails: (input: string) => {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -448,7 +448,7 @@ export default function TextToolsClient({ tool }: { tool: string }) {
       transformed = textTransformations.cleaning.stripHtml(inputText);
       break;
 
-     // Text extraction
+     // Content Extraction
      case "extract-emails":
       transformed = textTransformations.extraction.emails(inputText);
       break;

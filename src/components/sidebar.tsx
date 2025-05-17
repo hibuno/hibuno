@@ -34,6 +34,15 @@ const imageTools = {
  },
 };
 
+// Define document tools
+const documentTools = {
+ "document-extractor": {
+  title: "Content Extraction",
+  path: "/tools/document-extractor",
+  isNew: true,
+ },
+};
+
 // Common navigation links component that works for both mobile and desktop
 const NavigationLinks = ({
  isMobile = false,
@@ -45,6 +54,15 @@ const NavigationLinks = ({
   if (!searchQuery) return Object.entries(imageTools);
   const query = searchQuery.toLowerCase();
   return Object.entries(imageTools).filter(([, tool]) =>
+   tool.title.toLowerCase().includes(query)
+  );
+ }, [searchQuery]);
+
+ // Filter document tools based on search query
+ const filteredDocumentTools = useMemo(() => {
+  if (!searchQuery) return Object.entries(documentTools);
+  const query = searchQuery.toLowerCase();
+  return Object.entries(documentTools).filter(([, tool]) =>
    tool.title.toLowerCase().includes(query)
   );
  }, [searchQuery]);
@@ -61,6 +79,7 @@ const NavigationLinks = ({
 
  // Determine if we should show sections based on filtered results
  const showImageSection = filteredImageTools.length > 0;
+ const showDocumentSection = filteredDocumentTools.length > 0;
  const showTextSection = filteredTextTools.length > 0;
 
  return (
@@ -76,11 +95,6 @@ const NavigationLinks = ({
       }`}
      />
      <span>Dashboard</span>
-     {!isMobile && (
-      <Badge className="ml-auto text-xs bg-violet-500 text-white hidden">
-       New
-      </Badge>
-     )}
     </Button>
    </Link>
    <Link href="/blog" onClick={isMobile ? onMobileItemClick : undefined}>
@@ -94,11 +108,40 @@ const NavigationLinks = ({
       }`}
      />
      <span>Blog</span>
-     {!isMobile && (
-      <Badge className="ml-auto text-xs bg-violet-500 text-white">New</Badge>
-     )}
     </Button>
    </Link>
+
+   {/* Document Section */}
+   {showDocumentSection && (
+    <>
+     <div className="pt-2 pb-1">
+      <div className="text-xs text-zinc-500 px-3 py-1">Documents</div>
+     </div>
+
+     {filteredDocumentTools.map(([key, tool]) => (
+      <Link
+       key={key}
+       href={tool.path}
+       onClick={isMobile ? onMobileItemClick : undefined}
+      >
+       <Button
+        variant="ghost"
+        className="w-full justify-start gap-2 text-zinc-400 hover:text-white group"
+       >
+        <FileText
+         className={`h-4 w-4 ${
+          !isMobile ? "group-hover:text-violet-400 transition-colors" : ""
+         }`}
+        />
+        <span>{tool.title}</span>
+        {tool.isNew && !isMobile && (
+         <Badge className="ml-auto text-xs bg-violet-500 text-white">New</Badge>
+        )}
+       </Button>
+      </Link>
+     ))}
+    </>
+   )}
 
    {/* Image Section */}
    {showImageSection && (
