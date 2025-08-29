@@ -5,7 +5,7 @@ export default function Home() {
   <div className="min-h-screen bg-black flex items-center justify-center px-8">
    <div className="max-w-3xl mx-auto text-left animate-fade-in">
     <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-white mb-8 leading-tight tracking-wide font-serif">
-     Hello, I'm{" "}
+     Hello, I&apos;m{" "}
      <span className="font-normal border-b border-gray-400 pb-1">
       Muhibbudin Suretno
      </span>
@@ -36,10 +36,10 @@ export default function Home() {
      </p>
 
      <p className="animate-fade-in-delay-4 text-gray-500 text-xs md:text-sm tracking-normal italic font-serif">
-      "Hibuno" is a playful abbreviation of my full name "Muhibbudin Suretno".
-      It might also be transliterated as ヒブノ in katakana, commonly used for
-      names and borrowed words, carrying no inherent meaning but used
-      phonetically.
+      &quot;Hibuno&quot; is a playful abbreviation of my full name
+      &quot;Muhibbudin Suretno&quot;. It might also be transliterated as ヒブノ
+      in katakana, commonly used for names and borrowed words, carrying no
+      inherent meaning but used phonetically.
      </p>
 
      <p className="animate-fade-in-delay-5 text-base md:text-lg text-white font-light pt-4 tracking-normal font-serif">
