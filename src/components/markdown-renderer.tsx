@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { codeToHtml } from "shiki";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
@@ -11,6 +12,7 @@ import remarkSmartypants from "remark-smartypants";
 import { unified } from "unified";
 
 export async function markdownToHtml(markdown: string) {
+ // First, convert markdown to HTML without syntax highlighting
  const file = await unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -34,6 +36,8 @@ export async function markdownToHtml(markdown: string) {
     a: [...(defaultSchema.attributes?.a || []), "className"],
     code: [...(defaultSchema.attributes?.code || []), "className"],
     pre: [...(defaultSchema.attributes?.pre || []), "className"],
+    div: [...(defaultSchema.attributes?.div || []), "className", "style"],
+    span: [...(defaultSchema.attributes?.span || []), "className", "style"],
     img: [
      ...(defaultSchema.attributes?.img || []),
      "className",
@@ -43,10 +47,52 @@ export async function markdownToHtml(markdown: string) {
      "decoding",
     ],
    },
+   tagNames: [...(defaultSchema.tagNames || []), "div", "span", "pre", "code"],
   })
   .use(rehypeStringify)
   .process(markdown || "");
- return String(file);
+
+ let html = String(file);
+
+ // Post-process the HTML to add Shiki syntax highlighting
+ html = await addShikiHighlighting(html);
+
+ return html;
+}
+
+// Function to post-process HTML and add Shiki highlighting
+async function addShikiHighlighting(html: string): Promise<string> {
+ // For server environment, we'll use a different approach
+ // We'll manually find and replace code blocks with highlighted versions
+
+ const codeBlockRegex =
+  /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g;
+ const matches = [...html.matchAll(codeBlockRegex)];
+
+ if (matches.length === 0) {
+  return html;
+ }
+
+ // Process each code block sequentially
+ for (const match of matches) {
+  const fullMatch = match[0];
+  const language = match[1] || "text";
+  const codeContent = match[2] || "";
+
+  try {
+   const highlighted = await codeToHtml(codeContent, {
+    lang: language,
+    theme: "github-dark",
+   });
+
+   const replacement = `<div class="shiki-container">${highlighted}</div>`;
+   html = html.replace(fullMatch, replacement);
+  } catch (error) {
+   console.error("Error highlighting code:", error);
+  }
+ }
+
+ return html;
 }
 
 export const renderMarkdown = cache(markdownToHtml);

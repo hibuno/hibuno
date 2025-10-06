@@ -4,50 +4,60 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { type Post, PostCard } from "@/components/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { HeroSkeleton, PostsGridSkeleton } from "@/components/loading";
+import { StructuredData } from "@/components/structured-data";
+import { AnimatedHomepage } from "@/components/animated-homepage";
 import { postQueries } from "@/lib/database";
+import { retryDatabaseOperation } from "@/lib/retry";
+import { generateWebsiteStructuredData } from "@/lib/seo";
 
 async function getHomepageData(): Promise<{
  featuredPosts: Post[];
  recentPosts: Post[];
  error?: string;
+ isLoading?: boolean;
 }> {
  try {
-  // Get featured posts
-  const featuredPosts = await postQueries.getFeaturedPosts(1);
+  // Get featured posts with retry mechanism
+  const featuredPosts = await retryDatabaseOperation(() =>
+   postQueries.getFeaturedPosts(1)
+  );
 
-  // Get recent posts excluding featured ones
-  const recentPosts = await postQueries.getRecentPosts(
-   12,
-   featuredPosts.map((p) => p.id)
+  // Get recent posts excluding featured ones with retry mechanism
+  const recentPosts = await retryDatabaseOperation(() =>
+   postQueries.getRecentPosts(
+    12,
+    featuredPosts.map((p) => p.id)
+   )
   );
 
   return {
-    featuredPosts: featuredPosts.map((post) => ({
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      subtitle: post.subtitle,
-      excerpt: post.excerpt,
-      cover_image_url: post.coverImageUrl,
-      author_name: post.authorName,
-      author_avatar_url: post.authorAvatarUrl,
-      reading_time: post.readingTime,
-      published: (post as any).published ?? true,
-      published_at: (post.published_at || new Date().toISOString()) as string,
-    })),
-    recentPosts: recentPosts.map((post) => ({
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      subtitle: post.subtitle,
-      excerpt: post.excerpt,
-      cover_image_url: post.coverImageUrl,
-      author_name: post.authorName,
-      author_avatar_url: post.authorAvatarUrl,
-      reading_time: post.readingTime,
-      published: (post as any).published ?? true,
-      published_at: (post.published_at || new Date().toISOString()) as string,
-    })),
+   featuredPosts: featuredPosts.map((post) => ({
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    subtitle: post.subtitle,
+    excerpt: post.excerpt,
+    cover_image_url: post.coverImageUrl,
+    author_name: post.authorName,
+    author_avatar_url: post.authorAvatarUrl,
+    reading_time: post.readingTime,
+    published: (post as any).published ?? true,
+    published_at: (post.published_at || new Date().toISOString()) as string,
+   })),
+   recentPosts: recentPosts.map((post) => ({
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    subtitle: post.subtitle,
+    excerpt: post.excerpt,
+    cover_image_url: post.coverImageUrl,
+    author_name: post.authorName,
+    author_avatar_url: post.authorAvatarUrl,
+    reading_time: post.readingTime,
+    published: (post as any).published ?? true,
+    published_at: (post.published_at || new Date().toISOString()) as string,
+   })),
   };
  } catch (err: unknown) {
   const message =
@@ -66,9 +76,19 @@ async function getHomepageData(): Promise<{
  }
 }
 
-function HeroSection({ featuredPost }: { featuredPost?: Post | undefined }) {
+function HeroSection({
+ featuredPost,
+ isLoading,
+}: {
+ featuredPost?: Post | undefined;
+ isLoading?: boolean | undefined;
+}) {
+ if (isLoading) {
+  return <HeroSkeleton />;
+ }
+
  return (
-  <section className="border-b border-border bg-card">
+  <section className="border-b border-border bg-card" role="banner">
    <div className="mx-auto max-w-6xl px-4 py-12">
     <div className="grid items-start gap-8 md:grid-cols-2">
      <div>
@@ -85,7 +105,11 @@ function HeroSection({ featuredPost }: { featuredPost?: Post | undefined }) {
      </div>
      {featuredPost ? (
       <Link href={`/${featuredPost.slug}`} passHref>
-       <article className="group cursor-pointer">
+       <article
+        className="group cursor-pointer"
+        role="region"
+        aria-label="Featured post"
+       >
         <div className="aspect-[16/9] overflow-hidden rounded-lg mb-4 relative">
          <Image
           src={featuredPost.cover_image_url || "/placeholder.svg"}
@@ -93,6 +117,7 @@ function HeroSection({ featuredPost }: { featuredPost?: Post | undefined }) {
           width={500}
           height={300}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          priority
          />
          <span className="absolute top-3 left-3 px-2 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded">
           Featured
@@ -142,7 +167,7 @@ function HeroSection({ featuredPost }: { featuredPost?: Post | undefined }) {
        </article>
       </Link>
      ) : (
-      <div className="text-muted-foreground">
+      <div className="text-muted-foreground" role="status" aria-live="polite">
        Featured post will appear here
       </div>
      )}
@@ -152,10 +177,20 @@ function HeroSection({ featuredPost }: { featuredPost?: Post | undefined }) {
  );
 }
 
-function PostsGrid({ posts }: { posts: Post[] }) {
+function PostsGrid({
+ posts,
+ isLoading,
+}: {
+ posts: Post[];
+ isLoading?: boolean | undefined;
+}) {
+ if (isLoading) {
+  return <PostsGridSkeleton count={6} />;
+ }
+
  if (posts.length === 0) {
   return (
-   <section>
+   <section role="region" aria-label="Recent posts">
     <div className="mx-auto max-w-6xl px-4 py-10">
      <p className="text-center text-muted-foreground">
       No posts yet. Add some in Supabase to get started.
@@ -166,8 +201,9 @@ function PostsGrid({ posts }: { posts: Post[] }) {
  }
 
  return (
-  <section>
+  <section role="region" aria-label="Recent posts">
    <div className="mx-auto max-w-6xl px-4 py-10">
+    <h2 className="sr-only">Recent Posts</h2>
     <div className="grid gap-10 md:grid-cols-2">
      {posts.map((post) => (
       <PostCard key={post.id} post={post} />
@@ -193,19 +229,25 @@ function ErrorState({ error }: { error: string }) {
 }
 
 export default async function HomePage() {
- const { featuredPosts, recentPosts, error } = await getHomepageData();
+ const { featuredPosts, recentPosts, error, isLoading } =
+  await getHomepageData();
 
  if (error) {
   return <ErrorState error={error} />;
  }
 
+ const websiteStructuredData = generateWebsiteStructuredData();
+
  return (
   <ErrorBoundary>
-   <main>
+   <StructuredData data={websiteStructuredData} />
+   <div>
     <SiteHeader />
-    <HeroSection featuredPost={featuredPosts[0]} />
-    <PostsGrid posts={recentPosts} />
-   </main>
+    <AnimatedHomepage
+     featuredPost={featuredPosts[0]}
+     recentPosts={recentPosts}
+    />
+   </div>
   </ErrorBoundary>
  );
 }
