@@ -102,19 +102,24 @@ function PostMeta({ post }: { post: SelectPost }) {
 }
 
 function PostHeader({ post }: { post: SelectPost }) {
- return (
-  <header className="mb-12 text-center">
-   <h1 className="font-serif text-balance text-4xl font-bold leading-tight md:text-5xl mb-6">
-    {post.title}
-   </h1>
-   {post.subtitle && (
-    <p className="mt-6 text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-     {post.subtitle}
-    </p>
-   )}
-   <PostMeta post={post} />
-  </header>
- );
+  return (
+    <header className="mb-12 text-center">
+      <h1 className="font-serif text-balance text-4xl font-bold leading-tight md:text-5xl mb-6">
+        {post.title}
+      </h1>
+      {process.env.NODE_ENV === "development" && post.published === false && (
+        <div className="mx-auto mb-4 inline-block rounded bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
+          Unpublished
+        </div>
+      )}
+      {post.subtitle && (
+        <p className="mt-6 text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          {post.subtitle}
+        </p>
+      )}
+      <PostMeta post={post} />
+    </header>
+  );
 }
 
 function PostContent({ post }: { post: SelectPost }) {

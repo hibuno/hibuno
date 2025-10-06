@@ -19,6 +19,7 @@ export type PostListItem = Pick<
   | "readingTime"
   | "wordCount"
   | "featured"
+  | "published"
   | "published_at"
   | "created_at"
   | "updated_at"
@@ -38,6 +39,7 @@ export type PostSummary = Pick<
   | "tags"
   | "category"
   | "readingTime"
+  | "published"
   | "published_at"
 >;
 
@@ -57,15 +59,19 @@ export class PostQueries {
       tag?: string;
     } = {},
   ): Promise<PostListItem[]> {
+    const isDev = process.env.NODE_ENV === "development";
     let query = this.supabase
       .from("posts")
       .select(`
 	      id, slug, title, subtitle, excerpt, cover_image_url, cover_image_alt,
 	      author_name, author_avatar_url, author_bio, tags, category,
-	      reading_time, word_count, featured, published_at, created_at, updated_at
+	      reading_time, word_count, featured, published, published_at, created_at, updated_at
 	    `)
-      .eq("published", true)
       .order("published_at", { ascending: false });
+
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
 
     if (options.featured !== undefined) {
       query = query.eq("featured", options.featured);
@@ -101,12 +107,12 @@ export class PostQueries {
    * Get a single post by slug with full content
    */
   async getPostBySlug(slug: string): Promise<SelectPost | null> {
-    const { data, error } = await this.supabase
-      .from("posts")
-      .select("*")
-      .eq("slug", slug)
-      .eq("published", true)
-      .single();
+    const isDev = process.env.NODE_ENV === "development";
+    let query = this.supabase.from("posts").select("*").eq("slug", slug);
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
+    const { data, error } = await query.single();
 
     if (error) {
       // If no rows returned, it's not an error, just return null
@@ -133,16 +139,20 @@ export class PostQueries {
     limit = 10,
     excludeIds: string[] = [],
   ): Promise<PostSummary[]> {
+    const isDev = process.env.NODE_ENV === "development";
     let query = this.supabase
       .from("posts")
       .select(`
 	      id, slug, title, subtitle, excerpt, cover_image_url, cover_image_alt,
-	      author_name, author_avatar_url, tags, category, reading_time, published_at
+	      author_name, author_avatar_url, tags, category, reading_time, published, published_at
 	    `)
-      .eq("published", true)
       .eq("featured", false)
       .order("published_at", { ascending: false })
       .limit(limit);
+
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
 
     if (excludeIds.length > 0) {
       query = query.not("id", "in", `(${excludeIds.join(",")})`);
@@ -159,18 +169,22 @@ export class PostQueries {
    * Search posts by title, content, or excerpt
    */
   async searchPosts(query: string, limit = 20): Promise<PostSummary[]> {
-    const { data, error } = await this.supabase
+    const isDev = process.env.NODE_ENV === "development";
+    let base = this.supabase
       .from("posts")
       .select(`
 	      id, slug, title, subtitle, excerpt, cover_image_url,
-	      author_name, reading_time, published_at
+	      author_name, reading_time, published, published_at
 	    `)
-      .eq("published", true)
       .or(
         `title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`,
       )
       .order("published_at", { ascending: false })
       .limit(limit);
+    if (!isDev) {
+      base = base.eq("published", true);
+    }
+    const { data, error } = await base;
 
     if (error) throw error;
 

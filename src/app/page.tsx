@@ -22,30 +22,32 @@ async function getHomepageData(): Promise<{
   );
 
   return {
-   featuredPosts: featuredPosts.map((post) => ({
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    subtitle: post.subtitle,
-    excerpt: post.excerpt,
-    cover_image_url: post.coverImageUrl,
-    author_name: post.authorName,
-    author_avatar_url: post.authorAvatarUrl,
-    reading_time: post.readingTime,
-    published_at: (post.published_at || new Date().toISOString()) as string,
-   })),
-   recentPosts: recentPosts.map((post) => ({
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    subtitle: post.subtitle,
-    excerpt: post.excerpt,
-    cover_image_url: post.coverImageUrl,
-    author_name: post.authorName,
-    author_avatar_url: post.authorAvatarUrl,
-    reading_time: post.readingTime,
-    published_at: (post.published_at || new Date().toISOString()) as string,
-   })),
+    featuredPosts: featuredPosts.map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      subtitle: post.subtitle,
+      excerpt: post.excerpt,
+      cover_image_url: post.coverImageUrl,
+      author_name: post.authorName,
+      author_avatar_url: post.authorAvatarUrl,
+      reading_time: post.readingTime,
+      published: (post as any).published ?? true,
+      published_at: (post.published_at || new Date().toISOString()) as string,
+    })),
+    recentPosts: recentPosts.map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      subtitle: post.subtitle,
+      excerpt: post.excerpt,
+      cover_image_url: post.coverImageUrl,
+      author_name: post.authorName,
+      author_avatar_url: post.authorAvatarUrl,
+      reading_time: post.readingTime,
+      published: (post as any).published ?? true,
+      published_at: (post.published_at || new Date().toISOString()) as string,
+    })),
   };
  } catch (err: unknown) {
   const message =

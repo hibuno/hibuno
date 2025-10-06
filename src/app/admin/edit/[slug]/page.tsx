@@ -860,6 +860,8 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  // Auto-save functionality
  useEffect(() => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
   if (autoSaveEnabled && post && isValid && debouncedContent) {
    const autoSave = async () => {
     try {
@@ -880,9 +882,14 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     }
    };
 
-   const timeoutId = setTimeout(autoSave, 2000);
-   return () => clearTimeout(timeoutId);
+   timeoutId = setTimeout(autoSave, 2000);
   }
+
+  return () => {
+   if (timeoutId) {
+    clearTimeout(timeoutId);
+   }
+  };
  }, [autoSaveEnabled, post, isValid, debouncedContent, formData, slug]);
 
  useEffect(() => {
