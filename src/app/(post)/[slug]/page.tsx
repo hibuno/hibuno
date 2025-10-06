@@ -201,6 +201,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <main className="min-h-screen">
      <SiteHeader />
      <div className="mx-auto max-w-4xl px-4 py-8 lg:py-12">
+      {/* Development-only edit button */}
+      {process.env.NODE_ENV === "development" && (
+       <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
+         Development Mode: Edit this post
+        </p>
+        <a
+         href={`/admin/edit/${slug}`}
+         className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+        >
+         Edit Post
+        </a>
+       </div>
+      )}
       <article className="mx-auto max-w-3xl">
        <PostHeader post={post} />
        <PostImage post={post} />
