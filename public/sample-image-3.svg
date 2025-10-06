@@ -1,0 +1,33 @@
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0c0c0c;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#2a2a2a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="accent" cx="70%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(255, 107, 107, 0.2);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255, 107, 107, 0);stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#grad3)"/>
+  <rect width="100%" height="100%" fill="url(#accent)"/>
+  
+  <!-- Minimalist lines -->
+  <line x1="100" y1="400" x2="980" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+  <line x1="100" y1="1520" x2="980" y2="1520" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+  
+  <!-- Elegant geometric elements -->
+  <rect x="200" y="600" width="680" height="2" fill="rgba(255,107,107,0.6)"/>
+  <rect x="200" y="700" width="480" height="2" fill="rgba(255,255,255,0.3)"/>
+  <rect x="200" y="800" width="580" height="2" fill="rgba(255,255,255,0.2)"/>
+  
+  <!-- Professional content area -->
+  <rect x="120" y="1000" width="840" height="400" fill="rgba(255,255,255,0.02)" rx="16" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <!-- Accent dots -->
+  <circle cx="850" cy="650" r="4" fill="rgba(255,107,107,0.8)"/>
+  <circle cx="880" cy="750" r="3" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="860" cy="850" r="2" fill="rgba(255,255,255,0.4)"/>
+</svg>

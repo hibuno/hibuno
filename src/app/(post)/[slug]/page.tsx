@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { MediaProvider } from "@/components/media-provider";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import { AuthorAvatar, PostCoverImage } from "@/components/optimized-image";
 import PostNavigation from "@/components/post-navigation";
@@ -361,9 +362,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <StructuredData data={structuredData} />
     <StructuredData data={breadcrumbData} />
     <ReadingProgress />
-    <main className="min-h-screen">
-     <SiteHeader />
-     <div className="mx-auto max-w-4xl px-4 py-8 lg:py-12">
+    <MediaProvider>
+     <main className="min-h-screen">
+      <SiteHeader />
+      <div className="mx-auto max-w-4xl px-4 py-8 lg:py-12">
       {/* Development-only edit button */}
       {process.env.NODE_ENV === "development" && (
        <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -410,8 +412,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <SimilarPosts currentSlug={slug} tags={tags} />
        </div>
       </article>
-     </div>
-    </main>
+      </div>
+     </main>
+    </MediaProvider>
    </ErrorBoundary>
   );
  } catch (_error) {

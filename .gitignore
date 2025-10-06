@@ -42,4 +42,8 @@ next-env.d.ts
 package-lock.json
 
 # remotion
-video
+dist
+
+# Ignore the output video from Git but not videos you import into src/.
+out
+whisper.cpp

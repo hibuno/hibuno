@@ -43,6 +43,7 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
+    "remotion.config.ts",
     "node_modules",
     ".next",
     "dist",

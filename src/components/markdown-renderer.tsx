@@ -45,9 +45,21 @@ export async function markdownToHtml(markdown: string) {
      "height",
      "loading",
      "decoding",
+     "dataInteractive",
+    ],
+    video: [
+     ...(defaultSchema.attributes?.video || []),
+     "src",
+     "controls",
+     "className",
+     "width",
+     "height",
+     "preload",
+     "poster",
+     "dataInteractive",
     ],
    },
-   tagNames: [...(defaultSchema.tagNames || []), "div", "span", "pre", "code"],
+   tagNames: [...(defaultSchema.tagNames || []), "div", "span", "pre", "code", "video"],
   })
   .use(rehypeStringify)
   .process(markdown || "");
@@ -105,16 +117,14 @@ export default async function MarkdownRenderer({
  className?: string;
 }) {
  const html = await renderMarkdown(markdown || "");
+ 
+ // Import the interactive component dynamically to avoid SSR issues
+ const { InteractiveMarkdownRenderer } = await import("./interactive-markdown-renderer");
+ 
  return (
-  <article
-   className={[
-    "prose prose-zinc dark:prose-invert max-w-none prose-custom",
-    className,
-   ]
-    .filter(Boolean)
-    .join(" ")}
-   // biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown content is sanitized
-   dangerouslySetInnerHTML={{ __html: html }}
+  <InteractiveMarkdownRenderer 
+   html={html}
+   {...(className && { className })}
   />
  );
 }
