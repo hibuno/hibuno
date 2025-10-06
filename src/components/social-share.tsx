@@ -6,7 +6,6 @@ import {
  Facebook,
  Linkedin,
  Link as LinkIcon,
- Copy,
  Check,
 } from "lucide-react";
 import { useState } from "react";
@@ -16,22 +15,15 @@ import { cn } from "@/lib/utils";
 interface SocialShareProps {
  url: string;
  title: string;
- description?: string | undefined;
  className?: string;
 }
 
-export function SocialShare({
- url,
- title,
- description,
- className,
-}: SocialShareProps) {
+export function SocialShare({ url, title, className }: SocialShareProps) {
  const [copied, setCopied] = useState(false);
  const [showDropdown, setShowDropdown] = useState(false);
 
  const encodedUrl = encodeURIComponent(url);
  const encodedTitle = encodeURIComponent(title);
- const encodedDescription = encodeURIComponent(description || title);
 
  const shareLinks = {
   twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
@@ -127,7 +119,6 @@ export function SocialShare({
 export function SocialShareCompact({
  url,
  title,
- description,
  className,
 }: SocialShareProps) {
  const [copied, setCopied] = useState(false);

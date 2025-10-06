@@ -16,8 +16,8 @@ export interface SEOProps {
 }
 
 const SITE_CONFIG = {
-	name: "Hibuno",
-	url: "https://hibuno.com",
+    name: "Hibuno",
+    url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://hibuno.com",
 	description:
 		"Stories and ideas to deepen your understanding. Read, learn, and subscribe for weekly updates on web development, TypeScript, and modern programming practices.",
 	keywords: [

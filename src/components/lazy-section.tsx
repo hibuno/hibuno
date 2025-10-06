@@ -57,7 +57,7 @@ export function LazySection({
 // Hook for lazy loading data
 export function useLazyLoad<T>(
  loadFn: () => Promise<T>,
- dependencies: React.DependencyList = []
+ _dependencies: React.DependencyList = []
 ) {
  const [data, setData] = useState<T | null>(null);
  const [loading, setLoading] = useState(false);

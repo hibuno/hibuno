@@ -1107,7 +1107,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    )}
 
    <Tabs defaultValue="content" className="space-y-6">
-    <TabsList className="grid w-full grid-cols-4">
+    <TabsList className="grid w-full grid-cols-5">
      <TabsTrigger value="content" className="flex items-center gap-2">
       <FileText className="w-4 h-4" />
       Content
@@ -1119,6 +1119,12 @@ export default function EditPostPage({ params }: EditPostPageProps) {
      <TabsTrigger value="media" className="flex items-center gap-2">
       <Image className="w-4 h-4" />
       Media
+     </TabsTrigger>
+     <TabsTrigger value="github" className="flex items-center gap-2">
+      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+       <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+      </svg>
+      GitHub
      </TabsTrigger>
      <TabsTrigger value="settings" className="flex items-center gap-2">
       <Settings className="w-4 h-4" />
@@ -1387,6 +1393,465 @@ export default function EditPostPage({ params }: EditPostPageProps) {
         />
         <p className="text-xs text-gray-500 mt-1">
          Important for accessibility and SEO
+        </p>
+       </div>
+      </CardContent>
+     </Card>
+    </TabsContent>
+
+    <TabsContent value="github" className="space-y-6">
+     <Card>
+      <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+        </svg>
+        GitHub Repository Information
+       </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+       <div>
+        <Label htmlFor="githubRepoUrl">GitHub Repository URL</Label>
+        <Input
+         id="githubRepoUrl"
+         value={formData.githubRepoUrl || ""}
+         onChange={(e) => handleInputChange("githubRepoUrl", e.target.value)}
+         placeholder="https://github.com/username/repository"
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         Full URL to the GitHub repository (e.g.,
+         https://github.com/facebook/react)
+        </p>
+       </div>
+
+       <div className="grid grid-cols-2 gap-4">
+        <div>
+         <Label htmlFor="githubStars">Stars Count</Label>
+         <Input
+          id="githubStars"
+          type="number"
+          value={formData.githubStars || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "githubStars",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">Number of GitHub stars</p>
+        </div>
+
+        <div>
+         <Label htmlFor="githubForks">Forks Count</Label>
+         <Input
+          id="githubForks"
+          type="number"
+          value={formData.githubForks || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "githubForks",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">Number of GitHub forks</p>
+        </div>
+       </div>
+
+       <div>
+        <Label htmlFor="githubHomepageUrl">Homepage URL</Label>
+        <Input
+         id="githubHomepageUrl"
+         value={formData.githubHomepageUrl || ""}
+         onChange={(e) =>
+          handleInputChange("githubHomepageUrl", e.target.value)
+         }
+         placeholder="https://project-website.com"
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         Project homepage or documentation URL (if different from repo)
+        </p>
+       </div>
+
+       <div>
+        <Label htmlFor="githubPricingUrl">Pricing URL</Label>
+        <Input
+         id="githubPricingUrl"
+         value={formData.githubPricingUrl || ""}
+         onChange={(e) => handleInputChange("githubPricingUrl", e.target.value)}
+         placeholder="https://project-website.com/pricing"
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         Link to pricing information for commercial projects
+        </p>
+       </div>
+
+       <div>
+        <Label htmlFor="githubLicense">License</Label>
+        <Input
+         id="githubLicense"
+         value={formData.githubLicense || ""}
+         onChange={(e) => handleInputChange("githubLicense", e.target.value)}
+         placeholder="MIT, Apache 2.0, GPL, etc."
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         Software license (e.g., MIT, Apache 2.0, GPL-3.0)
+        </p>
+       </div>
+      </CardContent>
+     </Card>
+
+     <Card>
+      <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+        <Info className="w-5 h-5" />
+        GitHub Information Preview
+       </CardTitle>
+      </CardHeader>
+      <CardContent>
+       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+         This is how the GitHub information will appear on your post:
+        </p>
+        <div className="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700">
+         {formData.githubRepoUrl && (
+          <a
+           href={formData.githubRepoUrl}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
+          >
+           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+           </svg>
+           <span className="text-sm font-medium">View Repository</span>
+          </a>
+         )}
+
+         <div className="flex items-center gap-3">
+          {formData.githubStars && formData.githubStars > 0 && (
+           <div className="flex items-center gap-1 text-sm">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span className="font-medium">
+             {formData.githubStars.toLocaleString()}
+            </span>
+           </div>
+          )}
+
+          {formData.githubForks && formData.githubForks > 0 && (
+           <div className="flex items-center gap-1 text-sm">
+            <svg
+             className="w-4 h-4"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24"
+            >
+             <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+             />
+            </svg>
+            <span className="font-medium">
+             {formData.githubForks.toLocaleString()}
+            </span>
+           </div>
+          )}
+         </div>
+
+         {formData.githubHomepageUrl && (
+          <a
+           href={formData.githubHomepageUrl}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800"
+          >
+           <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+           >
+            <path
+             strokeLinecap="round"
+             strokeLinejoin="round"
+             strokeWidth={2}
+             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
+           </svg>
+           <span className="text-sm font-medium">Homepage</span>
+          </a>
+         )}
+
+         {formData.githubPricingUrl && (
+          <a
+           href={formData.githubPricingUrl}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-md border border-green-200 dark:border-green-800"
+          >
+           <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+           >
+            <path
+             strokeLinecap="round"
+             strokeLinejoin="round"
+             strokeWidth={2}
+             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+            />
+           </svg>
+           <span className="text-sm font-medium">Pricing</span>
+          </a>
+         )}
+        </div>
+        {!formData.githubRepoUrl &&
+         !formData.githubStars &&
+         !formData.githubForks &&
+         !formData.githubHomepageUrl &&
+         !formData.githubPricingUrl && (
+          <p className="text-sm text-gray-500 italic">
+           No GitHub information added yet. Fill in the fields above to see the
+           preview.
+          </p>
+         )}
+       </div>
+      </CardContent>
+     </Card>
+
+     <Card>
+      <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+        <svg
+         className="w-5 h-5 text-green-600"
+         fill="none"
+         stroke="currentColor"
+         viewBox="0 0 24 24"
+        >
+         <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+         />
+        </svg>
+        Pricing Information
+       </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+       <div className="grid grid-cols-2 gap-4">
+        <div>
+         <Label htmlFor="minPrice">Minimum Price ($)</Label>
+         <Input
+          id="minPrice"
+          type="number"
+          value={formData.minPrice || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "minPrice",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">Starting price (e.g., 29)</p>
+        </div>
+
+        <div>
+         <Label htmlFor="maxPrice">Maximum Price ($)</Label>
+         <Input
+          id="maxPrice"
+          type="number"
+          value={formData.maxPrice || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "maxPrice",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">
+          Highest price tier (e.g., 299)
+         </p>
+        </div>
+       </div>
+
+       <div className="flex items-center space-x-2">
+        <Switch
+         id="offerFree"
+         checked={formData.offerFree || false}
+         onCheckedChange={(checked) => handleInputChange("offerFree", checked)}
+        />
+        <Label htmlFor="offerFree" className="flex items-center gap-2">
+         <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+         >
+          <path
+           strokeLinecap="round"
+           strokeLinejoin="round"
+           strokeWidth={2}
+           d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+          />
+         </svg>
+         Offer Free Version
+        </Label>
+       </div>
+
+       <div className="grid grid-cols-2 gap-4">
+        <div>
+         <Label htmlFor="prevMinPrice">Previous Min Price ($)</Label>
+         <Input
+          id="prevMinPrice"
+          type="number"
+          value={formData.prevMinPrice || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "prevMinPrice",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">
+          Before discount (optional)
+         </p>
+        </div>
+
+        <div>
+         <Label htmlFor="prevMaxPrice">Previous Max Price ($)</Label>
+         <Input
+          id="prevMaxPrice"
+          type="number"
+          value={formData.prevMaxPrice || ""}
+          onChange={(e) =>
+           handleInputChange(
+            "prevMaxPrice",
+            e.target.value ? parseInt(e.target.value) : null
+           )
+          }
+          placeholder="0"
+          className="mt-1"
+         />
+         <p className="text-xs text-gray-500 mt-1">
+          Before discount (optional)
+         </p>
+        </div>
+       </div>
+
+       <div className="flex items-center space-x-2">
+        <Switch
+         id="inPromotion"
+         checked={formData.inPromotion || false}
+         onCheckedChange={(checked) =>
+          handleInputChange("inPromotion", checked)
+         }
+        />
+        <Label htmlFor="inPromotion" className="flex items-center gap-2">
+         <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+         >
+          <path
+           strokeLinecap="round"
+           strokeLinejoin="round"
+           strokeWidth={2}
+           d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+          />
+         </svg>
+         Currently in Promotion
+        </Label>
+       </div>
+      </CardContent>
+     </Card>
+
+     <Card>
+      <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+        <svg
+         className="w-5 h-5 text-blue-600"
+         fill="none"
+         stroke="currentColor"
+         viewBox="0 0 24 24"
+        >
+         <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+         />
+        </svg>
+        Social Media & Community
+       </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+       <div>
+        <Label htmlFor="socialMedias">Social Media Links</Label>
+        <Textarea
+         id="socialMedias"
+         value={
+          Array.isArray(formData.socialMedias)
+           ? formData.socialMedias.join("\n")
+           : formData.socialMedias || ""
+         }
+         onChange={(e) =>
+          handleInputChange(
+           "socialMedias",
+           e.target.value.split("\n").filter(Boolean)
+          )
+         }
+         placeholder="https://twitter.com/username&#10;https://discord.gg/invite&#10;https://linkedin.com/company&#10;https://youtube.com/channel"
+         rows={4}
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         One social media link per line (Twitter, Discord, LinkedIn, YouTube,
+         etc.)
+        </p>
+       </div>
+
+       <div>
+        <Label htmlFor="voucherCodes">Voucher Codes</Label>
+        <Textarea
+         id="voucherCodes"
+         value={
+          Array.isArray(formData.voucherCodes)
+           ? formData.voucherCodes.join("\n")
+           : formData.voucherCodes || ""
+         }
+         onChange={(e) =>
+          handleInputChange(
+           "voucherCodes",
+           e.target.value.split("\n").filter(Boolean)
+          )
+         }
+         placeholder="SAVE20&#10;WELCOME10&#10;DISCOUNT50"
+         rows={3}
+         className="mt-1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+         One voucher code per line (users can click to copy)
         </p>
        </div>
       </CardContent>

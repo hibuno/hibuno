@@ -6,6 +6,7 @@ import type React from "react";
 import "./globals.css";
 import { Databuddy } from "@databuddy/sdk/react";
 import { Suspense } from "react";
+import { generateSiteMetadata } from "@/lib/seo";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -24,56 +25,15 @@ const InterFont = Inter({
 });
 
 export const metadata: Metadata = {
- title: {
-  default: "Hibuno",
-  template: "%s | Hibuno",
- },
- description:
-  "Stories and ideas to deepen your understanding. Read, learn, and subscribe for weekly updates on web development, TypeScript, and modern programming practices.",
- keywords: [
-  "blog",
-  "web development",
-  "typescript",
-  "programming",
-  "tutorials",
- ],
- authors: [{ name: "Hibuno Team" }],
- creator: "Hibuno",
- publisher: "Hibuno",
- formatDetection: {
-  email: false,
-  address: false,
-  telephone: false,
- },
- metadataBase: new URL("https://hibuno.com"),
- alternates: {
-  canonical: "/",
- },
- openGraph: {
-  type: "website",
-  locale: "en_US",
-  url: "/",
-  title: "Hibuno",
-  description: "Stories and ideas to deepen your understanding",
-  siteName: "Hibuno",
- },
- twitter: {
-  card: "summary_large_image",
-  title: "Hibuno",
-  description: "Stories and ideas to deepen your understanding",
-  creator: "@hibuno",
- },
- robots: {
-  index: true,
-  follow: true,
-  googleBot: {
-   index: true,
-   follow: true,
-   "max-video-preview": -1,
-   "max-image-preview": "large",
-   "max-snippet": -1,
+  ...generateSiteMetadata({
+    url: "/",
+  }),
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
- },
+  // Additional alternates for common pages can be added here later
 };
 
 export const viewport: Viewport = {
