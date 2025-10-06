@@ -1,16 +1,16 @@
-import path from "path";
-import fs from "fs";
-import os from "os";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import * as readline from "node:readline";
 import {
   downloadWhisperModel,
   installWhisperCpp,
-  transcribe,
-  toCaptions,
-  type WhisperModel,
   type Language,
+  toCaptions,
+  transcribe,
+  type WhisperModel,
 } from "@remotion/install-whisper-cpp";
-import { execSync } from "child_process";
-import * as readline from "readline";
 
 const SPEECH_START_SECONDS_DEFAULT = 0;
 const DEFAULT_AUDIO_PATH = "./public/audio.wav";

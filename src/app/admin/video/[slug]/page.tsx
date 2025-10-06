@@ -1,59 +1,43 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { use } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
- ArrowLeft,
- Save,
- X,
- Upload,
- ImagePlus,
- Code as CodeIcon,
- Loader2,
- Bold,
- Italic,
- Link,
- List,
- ListOrdered,
- Quote,
- Code,
- Heading1,
- Heading2,
- Heading3,
- Undo,
- Redo,
- FileText,
- Image,
- Tag,
- User,
- Settings,
- CheckCircle,
  AlertCircle,
- Info,
- Sparkles,
- Copy,
- ExternalLink,
+ ArrowLeft,
+ CheckCircle,
  Clock,
- Video,
- Play,
- Pause,
- Volume2,
  Download,
- Zap,
+ ExternalLink,
+ FileText,
  FileVideo,
+ Image,
+ Info,
+ Loader2,
  Mic,
+ Play,
+ Settings,
+ Video,
+ Volume2,
  Wand2,
 } from "lucide-react";
+import { use, useEffect, useState } from "react";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import {
+ Card,
+ CardContent,
+ CardHeader,
+ CardTitle,
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import {
+ Tabs,
+ TabsContent,
+ TabsList,
+ TabsTrigger,
+} from "../../components/ui/tabs";
+import { Textarea } from "../../components/ui/textarea";
 
 // Asset extraction from article content
 function extractAssetsFromContent(content: string) {
@@ -82,7 +66,7 @@ function extractAssetsFromContent(content: string) {
 }
 
 // Generate narration prompt for OpenRouter
-function generateNarrationPrompt(content: string, style: string = "engaging") {
+function _generateNarrationPrompt(content: string, style: string = "engaging") {
  const plainText = content
   .replace(/#{1,6}\s/g, "")
   .replace(/\*\*([^*]+)\*\*/g, "$1")
@@ -782,19 +766,104 @@ export default function VideoGeneratorPage({
            Video Generated Successfully!
           </Label>
          </div>
-         <video controls className="w-full max-h-96">
-          <source src={formData.videoUrl} type="video/mp4" />
-          Your browser does not support the video element.
-         </video>
-         <div className="flex gap-3 mt-4">
-          <Button className="flex-1">
+
+         {/* Video Preview */}
+         <div className="mb-4">
+          <video
+           controls
+           className="w-full max-h-96 bg-black rounded-lg"
+           preload="metadata"
+          >
+           <source src={formData.videoUrl} type="video/mp4" />
+           Your browser does not support the video element.
+          </video>
+         </div>
+
+         {/* Video Info */}
+         <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-white/50 rounded-lg">
+          <div>
+           <p className="text-xs text-green-700 font-medium">Title</p>
+           <p className="text-sm text-green-800 truncate">
+            {formData.videoTitle}
+           </p>
+          </div>
+          <div>
+           <p className="text-xs text-green-700 font-medium">Narration Style</p>
+           <p className="text-sm text-green-800 capitalize">
+            {formData.narrationStyle}
+           </p>
+          </div>
+          <div>
+           <p className="text-xs text-green-700 font-medium">Assets</p>
+           <p className="text-sm text-green-800">
+            {formData.assets.length} media files
+           </p>
+          </div>
+          <div>
+           <p className="text-xs text-green-700 font-medium">Voice</p>
+           <p className="text-sm text-green-800">
+            {formData.voiceSettings.voiceId}
+           </p>
+          </div>
+         </div>
+
+         {/* Action Buttons */}
+         <div className="flex gap-3">
+          <Button
+           className="flex-1"
+           onClick={() => {
+            const link = document.createElement("a");
+            link.href = formData.videoUrl;
+            link.download = `${formData.videoTitle}.mp4`;
+            link.click();
+           }}
+          >
            <Download className="w-4 h-4 mr-2" />
            Download Video
           </Button>
-          <Button variant="outline" className="flex-1">
+          <Button
+           variant="outline"
+           className="flex-1"
+           onClick={() => window.open(formData.videoUrl, "_blank")}
+          >
            <ExternalLink className="w-4 h-4 mr-2" />
            Open in New Tab
           </Button>
+         </div>
+
+         {/* Share Options */}
+         <div className="mt-3 pt-3 border-t border-green-200">
+          <p className="text-xs text-green-700 font-medium mb-2">
+           Share Video:
+          </p>
+          <div className="flex gap-2">
+           <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+             if (navigator.share) {
+              navigator.share({
+               title: formData.videoTitle,
+               url: `${window.location.origin}${formData.videoUrl}`,
+              });
+             }
+            }}
+           >
+            Share
+           </Button>
+           <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+             navigator.clipboard.writeText(
+              `${window.location.origin}${formData.videoUrl}`
+             );
+             // You could add a toast notification here
+            }}
+           >
+            Copy Link
+           </Button>
+          </div>
          </div>
         </div>
        )}

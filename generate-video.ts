@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
-import { transcribeAudio, type TranscriptionOptions } from "./transcribe";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { type TranscriptionOptions, transcribeAudio } from "./transcribe";
 
 // Simple background sound selection function
 function getRandomBackgroundSound(): string {
@@ -20,7 +20,7 @@ interface VideoGenerationInput {
   mediaUrls: string[];
   titleText: string;
   outputPath?: string;
-  
+
   // Optional fields with defaults
   speechStartsAtSecond?: number;
   titleColor?: string;
@@ -42,51 +42,58 @@ interface VideoGenerationConfig extends VideoGenerationInput {
 }
 
 function validateInput(input: unknown): VideoGenerationInput {
-  if (typeof input !== 'object' || input === null) {
-    throw new Error('Input must be an object');
+  if (typeof input !== "object" || input === null) {
+    throw new Error("Input must be an object");
   }
-  
+
   const obj = input as Record<string, unknown>;
-  
-  if (!obj.audioPath || typeof obj.audioPath !== 'string') {
-    throw new Error('audioPath is required and must be a string');
+
+  if (!obj.audioPath || typeof obj.audioPath !== "string") {
+    throw new Error("audioPath is required and must be a string");
   }
-  
-  if (!obj.mediaUrls || !Array.isArray(obj.mediaUrls) || obj.mediaUrls.length === 0) {
-    throw new Error('mediaUrls is required and must be a non-empty array');
+
+  if (
+    !obj.mediaUrls ||
+    !Array.isArray(obj.mediaUrls) ||
+    obj.mediaUrls.length === 0
+  ) {
+    throw new Error("mediaUrls is required and must be a non-empty array");
   }
-  
-  if (!obj.titleText || typeof obj.titleText !== 'string') {
-    throw new Error('titleText is required and must be a string');
+
+  if (!obj.titleText || typeof obj.titleText !== "string") {
+    throw new Error("titleText is required and must be a string");
   }
-  
+
   return obj as unknown as VideoGenerationInput;
 }
 
 function prepareAssets(input: VideoGenerationInput): VideoGenerationConfig {
   const timestamp = Date.now();
-  const publicDir = path.join(process.cwd(), 'public');
-  
+  const publicDir = path.join(process.cwd(), "public");
+
   // Copy audio file to public directory
   const audioFileName = `audio-${timestamp}.wav`;
   const audioDestPath = path.join(publicDir, audioFileName);
-  
+
   // Convert audio to WAV format if needed
   try {
-    execSync(`npx remotion ffmpeg -i "${input.audioPath}" -ar 44100 -ac 2 "${audioDestPath}" -y`, {
-      stdio: 'pipe'
-    });
+    execSync(
+      `npx remotion ffmpeg -i "${input.audioPath}" -ar 44100 -ac 2 "${audioDestPath}" -y`,
+      {
+        stdio: "pipe",
+      },
+    );
   } catch (error) {
     throw new Error(`Failed to process audio file: ${error}`);
   }
-  
+
   // Copy media files to public directory
   const processedMediaUrls: string[] = [];
   input.mediaUrls.forEach((mediaUrl, index) => {
     const ext = path.extname(mediaUrl);
     const mediaFileName = `media-${timestamp}-${index}${ext}`;
     const mediaDestPath = path.join(publicDir, mediaFileName);
-    
+
     try {
       fs.copyFileSync(mediaUrl, mediaDestPath);
       processedMediaUrls.push(mediaFileName);
@@ -94,7 +101,7 @@ function prepareAssets(input: VideoGenerationInput): VideoGenerationConfig {
       throw new Error(`Failed to copy media file ${mediaUrl}: ${error}`);
     }
   });
-  
+
   return {
     ...input,
     audioFileUrl: audioFileName,
@@ -117,17 +124,25 @@ function prepareAssets(input: VideoGenerationInput): VideoGenerationConfig {
 
 async function generateCaptions(config: VideoGenerationConfig): Promise<void> {
   const transcriptionOptions: TranscriptionOptions = {
-    audioPath: path.join(process.cwd(), 'public', config.audioFileUrl),
+    audioPath: path.join(process.cwd(), "public", config.audioFileUrl),
     speechStartsAtSecond: config.speechStartsAtSecond || 0,
   };
-  
-  console.log('🎤 Generating captions...');
+
+  console.log("🎤 Generating captions...");
   await transcribeAudio(transcriptionOptions);
-  
+
   // Rename the generated captions file
-  const defaultCaptionsPath = path.join(process.cwd(), 'public', 'captions.json');
-  const targetCaptionsPath = path.join(process.cwd(), 'public', config.captionsFileName);
-  
+  const defaultCaptionsPath = path.join(
+    process.cwd(),
+    "public",
+    "captions.json",
+  );
+  const targetCaptionsPath = path.join(
+    process.cwd(),
+    "public",
+    config.captionsFileName,
+  );
+
   if (fs.existsSync(defaultCaptionsPath)) {
     fs.renameSync(defaultCaptionsPath, targetCaptionsPath);
   }
@@ -158,7 +173,7 @@ export const RemotionRoot: React.FC = () => {
           audioFileUrl: staticFile("${config.audioFileUrl}"),
           backgroundSoundUrl: staticFile("${config.backgroundSoundUrl}"),
           backgroundSoundVolume: ${config.backgroundSoundVolume},
-          mediaUrls: [${config.mediaUrls.map(url => `staticFile("${url}")`).join(', ')}],
+          mediaUrls: [${config.mediaUrls.map((url) => `staticFile("${url}")`).join(", ")}],
           backgroundColor: "${config.backgroundColor}",
           titleText: "${config.titleText.replace(/"/g, '\\"')}",
           titleColor: "${config.titleColor}",
@@ -200,46 +215,49 @@ export const RemotionRoot: React.FC = () => {
 };
 `;
 
-  const tempRootPath = path.join(process.cwd(), 'src', 'Root-temp.tsx');
+  const tempRootPath = path.join(process.cwd(), "src", "Root-temp.tsx");
   fs.writeFileSync(tempRootPath, compositionContent);
   return tempRootPath;
 }
 
 async function renderVideo(config: VideoGenerationConfig): Promise<string> {
   const timestamp = Date.now();
-  const outputFileName = config.outputPath || `generated-video-${timestamp}.mp4`;
+  const outputFileName =
+    config.outputPath || `generated-video-${timestamp}.mp4`;
   const outputPath = path.resolve(outputFileName);
-  
+
   // Create temporary composition
   const tempRootPath = createTemporaryComposition(config);
-  const originalRootPath = path.join(process.cwd(), 'src', 'Root.tsx');
-  const backupRootPath = path.join(process.cwd(), 'src', 'Root-backup.tsx');
-  
+  const originalRootPath = path.join(process.cwd(), "src", "Root.tsx");
+  const backupRootPath = path.join(process.cwd(), "src", "Root-backup.tsx");
+
   try {
     // Backup original Root.tsx
     fs.copyFileSync(originalRootPath, backupRootPath);
-    
+
     // Replace with temporary composition
     fs.copyFileSync(tempRootPath, originalRootPath);
-    
-    console.log('🎬 Rendering video...');
-    
+
+    console.log("🎬 Rendering video...");
+
     // Render the video
-    execSync(`npx remotion render GeneratedVideo "${outputPath}" --log=verbose`, {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-    });
-    
+    execSync(
+      `npx remotion render GeneratedVideo "${outputPath}" --log=verbose`,
+      {
+        stdio: "inherit",
+        cwd: process.cwd(),
+      },
+    );
+
     console.log(`✅ Video generated successfully: ${outputPath}`);
     return outputPath;
-    
   } finally {
     // Restore original Root.tsx
     if (fs.existsSync(backupRootPath)) {
       fs.copyFileSync(backupRootPath, originalRootPath);
       fs.unlinkSync(backupRootPath);
     }
-    
+
     // Clean up temporary files
     if (fs.existsSync(tempRootPath)) {
       fs.unlinkSync(tempRootPath);
@@ -248,16 +266,16 @@ async function renderVideo(config: VideoGenerationConfig): Promise<string> {
 }
 
 function cleanupAssets(config: VideoGenerationConfig): void {
-  const publicDir = path.join(process.cwd(), 'public');
-  
+  const publicDir = path.join(process.cwd(), "public");
+
   // Clean up copied files
   const filesToClean = [
     config.audioFileUrl,
     config.captionsFileName,
-    ...config.mediaUrls
+    ...config.mediaUrls,
   ];
-  
-  filesToClean.forEach(fileName => {
+
+  filesToClean.forEach((fileName) => {
     const filePath = path.join(publicDir, fileName);
     if (fs.existsSync(filePath)) {
       try {
@@ -274,23 +292,22 @@ async function generateVideo(inputJson: string): Promise<string> {
     // Parse and validate input
     const input = JSON.parse(inputJson);
     const validatedInput = validateInput(input);
-    
-    console.log('📋 Preparing assets...');
+
+    console.log("📋 Preparing assets...");
     const config = prepareAssets(validatedInput);
-    
+
     // Generate captions
     await generateCaptions(config);
-    
+
     // Render video
     const outputPath = await renderVideo(config);
-    
+
     // Clean up temporary assets
     cleanupAssets(config);
-    
+
     return outputPath;
-    
   } catch (error) {
-    console.error('❌ Error generating video:', error);
+    console.error("❌ Error generating video:", error);
     throw error;
   }
 }
@@ -298,25 +315,31 @@ async function generateVideo(inputJson: string): Promise<string> {
 // CLI interface
 async function main() {
   if (process.argv.length < 3) {
-    console.error('Usage: npx ts-node generate-video.ts <json-input>');
-    console.error('');
-    console.error('Example JSON input:');
-    console.error(JSON.stringify({
-      audioPath: "/path/to/audio.wav",
-      mediaUrls: ["/path/to/image1.jpg", "/path/to/image2.jpg"],
-      titleText: "My Amazing Video",
-      outputPath: "output.mp4"
-    }, null, 2));
+    console.error("Usage: npx ts-node generate-video.ts <json-input>");
+    console.error("");
+    console.error("Example JSON input:");
+    console.error(
+      JSON.stringify(
+        {
+          audioPath: "/path/to/audio.wav",
+          mediaUrls: ["/path/to/image1.jpg", "/path/to/image2.jpg"],
+          titleText: "My Amazing Video",
+          outputPath: "output.mp4",
+        },
+        null,
+        2,
+      ),
+    );
     process.exit(1);
   }
-  
+
   const jsonInput = process.argv[2];
-  
+
   try {
     const outputPath = await generateVideo(jsonInput);
     console.log(outputPath); // Return only the path as requested
   } catch (error) {
-    console.error('Failed to generate video:', error);
+    console.error("Failed to generate video:", error);
     process.exit(1);
   }
 }

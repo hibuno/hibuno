@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { delayRender, continueRender, cancelRender } from "remotion";
-import { loadFont, fontFamily } from "@remotion/google-fonts/IBMPlexSans";
+import { fontFamily, loadFont } from "@remotion/google-fonts/IBMPlexSans";
+import { useEffect, useState } from "react";
+import { cancelRender, continueRender, delayRender } from "remotion";
 
 // Font loading utilities
 const loading = loadFont("normal", {
@@ -38,7 +38,7 @@ export const WaitForFonts: React.FC<{
       .catch((err) => {
         cancelRender(err);
       });
-  }, [fontsLoaded, handle]);
+  }, [handle]);
 
   if (!fontsLoaded) {
     return null;

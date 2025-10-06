@@ -1,4 +1,4 @@
-import { Caption, parseSrt } from "@remotion/captions";
+import { type Caption, parseSrt } from "@remotion/captions";
 
 export const getSubtitlesFromSrt = async (src: string) => {
   const res = await fetch(src);

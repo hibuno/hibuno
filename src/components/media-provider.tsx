@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import type React from "react";
+import { createContext, useContext } from "react";
 import { MediaDialog, useMediaDialog } from "@/components/media-dialog";
 
 interface MediaContextType {
@@ -19,7 +20,7 @@ export function useMediaContext() {
   if (!context) {
     // Return a no-op function if no provider is found
     return {
-      openDialog: () => {}
+      openDialog: () => {},
     };
   }
   return context;

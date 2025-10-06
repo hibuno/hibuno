@@ -1,7 +1,7 @@
 import {
   createSmoothSvgPath,
-  visualizeAudioWaveform,
   visualizeAudio,
+  visualizeAudioWaveform,
 } from "@remotion/media-utils";
 import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";

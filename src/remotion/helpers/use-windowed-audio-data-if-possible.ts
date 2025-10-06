@@ -1,7 +1,7 @@
 import {
+  type UseWindowedAudioDataReturnValue,
   useAudioData,
   useWindowedAudioData,
-  UseWindowedAudioDataReturnValue,
 } from "@remotion/media-utils";
 import { useState } from "react";
 
@@ -22,12 +22,20 @@ export const useWindowedAudioDataIfPossible = ({
       "`src` cannot be changed dynamically - re-mount the component instead by setting a `key={src}`",
     );
   }
+
+  // Call hooks unconditionally at the top level
+  const windowedData = useWindowedAudioData({
+    src,
+    frame,
+    fps,
+    windowInSeconds,
+  });
+  const audioData = useAudioData(src);
+
+  // Return based on file type
   if (src.endsWith(".wav")) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useWindowedAudioData({ src, frame, fps, windowInSeconds });
+    return windowedData;
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const audioData = useAudioData(src);
   return { audioData, dataOffsetInSeconds: 0 };
 };

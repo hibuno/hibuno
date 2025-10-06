@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import {
+  Download,
+  ExternalLink,
+  RotateCw,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Download, ExternalLink, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface MediaDialogProps {
@@ -15,7 +22,14 @@ interface MediaDialogProps {
   caption?: string | undefined;
 }
 
-export function MediaDialog({ isOpen, onClose, src, alt, type, caption }: MediaDialogProps) {
+export function MediaDialog({
+  isOpen,
+  onClose,
+  src,
+  alt,
+  type,
+  caption,
+}: MediaDialogProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,51 +41,51 @@ export function MediaDialog({ isOpen, onClose, src, alt, type, caption }: MediaD
       setRotation(0);
       setIsLoading(true);
     }
-  }, [isOpen, src]);
+  }, [isOpen]);
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.25, 3));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5));
-  const handleRotate = () => setRotation(prev => (prev + 90) % 360);
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
   const handleReset = () => {
     setZoom(1);
     setRotation(0);
   };
 
   const handleDownload = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = src;
-    link.download = alt || 'media';
+    link.download = alt || "media";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const handleOpenInNewTab = () => {
-    window.open(src, '_blank');
+    window.open(src, "_blank");
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!isOpen) return;
-    
+
     switch (e.key) {
-      case 'Escape':
+      case "Escape":
         onClose();
         break;
-      case '+':
-      case '=':
+      case "+":
+      case "=":
         e.preventDefault();
         handleZoomIn();
         break;
-      case '-':
+      case "-":
         e.preventDefault();
         handleZoomOut();
         break;
-      case 'r':
-      case 'R':
+      case "r":
+      case "R":
         e.preventDefault();
         handleRotate();
         break;
-      case '0':
+      case "0":
         e.preventDefault();
         handleReset();
         break;
@@ -79,9 +93,9 @@ export function MediaDialog({ isOpen, onClose, src, alt, type, caption }: MediaD
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -123,7 +137,7 @@ export function MediaDialog({ isOpen, onClose, src, alt, type, caption }: MediaD
               </>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -167,11 +181,11 @@ export function MediaDialog({ isOpen, onClose, src, alt, type, caption }: MediaD
                 alt={alt}
                 className={cn(
                   "max-w-full max-h-full object-contain transition-all duration-300 ease-in-out",
-                  isLoading ? "opacity-0" : "opacity-100"
+                  isLoading ? "opacity-0" : "opacity-100",
                 )}
                 style={{
                   transform: `scale(${zoom}) rotate(${rotation}deg)`,
-                  transformOrigin: "center"
+                  transformOrigin: "center",
                 }}
                 onLoad={() => setIsLoading(false)}
                 onError={() => setIsLoading(false)}

@@ -8,8 +8,8 @@ async function example() {
     audioPath: "./public/audio.wav",
     mediaUrls: [
       "./public/sample-image-1.svg",
-      "./public/sample-image-2.svg", 
-      "./public/sample-image-3.svg"
+      "./public/sample-image-2.svg",
+      "./public/sample-image-3.svg",
     ],
     titleText: "Professional Content Creation",
     outputPath: "./output/example-video.mp4",
@@ -21,7 +21,7 @@ async function example() {
     onlyDisplayCurrentSentence: true,
     transitionDurationInSeconds: 0.8,
     mediaFitMode: "cover" as const,
-    backgroundSoundVolume: 0.15
+    backgroundSoundVolume: 0.15,
   };
 
   try {
@@ -43,7 +43,7 @@ function showUsageExample() {
   console.log('    "/path/to/image1.jpg",');
   console.log('    "/path/to/image2.jpg",');
   console.log('    "/path/to/image3.jpg"');
-  console.log('  ],');
+  console.log("  ],");
   console.log('  "titleText": "My Amazing Video",');
   console.log('  "outputPath": "./my-video.mp4"');
   console.log("}'");

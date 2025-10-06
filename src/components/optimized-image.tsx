@@ -2,8 +2,8 @@
 
 import Image, { type ImageProps } from "next/image";
 import React from "react";
-import { cn } from "@/lib/utils";
 import { useMediaContext } from "@/components/media-provider";
+import { cn } from "@/lib/utils";
 
 interface OptimizedImageProps extends Omit<ImageProps, "src"> {
   src: string;
@@ -64,23 +64,23 @@ export function OptimizedImage({
     if (clickable) {
       const dialogData: Parameters<typeof openDialog>[0] = {
         src: imageSrc,
-        type: 'image'
+        type: "image",
       };
-      
+
       if (alt) dialogData.alt = alt;
       if (caption) dialogData.caption = caption;
-      
+
       openDialog(dialogData);
     }
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "relative", 
-        aspectRatioClasses[aspectRatio], 
+        "relative",
+        aspectRatioClasses[aspectRatio],
         clickable && "cursor-pointer hover:opacity-90 transition-opacity",
-        className
+        className,
       )}
       onClick={handleClick}
     >
@@ -129,22 +129,22 @@ export function OptimizedVideo({
       // Only open dialog if clicking on the video itself, not controls
       const dialogData: Parameters<typeof openDialog>[0] = {
         src,
-        type: 'video'
+        type: "video",
       };
-      
+
       if (caption) dialogData.caption = caption;
-      
+
       openDialog(dialogData);
     }
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "relative", 
-        aspectRatioClasses[aspectRatio], 
+        "relative",
+        aspectRatioClasses[aspectRatio],
         clickable && "cursor-pointer",
-        className
+        className,
       )}
     >
       <video
@@ -152,7 +152,7 @@ export function OptimizedVideo({
         className={cn(
           "w-full h-full object-cover transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100",
-          clickable && "hover:opacity-90 transition-opacity"
+          clickable && "hover:opacity-90 transition-opacity",
         )}
         controls={controls}
         autoPlay={autoPlay}
