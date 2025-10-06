@@ -18,7 +18,6 @@ import {
  X,
  Upload,
  ImagePlus,
- Eye,
  Code as CodeIcon,
  Loader2,
  Bold,
@@ -67,53 +66,6 @@ function useDebounce<T>(value: T, delay: number, immediate = false): T {
  }, [value, delay, immediate]);
 
  return debouncedValue;
-}
-
-// Simple Markdown to HTML converter
-function markdownToHtml(markdown: string): string {
- let html = markdown;
-
- // Code blocks
- html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>");
-
- // Headers
- html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
- html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
- html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
-
- // Bold
- html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-
- // Italic
- html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
- // Images
- html = html.replace(
-  /!\[([^\]]*)\]\(([^)]+)\)/g,
-  '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg my-4" />'
- );
-
- // Links
- html = html.replace(
-  /\[([^\]]+)\]\(([^)]+)\)/g,
-  '<a href="$2" class="text-blue-600 underline hover:text-blue-800">$1</a>'
- );
-
- // Inline code
- html = html.replace(
-  /`([^`]+)`/g,
-  '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>'
- );
-
- // Line breaks
- html = html.replace(/\n\n/g, "</p><p>");
- html = "<p>" + html + "</p>";
-
- // Lists
- html = html.replace(/<p>- (.+?)<\/p>/g, "<ul><li>$1</li></ul>");
- html = html.replace(/<\/ul>\s*<ul>/g, "");
-
- return html;
 }
 
 // Enhanced stats calculation with more metrics
@@ -362,8 +314,8 @@ function ImageDropZone({
  );
 }
 
-// Enhanced Markdown Editor with rich toolbar and live preview
-function MarkdownEditor({
+// Enhanced Monaco Editor with modern features
+function MonacoEditor({
  content,
  onChange,
  onImageUpload,
@@ -372,100 +324,101 @@ function MarkdownEditor({
  onChange: (content: string) => void;
  onImageUpload: (file: File) => Promise<string>;
 }) {
- const [showPreview, setShowPreview] = useState(false);
  const [isDragging, setIsDragging] = useState(false);
  const [uploading, setUploading] = useState(false);
- const [history, setHistory] = useState<string[]>([content]);
- const [historyIndex, setHistoryIndex] = useState(0);
- const textareaRef = useRef<HTMLTextAreaElement>(null);
+ const editorRef = useRef<HTMLDivElement>(null);
+ const monacoRef = useRef<any>(null);
 
- // Enhanced toolbar actions
- const insertMarkdown = useCallback(
-  (before: string, after: string = "", placeholder = "") => {
-   const textarea = textareaRef.current;
-   if (!textarea) return;
-
-   const start = textarea.selectionStart;
-   const end = textarea.selectionEnd;
-   const selectedText = content.substring(start, end);
-   const insertText = selectedText || placeholder;
-   const newText = before + insertText + after;
-
-   const newContent =
-    content.substring(0, start) + newText + content.substring(end);
-
-   // Add to history
-   const newHistory = history.slice(0, historyIndex + 1);
-   newHistory.push(newContent);
-   setHistory(newHistory);
-   setHistoryIndex(newHistory.length - 1);
-
-   onChange(newContent);
-
-   setTimeout(() => {
-    textarea.focus();
-    const newStart = start + before.length;
-    const newEnd = newStart + insertText.length;
-    textarea.setSelectionRange(newStart, newEnd);
-   }, 0);
-  },
-  [content, history, historyIndex, onChange]
- );
-
- const undo = useCallback(() => {
-  if (historyIndex > 0) {
-   const newIndex = historyIndex - 1;
-   setHistoryIndex(newIndex);
-   const historyItem = history[newIndex];
-   if (historyItem !== undefined) {
-    onChange(historyItem);
-   }
-  }
- }, [history, historyIndex, onChange]);
-
- const redo = useCallback(() => {
-  if (historyIndex < history.length - 1) {
-   const newIndex = historyIndex + 1;
-   setHistoryIndex(newIndex);
-   const historyItem = history[newIndex];
-   if (historyItem !== undefined) {
-    onChange(historyItem);
-   }
-  }
- }, [history, historyIndex, onChange]);
-
- // Keyboard shortcuts
+ // Initialize Monaco Editor
  useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-   if (e.metaKey || e.ctrlKey) {
-    switch (e.key) {
-     case "b":
-      e.preventDefault();
-      insertMarkdown("**", "**", "bold text");
-      break;
-     case "i":
-      e.preventDefault();
-      insertMarkdown("*", "*", "italic text");
-      break;
-     case "k":
-      e.preventDefault();
-      insertMarkdown("[", "](url)", "link text");
-      break;
-     case "z":
-      e.preventDefault();
-      if (e.shiftKey) {
-       redo();
-      } else {
-       undo();
-      }
-      break;
+  let isMounted = false;
+  if (editorRef.current && !monacoRef.current) {
+   const initializeEditor = async () => {
+    try {
+     // Load Monaco Editor if not already loaded
+     if (!(window as any).monaco) {
+      await new Promise<void>((resolve) => {
+       const script = document.createElement("script");
+       script.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js";
+       script.onload = () => {
+        (window as any).require.config({
+         paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs",
+         },
+        });
+
+        (window as any).require(["vs/editor/editor.main"], () => {
+         resolve();
+        });
+       };
+       document.head.appendChild(script);
+      });
+     }
+
+     // Wait a bit for Monaco to be fully loaded
+     await new Promise((resolve) => setTimeout(resolve, 100));
+
+     if (editorRef.current && !monacoRef.current) {
+      const editor = (window as any).monaco.editor.create(editorRef.current, {
+       value: content || "# Start writing your content here...",
+       language: "markdown",
+       theme: "vs-light",
+       minimap: { enabled: false },
+       fontSize: 14,
+       lineNumbers: "on",
+       wordWrap: "on",
+       automaticLayout: true,
+       scrollBeyondLastLine: false,
+       renderWhitespace: "selection",
+       bracketPairColorization: { enabled: true },
+       guides: {
+        bracketPairs: true,
+        indentation: true,
+       },
+      });
+
+      monacoRef.current = editor;
+      isMounted = true;
+
+      // Listen for content changes
+      editor.onDidChangeModelContent(() => {
+       const newContent = editor.getValue();
+       onChange(newContent);
+      });
+     }
+    } catch (error) {
+     console.error("Failed to initialize Monaco Editor:", error);
     }
+   };
+
+   initializeEditor();
+
+   if (!isMounted) {
+    return;
+   }
+  }
+
+  return () => {
+   if (monacoRef.current) {
+    monacoRef.current.dispose();
+    monacoRef.current = null;
    }
   };
+ }, []);
 
-  document.addEventListener("keydown", handleKeyDown);
-  return () => document.removeEventListener("keydown", handleKeyDown);
- }, [insertMarkdown, undo, redo]);
+ // Update editor content when prop changes
+ useEffect(() => {
+  if (monacoRef.current && (window as any).monaco && content !== undefined) {
+   const currentValue = monacoRef.current.getValue();
+   if (currentValue !== content) {
+    // Use pushUndoStop to prevent undo history pollution
+    monacoRef.current.pushUndoStop();
+    monacoRef.current.setValue(content);
+    monacoRef.current.pushUndoStop();
+   }
+  }
+ }, [content]);
 
  const handleDragOver = (e: React.DragEvent) => {
   e.preventDefault();
@@ -485,24 +438,27 @@ function MarkdownEditor({
    setUploading(true);
    try {
     const imageUrl = await onImageUpload(file);
-    const textarea = textareaRef.current;
-    if (textarea) {
-     const start = textarea.selectionStart;
-     const markdownImage = `\n![${file.name.replace(
-      /\.[^/.]+$/,
-      ""
-     )}](${imageUrl})\n`;
-     const newContent =
-      content.substring(0, start) + markdownImage + content.substring(start);
-     onChange(newContent);
 
-     setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(
-       start + markdownImage.length,
-       start + markdownImage.length
-      );
-     }, 0);
+    // Insert markdown image at cursor position
+    if (monacoRef.current && (window as any).monaco) {
+     const selection = monacoRef.current.getSelection();
+     const text = `\n![${file.name.replace(/\.[^/.]+$/, "")}](${imageUrl})\n`;
+
+     const range = new (window as any).monaco.Range(
+      selection.startLineNumber,
+      selection.startColumn,
+      selection.endLineNumber,
+      selection.endColumn
+     );
+
+     const op = {
+      range: range,
+      text: text,
+      forceMoveMarkers: true,
+     };
+
+     monacoRef.current.executeEdits("insert-image", [op]);
+     monacoRef.current.focus();
     }
    } catch (error) {
     console.error("Upload failed:", error);
@@ -512,19 +468,71 @@ function MarkdownEditor({
   }
  };
 
+ // Insert markdown syntax at cursor position
+ const insertMarkdown = (
+  before: string,
+  after: string = "",
+  placeholder = ""
+ ) => {
+  if (monacoRef.current && (window as any).monaco) {
+   try {
+    const selection = monacoRef.current.getSelection();
+    const selectedText = monacoRef.current
+     .getModel()
+     .getValueInRange(selection);
+    const insertText = selectedText || placeholder;
+    const text = before + insertText + after;
+
+    // Use Monaco's edit operations
+    const range = new (window as any).monaco.Range(
+     selection.startLineNumber,
+     selection.startColumn,
+     selection.endLineNumber,
+     selection.endColumn
+    );
+
+    const op = {
+     range: range,
+     text: text,
+     forceMoveMarkers: true,
+    };
+
+    monacoRef.current.executeEdits("insert-markdown", [op]);
+
+    // Set cursor position after inserted text if placeholder was used
+    if (insertText === placeholder) {
+     const newPosition = new (window as any).monaco.Position(
+      selection.startLineNumber,
+      selection.startColumn + before.length + insertText.length
+     );
+     monacoRef.current.setPosition(newPosition);
+    }
+
+    // Focus the editor
+    monacoRef.current.focus();
+   } catch (error) {
+    console.error("Error inserting markdown:", error);
+   }
+  }
+ };
+
  return (
   <div className="space-y-4">
    {/* Enhanced Toolbar */}
-   <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50 flex-wrap">
+   <div className="flex items-center gap-2 p-4 border rounded-lg bg-gradient-to-r from-gray-50 to-white flex-wrap">
     {/* History Controls */}
     <div className="flex gap-1">
      <Button
       type="button"
       variant="ghost"
       size="sm"
-      onClick={undo}
-      disabled={historyIndex <= 0}
+      onClick={() => {
+       if (monacoRef.current) {
+        monacoRef.current.getModel()?.undo();
+       }
+      }}
       title="Undo (Ctrl+Z)"
+      className="hover:bg-white"
      >
       <Undo className="w-4 h-4" />
      </Button>
@@ -532,9 +540,13 @@ function MarkdownEditor({
       type="button"
       variant="ghost"
       size="sm"
-      onClick={redo}
-      disabled={historyIndex >= history.length - 1}
-      title="Redo (Ctrl+Shift+Z)"
+      onClick={() => {
+       if (monacoRef.current) {
+        monacoRef.current.getModel()?.redo();
+       }
+      }}
+      title="Redo (Ctrl+Y)"
+      className="hover:bg-white"
      >
       <Redo className="w-4 h-4" />
      </Button>
@@ -550,6 +562,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("**", "**", "bold text")}
       title="Bold (Ctrl+B)"
+      className="hover:bg-white"
      >
       <Bold className="w-4 h-4" />
      </Button>
@@ -559,6 +572,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("*", "*", "italic text")}
       title="Italic (Ctrl+I)"
+      className="hover:bg-white"
      >
       <Italic className="w-4 h-4" />
      </Button>
@@ -568,6 +582,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("`", "`", "code")}
       title="Inline Code"
+      className="hover:bg-white"
      >
       <Code className="w-4 h-4" />
      </Button>
@@ -583,6 +598,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("# ", "", "Heading 1")}
       title="Heading 1"
+      className="hover:bg-white"
      >
       <Heading1 className="w-4 h-4" />
      </Button>
@@ -592,6 +608,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("## ", "", "Heading 2")}
       title="Heading 2"
+      className="hover:bg-white"
      >
       <Heading2 className="w-4 h-4" />
      </Button>
@@ -601,6 +618,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("### ", "", "Heading 3")}
       title="Heading 3"
+      className="hover:bg-white"
      >
       <Heading3 className="w-4 h-4" />
      </Button>
@@ -616,6 +634,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("- ", "", "List item")}
       title="Bullet List"
+      className="hover:bg-white"
      >
       <List className="w-4 h-4" />
      </Button>
@@ -625,6 +644,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("1. ", "", "Numbered item")}
       title="Numbered List"
+      className="hover:bg-white"
      >
       <ListOrdered className="w-4 h-4" />
      </Button>
@@ -634,6 +654,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("> ", "", "Quote")}
       title="Quote"
+      className="hover:bg-white"
      >
       <Quote className="w-4 h-4" />
      </Button>
@@ -649,6 +670,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("[", "](url)", "link text")}
       title="Link (Ctrl+K)"
+      className="hover:bg-white"
      >
       <Link className="w-4 h-4" />
      </Button>
@@ -658,6 +680,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("![", "](url)", "alt text")}
       title="Image"
+      className="hover:bg-white"
      >
       <ImagePlus className="w-4 h-4" />
      </Button>
@@ -667,6 +690,7 @@ function MarkdownEditor({
       size="sm"
       onClick={() => insertMarkdown("```\n", "\n```", "code block")}
       title="Code Block"
+      className="hover:bg-white"
      >
       <CodeIcon className="w-4 h-4" />
      </Button>
@@ -674,88 +698,45 @@ function MarkdownEditor({
 
     <div className="flex-1" />
 
-    {/* Preview Toggle */}
-    <Button
-     type="button"
-     variant={showPreview ? "default" : "outline"}
-     size="sm"
-     onClick={() => setShowPreview(!showPreview)}
-     title="Toggle Preview"
-    >
-     {showPreview ? (
-      <CodeIcon className="w-4 h-4 mr-2" />
-     ) : (
-      <Eye className="w-4 h-4 mr-2" />
-     )}
-     {showPreview ? "Edit" : "Preview"}
-    </Button>
+    <div className="flex items-center gap-2 text-xs text-gray-500">
+     <div className="flex items-center gap-1">
+      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+      <span>Monaco Editor - VS Code Experience</span>
+     </div>
+    </div>
    </div>
 
-   {/* Editor/Preview Area */}
+   {/* Editor Area */}
    <div className="relative">
-    {showPreview ? (
-     <div
-      className="min-h-[400px] p-6 border rounded-lg prose prose-sm max-w-none bg-white"
-      dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
-     />
-    ) : (
-     <div
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={`relative ${isDragging ? "ring-2 ring-blue-500" : ""}`}
-     >
-      <Textarea
-       ref={textareaRef}
-       value={content}
-       onChange={(e) => {
-        const newContent = e.target.value;
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(newContent);
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-        onChange(newContent);
-       }}
-       className="min-h-[500px] font-mono text-sm resize-none"
-       placeholder="Write your content in Markdown...
-
-# Your Amazing Title
-
-Start writing your content here. You can use:
-- **Bold text** and *italic text*
-- [Links](https://example.com)
-- ![Images](image-url)
-- `inline code` and code blocks
-- Lists and quotes
-
-Drag and drop images directly into this editor!"
-      />
-      {isDragging && (
-       <div className="absolute inset-0 bg-blue-50 bg-opacity-90 flex items-center justify-center pointer-events-none rounded-lg">
-        <div className="text-center">
-         <Upload className="w-12 h-12 mx-auto mb-2 text-blue-500" />
-         <p className="text-blue-700 font-medium">
-          Drop image to upload and insert
-         </p>
-        </div>
-       </div>
-      )}
-      {uploading && (
-       <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
-        <div className="text-center">
-         <Loader2 className="w-8 h-8 mx-auto mb-2 text-blue-500 animate-spin" />
-         <p className="text-gray-700">Uploading image...</p>
-        </div>
-       </div>
-      )}
+    <div
+     ref={editorRef}
+     className="h-[600px] border rounded-lg overflow-hidden"
+     onDragOver={handleDragOver}
+     onDragLeave={handleDragLeave}
+     onDrop={handleDrop}
+    />
+    {isDragging && (
+     <div className="absolute inset-0 bg-blue-50 bg-opacity-90 flex items-center justify-center pointer-events-none rounded-lg">
+      <div className="text-center">
+       <Upload className="w-12 h-12 mx-auto mb-2 text-blue-500" />
+       <p className="text-blue-700 font-medium">
+        Drop image to upload and insert
+       </p>
+      </div>
+     </div>
+    )}
+    {uploading && (
+     <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
+      <div className="text-center">
+       <Loader2 className="w-8 h-8 mx-auto mb-2 text-blue-500 animate-spin" />
+       <p className="text-gray-700">Uploading image...</p>
+      </div>
      </div>
     )}
    </div>
 
    <div className="flex items-center justify-between text-xs text-gray-500">
-    <span>
-     💡 Tip: Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for links
-    </span>
+    <span>🚀 Powered by Monaco Editor - Same editor used in VS Code</span>
     <span>
      Lines: {content.split("\n").length} | Characters: {content.length}
     </span>
@@ -916,6 +897,11 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    ...prev,
    [field]: value,
    ...(field === "excerpt" ? { manualExcerpt: true } : {}),
+   ...(field === "published" && value === true
+    ? { published_at: new Date().toISOString() }
+    : field === "published" && value === false
+    ? { published_at: null }
+    : {}),
   }));
  };
 
@@ -1015,18 +1001,41 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  return (
   <div className="container mx-auto px-4 py-8 max-w-6xl">
    {/* Header */}
-   <div className="flex items-center gap-4 mb-8">
+   <div className="flex items-center gap-4 mb-8 p-6 bg-gradient-to-r from-white to-gray-50 rounded-lg border">
     <Button
      variant="outline"
      size="sm"
      onClick={() => (window.location.href = `/${slug}`)}
+     className="shrink-0"
     >
      <ArrowLeft className="w-4 h-4 mr-2" />
      Back to Post
     </Button>
-    <div className="flex-1">
-     <h1 className="text-3xl font-bold">Edit Post</h1>
-     <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+
+    <div className="flex-1 min-w-0">
+     <div className="flex items-center gap-3 mb-2">
+      <h1 className="text-3xl font-bold text-gray-900">Edit Post</h1>
+      <div className="flex items-center gap-2">
+       {formData.published ? (
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+         <CheckCircle className="w-3 h-3 mr-1" />
+         Published
+        </Badge>
+       ) : (
+        <Badge variant="secondary">
+         <Clock className="w-3 h-3 mr-1" />
+         Draft
+        </Badge>
+       )}
+       {formData.featured && (
+        <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+         <Sparkles className="w-3 h-3 mr-1" />
+         Featured
+        </Badge>
+       )}
+      </div>
+     </div>
+     <div className="flex items-center gap-6 text-sm text-gray-600">
       <span className="flex items-center gap-1">
        <FileText className="w-4 h-4" />
        {formData.wordCount || 0} words
@@ -1035,6 +1044,18 @@ export default function EditPostPage({ params }: EditPostPageProps) {
        <Clock className="w-4 h-4" />
        {formData.readingTime || 0} min read
       </span>
+      {formData.headers > 0 && (
+       <span className="flex items-center gap-1">
+        <Heading1 className="w-4 h-4" />
+        {formData.headers} sections
+       </span>
+      )}
+      {formData.images > 0 && (
+       <span className="flex items-center gap-1">
+        <Image className="w-4 h-4" />
+        {formData.images} images
+       </span>
+      )}
       {lastSaved && (
        <span className="flex items-center gap-1 text-green-600">
         <CheckCircle className="w-4 h-4" />
@@ -1043,11 +1064,13 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       )}
      </div>
     </div>
+
     <div className="flex items-center gap-2">
      <Button
       variant="outline"
       size="sm"
       onClick={() => copyToClipboard(`${window.location.origin}/${slug}`)}
+      className="shrink-0"
      >
       <Copy className="w-4 h-4 mr-2" />
       Copy URL
@@ -1056,6 +1079,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       variant="outline"
       size="sm"
       onClick={() => window.open(`/${slug}`, "_blank")}
+      className="shrink-0"
      >
       <ExternalLink className="w-4 h-4 mr-2" />
       Preview
@@ -1203,9 +1227,9 @@ export default function EditPostPage({ params }: EditPostPageProps) {
        <CardTitle>Content Editor</CardTitle>
       </CardHeader>
       <CardContent>
-       <MarkdownEditor
+       <MonacoEditor
         content={formData.content || ""}
-        onChange={(content) => handleInputChange("content", content)}
+        onChange={(content: string) => handleInputChange("content", content)}
         onImageUpload={uploadImageToSupabase}
        />
       </CardContent>
@@ -1377,29 +1401,101 @@ export default function EditPostPage({ params }: EditPostPageProps) {
         Publishing Settings
        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-       <div className="flex items-center space-x-2">
-        <Switch
-         checked={formData.published || false}
-         onCheckedChange={(checked) => handleInputChange("published", checked)}
-        />
-        <Label>Published</Label>
-       </div>
+      <CardContent className="space-y-6">
+       <div className="space-y-4">
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
+         <div className="flex items-center space-x-3">
+          <div
+           className={`p-2 rounded-full ${
+            formData.published ? "bg-green-100" : "bg-gray-100"
+           }`}
+          >
+           {formData.published ? (
+            <CheckCircle className="w-5 h-5 text-green-600" />
+           ) : (
+            <Clock className="w-5 h-5 text-gray-600" />
+           )}
+          </div>
+          <div>
+           <div className="flex items-center gap-2">
+            <Label className="text-base font-medium">Published</Label>
+            {formData.published && formData.published_at && (
+             <Badge variant="secondary" className="text-xs">
+              Published {new Date(formData.published_at).toLocaleDateString()}
+             </Badge>
+            )}
+           </div>
+           <p className="text-sm text-gray-600">
+            {formData.published
+             ? "This post is live and visible to readers"
+             : "This post is in draft mode and not visible to readers"}
+           </p>
+          </div>
+         </div>
+         <Switch
+          checked={formData.published || false}
+          onCheckedChange={(checked) => handleInputChange("published", checked)}
+          className="data-[state=checked]:bg-green-600"
+         />
+        </div>
 
-       <div className="flex items-center space-x-2">
-        <Switch
-         checked={formData.featured || false}
-         onCheckedChange={(checked) => handleInputChange("featured", checked)}
-        />
-        <Label>Featured Post</Label>
-       </div>
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-pink-50">
+         <div className="flex items-center space-x-3">
+          <div
+           className={`p-2 rounded-full ${
+            formData.featured ? "bg-purple-100" : "bg-gray-100"
+           }`}
+          >
+           <Sparkles
+            className={`w-5 h-5 ${
+             formData.featured ? "text-purple-600" : "text-gray-600"
+            }`}
+           />
+          </div>
+          <div>
+           <Label className="text-base font-medium">Featured Post</Label>
+           <p className="text-sm text-gray-600">
+            {formData.featured
+             ? "This post will be highlighted on the homepage"
+             : "Feature this post to give it more visibility"}
+           </p>
+          </div>
+         </div>
+         <Switch
+          checked={formData.featured || false}
+          onCheckedChange={(checked) => handleInputChange("featured", checked)}
+          className="data-[state=checked]:bg-purple-600"
+         />
+        </div>
 
-       <div className="flex items-center space-x-2">
-        <Switch
-         checked={autoSaveEnabled}
-         onCheckedChange={setAutoSaveEnabled}
-        />
-        <Label>Auto-save (saves every 2 seconds)</Label>
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-green-50 to-emerald-50">
+         <div className="flex items-center space-x-3">
+          <div
+           className={`p-2 rounded-full ${
+            autoSaveEnabled ? "bg-green-100" : "bg-gray-100"
+           }`}
+          >
+           <Save
+            className={`w-5 h-5 ${
+             autoSaveEnabled ? "text-green-600" : "text-gray-600"
+            }`}
+           />
+          </div>
+          <div>
+           <Label className="text-base font-medium">Auto-save</Label>
+           <p className="text-sm text-gray-600">
+            {autoSaveEnabled
+             ? "Changes are automatically saved every 2 seconds"
+             : "Enable auto-save to prevent data loss"}
+           </p>
+          </div>
+         </div>
+         <Switch
+          checked={autoSaveEnabled}
+          onCheckedChange={setAutoSaveEnabled}
+          className="data-[state=checked]:bg-green-600"
+         />
+        </div>
        </div>
       </CardContent>
      </Card>
@@ -1447,35 +1543,45 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    </Tabs>
 
    {/* Action Buttons */}
-   <div className="flex justify-between items-center mt-8 p-4 bg-gray-50 rounded-lg">
-    <div className="flex items-center gap-4 text-sm text-gray-600">
-     <span className="flex items-center gap-1">
+   <div className="flex justify-between items-center mt-8 p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border shadow-sm">
+    <div className="flex items-center gap-4 text-sm">
+     <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border">
       {isValid ? (
-       <CheckCircle className="w-4 h-4 text-green-600" />
+       <>
+        <CheckCircle className="w-4 h-4 text-green-600" />
+        <span className="text-green-700 font-medium">Ready to publish</span>
+       </>
       ) : (
-       <AlertCircle className="w-4 h-4 text-red-600" />
+       <>
+        <AlertCircle className="w-4 h-4 text-red-600" />
+        <span className="text-red-700 font-medium">Has validation errors</span>
+       </>
       )}
-      {isValid ? "Ready to publish" : "Has validation errors"}
-     </span>
+     </div>
      {autoSaveEnabled && (
-      <span className="flex items-center gap-1 text-blue-600">
-       <Info className="w-4 h-4" />
-       Auto-save enabled
-      </span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-50 border border-blue-200">
+       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+       <span className="text-blue-700 font-medium">Auto-save enabled</span>
+      </div>
      )}
     </div>
 
-    <div className="flex gap-4">
+    <div className="flex gap-3">
      <Button
       variant="outline"
       onClick={() => (window.location.href = `/${slug}`)}
+      className="px-6"
      >
       Cancel
      </Button>
      <Button
       onClick={handleSave}
       disabled={saving || !isValid}
-      className="min-w-[120px]"
+      className={`min-w-[140px] transition-all duration-200 ${
+       formData.published
+        ? "bg-green-600 hover:bg-green-700"
+        : "bg-blue-600 hover:bg-blue-700"
+      }`}
      >
       {saving ? (
        <>
@@ -1485,7 +1591,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       ) : (
        <>
         <Save className="w-4 h-4 mr-2" />
-        Save Changes
+        {formData.published ? "Update Post" : "Save Changes"}
        </>
       )}
      </Button>
