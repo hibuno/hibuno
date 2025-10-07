@@ -1,14 +1,14 @@
 import "./index.css";
 import { parseMedia } from "@remotion/media-parser";
 import { Composition, staticFile } from "remotion";
-import { Audiogram } from "./Audiogram/Main";
-import { audiogramSchema } from "./Audiogram/schema";
+import { Video } from "./Video/Main";
+import { videoSchema } from "./helpers/schema";
 import { getRandomBackgroundSound } from "./helpers/background-sound";
 import { getSubtitles } from "./helpers/fetch-captions";
 import { FPS } from "./helpers/ms-to-frame";
 
 export interface RemotionRootProps {
- mode?: "audiogram" | "shorts";
+ mode?: "video";
  audioFileUrl?: string;
  backgroundSoundUrl?: string;
  backgroundSoundVolume?: number;
@@ -26,7 +26,7 @@ export interface RemotionRootProps {
 
 export const RemotionRoot: React.FC<RemotionRootProps> = (props) => {
  const {
-  mode = "shorts",
+  mode = "video",
   audioFileUrl = staticFile("audio.wav"),
   backgroundSoundUrl = getRandomBackgroundSound(),
   backgroundSoundVolume = 0.15,
@@ -48,21 +48,21 @@ export const RemotionRoot: React.FC<RemotionRootProps> = (props) => {
 
  return (
   <Composition
-   id="ShortsVideo"
-   component={Audiogram}
+   id="Video"
+   component={Video}
    width={1080}
    height={1920}
-   schema={audiogramSchema}
+   schema={videoSchema}
    defaultProps={{
     // mode settings
-    mode: mode as "audiogram" | "shorts",
+    mode: mode as "video",
     // audio settings
     audioOffsetInSeconds,
     audioFileUrl,
     // background sound settings
     backgroundSoundUrl,
     backgroundSoundVolume,
-    // media settings for shorts mode
+    // media settings for video mode
     mediaUrls,
     // visual settings
     backgroundColor,

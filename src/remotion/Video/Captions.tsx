@@ -4,8 +4,8 @@ import type React from "react";
 import { useMemo, useRef } from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { msToFrame } from "../helpers/ms-to-frame";
-import { CAPTIONS_FONT_SIZE, LINES_PER_PAGE } from "./constants";
-import { FONT_FAMILY } from "./FontManager";
+import { CAPTIONS_FONT_SIZE, LINES_PER_PAGE } from "../helpers/constants";
+import { FONT_FAMILY } from "./Font";
 
 // Word component for individual caption words
 export const Word: React.FC<{

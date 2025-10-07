@@ -1,6 +1,6 @@
 # 🎬 Automated Video Generation CLI
 
-This CLI tool automatically generates professional shorts videos with sliding images, background music, and captions.
+This CLI tool automatically generates professional video with sliding images, background music, and captions.
 
 ## 🚀 Features
 
@@ -8,7 +8,7 @@ This CLI tool automatically generates professional shorts videos with sliding im
 - **Background Music**: Randomly selects background music at 15% volume
 - **Sliding Animations**: Professional slide-up/fade-in and slide-down/fade-out effects
 - **Professional Styling**: Glass morphism effects, elegant typography, and sophisticated design
-- **Vertical Format**: Optimized for shorts (1080x1920)
+- **Vertical Format**: Optimized for video (1080x1920)
 - **Customizable**: Full control over colors, fonts, timing, and animations
 
 ## 📋 Requirements
@@ -43,13 +43,13 @@ npm run example
 
 ```json
 {
-  "audioPath": "/path/to/your/audio.wav",
-  "mediaUrls": [
-    "/path/to/image1.jpg",
-    "/path/to/image2.jpg",
-    "/path/to/image3.jpg"
-  ],
-  "titleText": "Your Video Title"
+ "audioPath": "/path/to/your/audio.wav",
+ "mediaUrls": [
+  "/path/to/image1.jpg",
+  "/path/to/image2.jpg",
+  "/path/to/image3.jpg"
+ ],
+ "titleText": "Your Video Title"
 }
 ```
 
@@ -57,33 +57,36 @@ npm run example
 
 ```json
 {
-  "outputPath": "./generated-video-{timestamp}.mp4",
-  "speechStartsAtSecond": 0,
-  "titleColor": "#FFFFFF",
-  "titleFontSize": 52,
-  "backgroundColor": "#0a0a0a",
-  "captionsTextColor": "#F8F9FA",
-  "onlyDisplayCurrentSentence": true,
-  "transitionDurationInSeconds": 0.8,
-  "mediaFitMode": "cover",
-  "backgroundSoundVolume": 0.15,
-  "audioOffsetInSeconds": 0
+ "outputPath": "./generated-video-{timestamp}.mp4",
+ "speechStartsAtSecond": 0,
+ "titleColor": "#FFFFFF",
+ "titleFontSize": 52,
+ "backgroundColor": "#0a0a0a",
+ "captionsTextColor": "#F8F9FA",
+ "onlyDisplayCurrentSentence": true,
+ "transitionDurationInSeconds": 0.8,
+ "mediaFitMode": "cover",
+ "backgroundSoundVolume": 0.15,
+ "audioOffsetInSeconds": 0
 }
 ```
 
 ## 🎨 Customization Options
 
 ### Visual Settings
+
 - `backgroundColor`: Background color (hex code)
 - `titleColor`: Title text color
 - `titleFontSize`: Title font size (20-100)
 - `captionsTextColor`: Caption text color
 
 ### Animation Settings
+
 - `transitionDurationInSeconds`: How long transitions take (0.1-2.0)
 - `mediaFitMode`: How images fit ("cover", "contain", "fill")
 
 ### Audio Settings
+
 - `speechStartsAtSecond`: When speech begins (helps with transcription)
 - `audioOffsetInSeconds`: Audio start offset
 - `backgroundSoundVolume`: Background music volume (0.0-1.0)
@@ -108,7 +111,7 @@ public/
 └── sample-image-*.svg  # Sample images
 
 src/
-├── Audiogram/          # Video component
+├── Video/          # Video component
 ├── helpers/            # Utility functions
 └── Root.tsx           # Remotion composition
 
@@ -119,6 +122,7 @@ example-usage.ts        # Usage examples
 ## 🎵 Background Music
 
 The system automatically selects background music from the `public/backsounds/` directory:
+
 - Volume is set to 15% to ensure narration clarity
 - Random selection for variety
 - Add your own MP3 files to this directory
@@ -138,12 +142,12 @@ This makes it easy to integrate into other scripts or workflows.
 ### Programmatic Usage
 
 ```typescript
-import { generateVideo } from './generate-video';
+import { generateVideo } from "./generate-video";
 
 const config = {
-  audioPath: "/path/to/audio.wav",
-  mediaUrls: ["/path/to/image1.jpg"],
-  titleText: "My Video"
+ audioPath: "/path/to/audio.wav",
+ mediaUrls: ["/path/to/image1.jpg"],
+ titleText: "My Video",
 };
 
 const outputPath = await generateVideo(JSON.stringify(config));

@@ -8,19 +8,19 @@ import {
  Sequence,
  useCurrentFrame,
  useVideoConfig,
- Video,
+ Video as RemotionVideo,
 } from "remotion";
-import { Oscilloscope, Spectrum } from "./AudioVisualizers";
-import { PaginatedCaptions } from "./CaptionsManager";
+import { Oscilloscope, Spectrum } from "./Visualizers";
+import { PaginatedCaptions } from "./Captions";
 import {
  BASE_SIZE,
  CAPTIONS_FONT_SIZE,
  CAPTIONS_FONT_WEIGHT,
  LINE_HEIGHT,
  LINES_PER_PAGE,
-} from "./constants";
-import { FONT_FAMILY, WaitForFonts } from "./FontManager";
-import type { AudiogramCompositionSchemaType } from "./schema";
+} from "../helpers/constants";
+import { FONT_FAMILY, WaitForFonts } from "./Font";
+import type { VideoCompositionSchemaType } from "../helpers/schema";
 
 // Component for rendering media (image or video) with sliding animations
 interface MediaSlideProps {
@@ -134,7 +134,7 @@ const MediaSlide: React.FC<MediaSlideProps> = ({
    }}
   >
    {isVideo ? (
-    <Video
+    <RemotionVideo
      src={src}
      style={{
       width: "100%",
@@ -207,7 +207,7 @@ const ThumbnailFrame: React.FC<ThumbnailFrameProps> = ({
     }}
    >
     {isVideo ? (
-     <Video
+     <RemotionVideo
       src={mediaUrl}
       style={{
        width: "100%",
@@ -297,8 +297,8 @@ const ThumbnailFrame: React.FC<ThumbnailFrameProps> = ({
  );
 };
 
-export const Audiogram: React.FC<AudiogramCompositionSchemaType> = ({
- mode = "audiogram",
+export const Video: React.FC<VideoCompositionSchemaType> = ({
+ mode = "video",
  visualizer,
  audioFileUrl,
  coverImageUrl,
@@ -321,10 +321,10 @@ export const Audiogram: React.FC<AudiogramCompositionSchemaType> = ({
  const audioOffsetInFrames = Math.round(audioOffsetInSeconds * fps);
  const transitionFrames = Math.round(transitionDurationInSeconds * fps);
 
- // Render original audiogram mode
- if (mode === "audiogram") {
+ // Render original video mode
+ if (mode === "video") {
   if (!visualizer || !coverImageUrl) {
-   throw new Error("Audiogram mode requires visualizer and coverImageUrl");
+   throw new Error("Video mode requires visualizer and coverImageUrl");
   }
 
   if (!captions) {
@@ -435,10 +435,10 @@ export const Audiogram: React.FC<AudiogramCompositionSchemaType> = ({
   );
  }
 
- // Render shorts video mode
- if (mode === "shorts") {
+ // Render video mode
+ if (mode === "video") {
   if (!mediaUrls || mediaUrls.length === 0) {
-   throw new Error("Shorts mode requires at least one media URL");
+   throw new Error("Video mode requires at least one media URL");
   }
 
   // Calculate timing for each media item (starting from frame 1, frame 0 is thumbnail)
