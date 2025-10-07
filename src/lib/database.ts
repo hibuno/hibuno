@@ -10,7 +10,6 @@ export type PostListItem = Pick<
 	| "excerpt"
 	| "cover_image_url"
 	| "tags"
-	| "featured"
 	| "published"
 	| "published_at"
 	| "created_at"
@@ -44,7 +43,6 @@ export class PostQueries {
 		options: {
 			limit?: number;
 			offset?: number;
-			featured?: boolean;
 			tag?: string;
 		} = {},
 	): Promise<PostListItem[]> {
@@ -53,17 +51,13 @@ export class PostQueries {
 			.from("posts")
 			.select(`
 			 id, slug, title, excerpt, cover_image_url,
-			 tags, featured, published, published_at, created_at, updated_at,
+			 tags, published, published_at, created_at, updated_at,
 			 github_repo_url, homepage_url
 		`)
 			.order("published_at", { ascending: false });
 
 		if (!isDev) {
 			query = query.eq("published", true);
-		}
-
-		if (options.featured !== undefined) {
-			query = query.eq("featured", options.featured);
 		}
 
 		if (options.tag) {
@@ -111,14 +105,7 @@ export class PostQueries {
 	}
 
 	/**
-	 * Get featured posts for homepage
-	 */
-	async getFeaturedPosts(limit = 1) {
-		return this.getPublishedPosts({ featured: true, limit });
-	}
-
-	/**
-	 * Get recent posts excluding featured ones
+	 * Get recent posts
 	 */
 	async getRecentPosts(
 		limit = 10,
@@ -132,7 +119,6 @@ export class PostQueries {
 			 tags, published, published_at,
 			 github_repo_url, homepage_url
 		`)
-			.eq("featured", false)
 			.order("published_at", { ascending: false })
 			.limit(limit);
 

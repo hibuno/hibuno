@@ -1003,7 +1003,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  return (
   <MediaProvider>
-   <div className="container mx-auto px-4 py-4 max-w-7xl">
+   <div className="container mx-auto px-4 py-4 max-w-3xl">
     {/* Compact Header */}
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
      <div className="flex items-center gap-3">
@@ -1028,12 +1028,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          <Badge variant="secondary">
           <Clock className="w-3 h-3 mr-1" />
           Draft
-         </Badge>
-        )}
-        {formData.featured && (
-         <Badge className="bg-purple-100 text-purple-800">
-          <Sparkles className="w-3 h-3 mr-1" />
-          Featured
          </Badge>
         )}
        </div>
@@ -1255,32 +1249,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          <Switch
           checked={formData.published || false}
           onCheckedChange={(checked) => handleInputChange("published", checked)}
-         />
-        </div>
-
-        <div className="flex items-center justify-between py-2">
-         <div className="flex items-center gap-3">
-          <div
-           className={`p-1.5 rounded-full ${
-            formData.featured ? "bg-purple-100" : "bg-gray-100"
-           }`}
-          >
-           <Sparkles
-            className={`w-4 h-4 ${
-             formData.featured ? "text-purple-600" : "text-gray-600"
-            }`}
-           />
-          </div>
-          <div>
-           <div className="text-sm font-medium text-gray-900">Featured</div>
-           <div className="text-xs text-gray-500 mt-0.5">
-            Highlight on homepage
-           </div>
-          </div>
-         </div>
-         <Switch
-          checked={formData.featured || false}
-          onCheckedChange={(checked) => handleInputChange("featured", checked)}
          />
         </div>
 

@@ -19,7 +19,6 @@ export const posts = pgTable(
 		content: text("content").notNull(),
 		cover_image_url: text("cover_image_url"),
 		tags: text("tags").array(),
-		featured: boolean("featured").default(false).notNull(),
 		published: boolean("published").default(false).notNull(),
 		published_at: timestamp("published_at", { withTimezone: true }),
 		// GitHub repository information
@@ -37,7 +36,6 @@ export const posts = pgTable(
 		slugIdx: uniqueIndex("posts_slug_idx").on(table.slug),
 		publishedIdx: index("posts_published_idx").on(table.published),
 		published_atIdx: index("posts_published_at_idx").on(table.published_at),
-		featuredIdx: index("posts_featured_idx").on(table.featured),
 		tagsIdx: index("posts_tags_idx").on(table.tags),
 		// Compound index for published posts ordered by date
 		publishedDateIdx: index("posts_published_date_idx").on(

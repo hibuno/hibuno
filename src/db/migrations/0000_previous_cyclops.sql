@@ -17,7 +17,6 @@ CREATE TABLE "posts" (
 	"content" text NOT NULL,
 	"cover_image_url" text,
 	"tags" text[],
-	"featured" boolean DEFAULT false NOT NULL,
 	"published" boolean DEFAULT false NOT NULL,
 	"published_at" timestamp with time zone,
 	"github_repo_url" text,
@@ -31,6 +30,5 @@ CREATE INDEX "newsletter_active_idx" ON "newsletter" USING btree ("is_active");-
 CREATE UNIQUE INDEX "posts_slug_idx" ON "posts" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "posts_published_idx" ON "posts" USING btree ("published");--> statement-breakpoint
 CREATE INDEX "posts_published_at_idx" ON "posts" USING btree ("published_at");--> statement-breakpoint
-CREATE INDEX "posts_featured_idx" ON "posts" USING btree ("featured");--> statement-breakpoint
 CREATE INDEX "posts_tags_idx" ON "posts" USING btree ("tags");--> statement-breakpoint
 CREATE INDEX "posts_published_date_idx" ON "posts" USING btree ("published","published_at");

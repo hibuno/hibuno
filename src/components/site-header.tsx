@@ -41,7 +41,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
     className || ""
    }`}
   >
-   <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+   <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
     <Link
      href="/"
      className="text-2xl font-bold tracking-tight transition-colors hover:text-muted-foreground"

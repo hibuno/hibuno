@@ -8,35 +8,17 @@ import { retryDatabaseOperation } from "@/lib/retry";
 import { generateWebsiteStructuredData } from "@/lib/seo";
 
 async function getHomepageData(): Promise<{
- featuredPosts: Post[];
  recentPosts: Post[];
  error?: string;
  isLoading?: boolean;
 }> {
  try {
-  // Get featured posts with retry mechanism
-  const featuredPosts = await retryDatabaseOperation(() =>
-   postQueries.getFeaturedPosts(1)
-  );
-
-  // Get recent posts excluding featured ones with retry mechanism
+  // Get recent posts with retry mechanism
   const recentPosts = await retryDatabaseOperation(() =>
-   postQueries.getRecentPosts(
-    12,
-    featuredPosts.map((p) => p.id)
-   )
+   postQueries.getRecentPosts(12)
   );
 
   return {
-   featuredPosts: featuredPosts.map((post) => ({
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    excerpt: post.excerpt,
-    cover_image_url: post.cover_image_url,
-    published: "published" in post ? post.published ?? true : true,
-    published_at: (post.published_at || new Date().toISOString()) as string,
-   })),
    recentPosts: recentPosts.map((post) => ({
     id: post.id,
     slug: post.slug,
@@ -55,7 +37,6 @@ async function getHomepageData(): Promise<{
   const isMissingTable = message.includes("Could not find the table");
 
   return {
-   featuredPosts: [],
    recentPosts: [],
    error: isMissingTable
     ? "Database tables not found. Run `npm run db:migrate` to apply Drizzle migrations, then refresh."
@@ -68,7 +49,7 @@ function ErrorState({ error }: { error: string }) {
  return (
   <main>
    <SiteHeader />
-   <div className="mx-auto max-w-6xl px-4 py-16">
+   <div className="mx-auto max-w-3xl px-4 py-16">
     <div className="text-center">
      <h2 className="text-2xl font-semibold mb-2">Unable to load content</h2>
      <p className="text-muted-foreground">{error}</p>
@@ -79,7 +60,7 @@ function ErrorState({ error }: { error: string }) {
 }
 
 export default async function HomePage() {
- const { featuredPosts, recentPosts, error } = await getHomepageData();
+ const { recentPosts, error } = await getHomepageData();
 
  if (error) {
   return <ErrorState error={error} />;
@@ -92,10 +73,7 @@ export default async function HomePage() {
    <StructuredData data={websiteStructuredData} />
    <div>
     <SiteHeader />
-    <AnimatedHomepage
-     featuredPost={featuredPosts[0]}
-     recentPosts={recentPosts}
-    />
+    <AnimatedHomepage recentPosts={recentPosts} />
    </div>
   </ErrorBoundary>
  );
