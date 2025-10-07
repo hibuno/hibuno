@@ -36,7 +36,7 @@ export function PostCard({ post }: { post: Post }) {
        className="w-full h-full"
       >
        <Image
-        src={post.cover_image_url || "/placeholder.svg"}
+        src={post.cover_image_url || "/placeholder.png"}
         alt={post.title}
         className="w-full h-full object-cover"
         width={500}
@@ -96,7 +96,7 @@ export function PostCard({ post }: { post: Post }) {
        transition={{ delay: 0.5 }}
       >
        <Image
-        src="/placeholder.svg"
+        src="/placeholder.png"
         alt="hibuno"
         width={32}
         height={32}

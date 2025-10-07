@@ -38,7 +38,7 @@ const aspectRatioClasses = {
 export function OptimizedImage({
  src,
  alt,
- fallback = "/placeholder.svg",
+ fallback = "/placeholder.png",
  className,
  aspectRatio = "auto",
  priority = false,

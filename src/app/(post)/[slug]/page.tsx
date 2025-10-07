@@ -119,7 +119,7 @@ function PostHeader({ post }: { post: SelectPost }) {
    <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
     <div className="flex items-center gap-2">
      <AuthorAvatar
-      src="/placeholder.svg"
+      src="/placeholder.png"
       alt="hibuno"
       className="h-6 w-6 rounded-full"
      />

@@ -170,7 +170,7 @@ export function generatePostStructuredData(post: SelectPost) {
 		author: {
 			"@type": "Person",
 			name: "Hibuno",
-			image: "https://hibuno.com/placeholder.svg",
+			image: "https://hibuno.com/placeholder.png",
 			bio: "Hibuno is a developer who loves to share his knowledge with the world.",
 		},
 		publisher: {
