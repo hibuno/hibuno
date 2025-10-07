@@ -20,24 +20,14 @@ import {
  Wand2,
 } from "lucide-react";
 import { use, useEffect, useState } from "react";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
-import {
- Card,
- CardContent,
- CardHeader,
- CardTitle,
-} from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import {
- Tabs,
- TabsContent,
- TabsList,
- TabsTrigger,
-} from "../../components/ui/tabs";
-import { Textarea } from "../../components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 // Asset extraction from article content
 function extractAssetsFromContent(content: string) {
@@ -386,38 +376,6 @@ export default function VideoGeneratorPage({
        {formData.assets.length} assets
       </span>
      </div>
-    </div>
-   </div>
-
-   {/* Progress Steps */}
-   <div className="mb-8">
-    <div className="flex items-center justify-between">
-     {[1, 2, 3, 4].map((step) => (
-      <div key={step} className="flex items-center">
-       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-         step <= currentStep
-          ? "bg-blue-600 text-white"
-          : "bg-gray-200 text-gray-600"
-        }`}
-       >
-        {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
-       </div>
-       {step < 4 && (
-        <div
-         className={`w-16 h-1 mx-2 ${
-          step < currentStep ? "bg-blue-600" : "bg-gray-200"
-         }`}
-        />
-       )}
-      </div>
-     ))}
-    </div>
-    <div className="flex justify-between mt-2 text-xs text-gray-500">
-     <span>Setup</span>
-     <span>Narration</span>
-     <span>Audio</span>
-     <span>Video</span>
     </div>
    </div>
 
@@ -871,35 +829,6 @@ export default function VideoGeneratorPage({
      </Card>
     </TabsContent>
    </Tabs>
-
-   {/* Action Buttons */}
-   <div className="flex justify-between items-center mt-8 p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border shadow-sm">
-    <div className="flex items-center gap-4 text-sm">
-     <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border">
-      <Info className="w-4 h-4 text-blue-600" />
-      <span className="text-blue-700 font-medium">Step {currentStep} of 4</span>
-     </div>
-    </div>
-
-    <div className="flex gap-3">
-     <Button
-      variant="outline"
-      onClick={() => (window.location.href = `/${slug}`)}
-      className="px-6"
-     >
-      Cancel
-     </Button>
-     {currentStep === 4 && formData.videoUrl && (
-      <Button
-       onClick={() => window.open(formData.videoUrl, "_blank")}
-       className="px-6"
-      >
-       <ExternalLink className="w-4 h-4 mr-2" />
-       View Video
-      </Button>
-     )}
-    </div>
-   </div>
   </div>
  );
 }

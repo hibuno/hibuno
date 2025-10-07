@@ -3,7 +3,7 @@ import {
 	generateVideoWithRemotion,
 	validateVideoGenerationData,
 	type VideoGenerationData,
-} from "../../../../../lib/video-integration";
+} from "@/lib/video-integration";
 
 export async function POST(request: NextRequest) {
 	try {
