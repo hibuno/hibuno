@@ -3,21 +3,13 @@
 import {
  AlertCircle,
  ArrowLeft,
- Bold,
  CheckCircle,
  Clock,
- Code,
  Code as CodeIcon,
  Copy,
  ExternalLink,
- FileText,
- Heading1,
- Heading2,
- Heading3,
- Image,
  ImagePlus,
  Info,
- Italic,
  Link,
  List,
  ListOrdered,
@@ -25,24 +17,25 @@ import {
  Quote,
  Redo,
  Save,
- Settings,
  Sparkles,
- Tag,
  Undo,
  Upload,
  X,
+ Bold,
+ Italic,
+ Heading1,
+ Heading2,
+ Heading3,
 } from "lucide-react";
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { MediaProvider } from "@/components/media-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { calculateStats } from "@/lib/utils";
 
@@ -292,11 +285,19 @@ function MonacoEditor({
  const [uploading, setUploading] = useState(false);
  const editorRef = useRef<HTMLDivElement>(null);
  const monacoRef = useRef<any>(null);
+ const initializedRef = useRef(false);
 
- // Initialize Monaco Editor
+ // Memoize the onChange callback to prevent unnecessary re-renders
+ const memoizedOnChange = useCallback(
+  (newContent: string) => {
+   onChange(newContent);
+  },
+  [onChange]
+ );
+
+ // Initialize Monaco Editor - only once
  useEffect(() => {
-  let isMounted = false;
-  if (editorRef.current && !monacoRef.current) {
+  if (editorRef.current && !monacoRef.current && !initializedRef.current) {
    const initializeEditor = async () => {
     try {
      // Load Monaco Editor if not already loaded
@@ -343,12 +344,12 @@ function MonacoEditor({
       });
 
       monacoRef.current = editor;
-      isMounted = true;
+      initializedRef.current = true;
 
       // Listen for content changes
       editor.onDidChangeModelContent(() => {
        const newContent = editor.getValue();
-       onChange(newContent);
+       memoizedOnChange(newContent);
       });
      }
     } catch (error) {
@@ -357,29 +358,38 @@ function MonacoEditor({
    };
 
    initializeEditor();
-
-   if (!isMounted) {
-    return;
-   }
   }
 
   return () => {
    if (monacoRef.current) {
     monacoRef.current.dispose();
     monacoRef.current = null;
+    initializedRef.current = false;
    }
   };
- }, [content, onChange]);
+ }, []); // Remove dependencies to prevent re-initialization
 
- // Update editor content when prop changes
+ // Update editor content when prop changes (only if significantly different)
  useEffect(() => {
-  if (monacoRef.current && (window as any).monaco && content !== undefined) {
+  if (
+   monacoRef.current &&
+   (window as any).monaco &&
+   content !== undefined &&
+   initializedRef.current
+  ) {
    const currentValue = monacoRef.current.getValue();
-   if (currentValue !== content) {
-    // Use pushUndoStop to prevent undo history pollution
+   // Only update if content is significantly different (not just cursor position changes)
+   if (currentValue.trim() !== content.trim() && content.length > 0) {
+    const selection = monacoRef.current.getSelection();
     monacoRef.current.pushUndoStop();
     monacoRef.current.setValue(content);
     monacoRef.current.pushUndoStop();
+    // Try to restore cursor position if possible
+    try {
+     monacoRef.current.setSelection(selection);
+    } catch (e) {
+     // Ignore cursor position errors
+    }
    }
   }
  }, [content]);
@@ -483,7 +493,7 @@ function MonacoEditor({
  return (
   <div className="space-y-4">
    {/* Enhanced Toolbar */}
-   <div className="flex items-center gap-2 p-4 border rounded-lg bg-gradient-to-r from-gray-50 to-white flex-wrap">
+   <div className="flex items-center gap-2 p-3 border rounded-lg bg-gradient-to-r from-gray-50 to-white flex-wrap">
     {/* History Controls */}
     <div className="flex gap-1">
      <Button
@@ -548,7 +558,7 @@ function MonacoEditor({
       title="Inline Code"
       className="hover:bg-white"
      >
-      <Code className="w-4 h-4" />
+      <CodeIcon className="w-4 h-4" />
      </Button>
     </div>
 
@@ -659,22 +669,13 @@ function MonacoEditor({
       <CodeIcon className="w-4 h-4" />
      </Button>
     </div>
-
-    <div className="flex-1" />
-
-    <div className="flex items-center gap-2 text-xs text-gray-500">
-     <div className="flex items-center gap-1">
-      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-      <span>Monaco Editor - VS Code Experience</span>
-     </div>
-    </div>
    </div>
 
    {/* Editor Area */}
    <div className="relative">
     <div
      ref={editorRef}
-     className="h-[600px] border rounded-lg overflow-hidden"
+     className="h-[500px] border rounded-lg overflow-hidden"
      onDragOver={handleDragOver}
      onDragLeave={handleDragLeave}
      onDrop={handleDrop}
@@ -700,7 +701,6 @@ function MonacoEditor({
    </div>
 
    <div className="flex items-center justify-between text-xs text-gray-500">
-    <span>🚀 Powered by Monaco Editor - Same editor used in VS Code</span>
     <span>
      Lines: {content.split("\n").length} | Characters: {content.length}
     </span>
@@ -743,7 +743,7 @@ function useFormValidation(formData: any) {
    newWarnings.excerpt = "Consider adding an excerpt for better SEO";
   }
 
-  if (!formData.coverImageUrl) {
+  if (!formData.cover_image_url) {
    newWarnings.coverImage = "Cover image recommended for social sharing";
   }
 
@@ -774,50 +774,83 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  const debouncedContent = useDebounce(formData.content || "", 1000);
  const { errors, warnings, isValid } = useFormValidation(formData);
 
- // Auto-calculate stats and metadata
+ // Auto-calculate stats and metadata - optimized to prevent unnecessary updates
  useEffect(() => {
-  if (debouncedContent) {
+  if (debouncedContent && debouncedContent !== formData.content) {
    const stats = calculateStats(debouncedContent);
-   const autoExcerpt = !formData.excerpt
-    ? generateExcerpt(debouncedContent || "")
-    : formData.excerpt;
-   const autoTags =
-    formData.tags?.length === 0
-     ? generateTags(debouncedContent || "", formData.title || "")
-     : formData.tags;
+   const currentTitle = formData.title || "";
 
-   setFormData((prev: any) => ({
-    ...prev,
-    ...stats,
-    ...(autoExcerpt !== prev.excerpt && !prev.manualExcerpt
-     ? { excerpt: autoExcerpt }
-     : {}),
-    ...(autoTags.length > 0 && (!prev.tags || prev.tags.length === 0)
-     ? { tags: autoTags }
-     : {}),
-   }));
+   setFormData((prev: any) => {
+    const newData: any = { ...prev };
+
+    // Only update stats if they've actually changed
+    if (JSON.stringify(prev) !== JSON.stringify({ ...prev, ...stats })) {
+     Object.assign(newData, stats);
+    }
+
+    // Auto-generate excerpt only if not manually set
+    if (!prev.manualExcerpt && prev.excerpt !== debouncedContent) {
+     const autoExcerpt = generateExcerpt(debouncedContent);
+     if (autoExcerpt && autoExcerpt !== prev.excerpt) {
+      newData.excerpt = autoExcerpt;
+     }
+    }
+
+    // Auto-generate tags only if no tags exist
+    if (
+     (!prev.tags || prev.tags.length === 0) &&
+     (debouncedContent || currentTitle)
+    ) {
+     const autoTags = generateTags(debouncedContent, currentTitle);
+     if (autoTags.length > 0) {
+      newData.tags = autoTags;
+     }
+    }
+
+    // Only update if something actually changed
+    return Object.keys(newData).some((key) => newData[key] !== prev[key])
+     ? newData
+     : prev;
+   });
   }
- }, [debouncedContent, formData.title, formData.excerpt, formData.tags]);
+ }, [
+  debouncedContent,
+  formData.content,
+  formData.title,
+  formData.excerpt,
+  formData.tags,
+  formData.manualExcerpt,
+ ]);
 
- // Auto-save functionality
+ // Auto-save functionality - optimized to prevent unnecessary saves
  useEffect(() => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  if (autoSaveEnabled && post && isValid && debouncedContent) {
+  if (
+   autoSaveEnabled &&
+   post &&
+   isValid &&
+   debouncedContent &&
+   formData.content
+  ) {
    const autoSave = async () => {
     try {
-     const updateData = {
-      ...formData,
-      updated_at: new Date().toISOString(),
-     };
+     // Only save if content has actually changed from the original
+     if (formData.content !== post.content) {
+      const updateData = {
+       ...formData,
+      };
 
-     await fetch(`/api/admin/posts/${slug}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updateData),
-     });
+      const response = await fetch(`/api/admin/posts/${slug}`, {
+       method: "PUT",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(updateData),
+      });
 
-     setLastSaved(new Date());
+      if (response.ok) {
+       setLastSaved(new Date());
+      }
+     }
     } catch (error) {
      console.error("Auto-save failed:", error);
     }
@@ -827,23 +860,30 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   }
 
   return () => {
-   if (timeoutId) {
-    clearTimeout(timeoutId);
-   }
+   if (timeoutId) clearTimeout(timeoutId);
   };
- }, [autoSaveEnabled, post, isValid, debouncedContent, formData, slug]);
+ }, [autoSaveEnabled, post, isValid, debouncedContent, formData.content, slug]);
 
  useEffect(() => {
   const fetchPost = async () => {
    try {
-    const response = await fetch(`/api/admin/posts/${slug}`);
+    // Add cache-busting timestamp to ensure fresh data
+    const timestamp = new Date().getTime();
+    const response = await fetch(`/api/admin/posts/${slug}?t=${timestamp}`, {
+     headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+     },
+    });
+
     if (!response.ok) throw new Error("Post not found");
     const postData = await response.json();
+
     setPost(postData);
     setFormData(postData);
-    setCoverImagePreview(postData.coverImageUrl || null);
+    setCoverImagePreview(postData.cover_image_url || null);
    } catch (error) {
-    console.error("Error:", error);
+    console.error("Error loading post:", error);
    } finally {
     setLoading(false);
    }
@@ -852,27 +892,27 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   fetchPost();
  }, [slug]);
 
- const handleInputChange = (field: string, value: any) => {
-  setFormData((prev: any) => ({
-   ...prev,
-   [field]: value,
-   ...(field === "excerpt" ? { manualExcerpt: true } : {}),
-   ...(field === "published" && value === true
-    ? { published_at: new Date().toISOString() }
-    : field === "published" && value === false
-    ? { published_at: null }
-    : {}),
-  }));
- };
+ const handleInputChange = useCallback((field: string, value: any) => {
+  setFormData((prev: any) => {
+   // Only update if value actually changed
+   if (prev[field] === value) return prev;
+
+   return {
+    ...prev,
+    [field]: value,
+    ...(field === "excerpt" ? { manualExcerpt: true } : {}),
+   };
+  });
+ }, []);
 
  const uploadImageToSupabase = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("postId", post.id);
+  const formDataUpload = new FormData();
+  formDataUpload.append("file", file);
+  formDataUpload.append("postId", post.id);
 
   const response = await fetch("/api/admin/upload", {
    method: "POST",
-   body: formData,
+   body: formDataUpload,
   });
 
   if (!response.ok) throw new Error("Upload failed");
@@ -892,7 +932,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  const removeCoverImage = () => {
   setCoverImageFile(null);
   setCoverImagePreview(null);
-  handleInputChange("coverImageUrl", "");
+  handleInputChange("cover_image_url", "");
  };
 
  const handleSave = async () => {
@@ -900,29 +940,41 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
   setSaving(true);
   try {
-   let coverImageUrl = formData.coverImageUrl;
+   let cover_image_url = formData.cover_image_url;
    if (coverImageFile) {
-    coverImageUrl = await uploadImageToSupabase(coverImageFile);
+    cover_image_url = await uploadImageToSupabase(coverImageFile);
    }
 
    const updateData = {
     ...formData,
-    coverImageUrl,
-    updated_at: new Date().toISOString(),
+    cover_image_url,
    };
 
-   const response = await fetch(`/api/admin/posts/${slug}`, {
+   // Use cache-busting for the save request
+   const timestamp = new Date().getTime();
+   const response = await fetch(`/api/admin/posts/${slug}?t=${timestamp}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+     "Content-Type": "application/json",
+     "Cache-Control": "no-cache",
+    },
     body: JSON.stringify(updateData),
    });
 
-   if (!response.ok) throw new Error("Save failed");
+   if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Save failed: ${response.status} ${errorText}`);
+   }
 
    setLastSaved(new Date());
+
+   // Force refresh the current page to show updated data
    window.location.href = `/${slug}`;
   } catch (error) {
-   console.error("Error:", error);
+   console.error("Save error:", error);
+   alert(
+    `Save failed: ${error instanceof Error ? error.message : "Unknown error"}`
+   );
   } finally {
    setSaving(false);
   }
@@ -953,25 +1005,24 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  return (
   <MediaProvider>
-   <div className="container mx-auto px-4 py-8 max-w-6xl">
-    {/* Header */}
-    <div className="flex items-center gap-4 mb-8 p-6 bg-gradient-to-r from-white to-gray-50 rounded-lg border">
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() => (window.location.href = `/${slug}`)}
-      className="shrink-0"
-     >
-      <ArrowLeft className="w-4 h-4 mr-2" />
-      Back to Post
-     </Button>
+   <div className="container mx-auto px-4 py-4 max-w-7xl">
+    {/* Compact Header */}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
+     <div className="flex items-center gap-3">
+      <Button
+       variant="outline"
+       size="sm"
+       onClick={() => (window.location.href = `/${slug}`)}
+      >
+       <ArrowLeft className="w-4 h-4 mr-2" />
+       Back
+      </Button>
 
-     <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-3 mb-2">
-       <h1 className="text-3xl font-bold text-gray-900">Edit Post</h1>
-       <div className="flex items-center gap-2">
+      <div>
+       <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
+       <div className="flex items-center gap-2 mt-1">
         {formData.published ? (
-         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+         <Badge className="bg-green-100 text-green-800">
           <CheckCircle className="w-3 h-3 mr-1" />
           Published
          </Badge>
@@ -982,40 +1033,12 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          </Badge>
         )}
         {formData.featured && (
-         <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+         <Badge className="bg-purple-100 text-purple-800">
           <Sparkles className="w-3 h-3 mr-1" />
           Featured
          </Badge>
         )}
        </div>
-      </div>
-      <div className="flex items-center gap-6 text-sm text-gray-600">
-       <span className="flex items-center gap-1">
-        <FileText className="w-4 h-4" />
-        {formData.wordCount || 0} words
-       </span>
-       <span className="flex items-center gap-1">
-        <Clock className="w-4 h-4" />
-        {formData.readingTime || 0} min read
-       </span>
-       {formData.headers > 0 && (
-        <span className="flex items-center gap-1">
-         <Heading1 className="w-4 h-4" />
-         {formData.headers} sections
-        </span>
-       )}
-       {formData.images > 0 && (
-        <span className="flex items-center gap-1">
-         <Image className="w-4 h-4" />
-         {formData.images} images
-        </span>
-       )}
-       {lastSaved && (
-        <span className="flex items-center gap-1 text-green-600">
-         <CheckCircle className="w-4 h-4" />
-         Saved {lastSaved.toLocaleTimeString()}
-        </span>
-       )}
       </div>
      </div>
 
@@ -1023,8 +1046,33 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       <Button
        variant="outline"
        size="sm"
+       onClick={async () => {
+        try {
+         const timestamp = new Date().getTime();
+         const response = await fetch(
+          `/api/admin/posts/${slug}?t=${timestamp}`,
+          {
+           headers: { "Cache-Control": "no-cache" },
+          }
+         );
+         if (response.ok) {
+          const freshData = await response.json();
+          setPost(freshData);
+          setFormData(freshData);
+          setCoverImagePreview(freshData.cover_image_url || null);
+          alert("Data refreshed from database");
+         }
+        } catch (error) {
+         console.error("Refresh failed:", error);
+        }
+       }}
+      >
+       🔄 Refresh
+      </Button>
+      <Button
+       variant="outline"
+       size="sm"
        onClick={() => copyToClipboard(`${window.location.origin}/${slug}`)}
-       className="shrink-0"
       >
        <Copy className="w-4 h-4 mr-2" />
        Copy URL
@@ -1032,8 +1080,9 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       <Button
        variant="outline"
        size="sm"
-       onClick={() => window.open(`/${slug}`, "_blank")}
-       className="shrink-0"
+       onClick={() =>
+        window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
+       }
       >
        <ExternalLink className="w-4 h-4 mr-2" />
        Preview
@@ -1043,16 +1092,16 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
     {/* Validation Alerts */}
     {Object.keys(errors).length > 0 && (
-     <Alert className="mb-6 border-red-200 bg-red-50">
+     <Alert className="mb-4 border-red-200 bg-red-50">
       <AlertCircle className="h-4 w-4 text-red-600" />
       <AlertDescription className="text-red-800">
-       Please fix the following errors: {Object.values(errors).join(", ")}
+       Please fix: {Object.values(errors).join(", ")}
       </AlertDescription>
      </Alert>
     )}
 
     {Object.keys(warnings).length > 0 && (
-     <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+     <Alert className="mb-4 border-yellow-200 bg-yellow-50">
       <Info className="h-4 w-4 text-yellow-600" />
       <AlertDescription className="text-yellow-800">
        Suggestions: {Object.values(warnings).join(", ")}
@@ -1060,147 +1109,92 @@ export default function EditPostPage({ params }: EditPostPageProps) {
      </Alert>
     )}
 
-    <Tabs defaultValue="content" className="space-y-6">
-     <TabsList className="grid w-full grid-cols-5">
-      <TabsTrigger value="content" className="flex items-center gap-2">
-       <FileText className="w-4 h-4" />
-       Content
-      </TabsTrigger>
-      <TabsTrigger value="metadata" className="flex items-center gap-2">
-       <Tag className="w-4 h-4" />
-       Metadata
-      </TabsTrigger>
-      <TabsTrigger value="media" className="flex items-center gap-2">
-       <Image className="w-4 h-4" />
-       Media
-      </TabsTrigger>
-      <TabsTrigger value="github" className="flex items-center gap-2">
-       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-       </svg>
-       GitHub
-      </TabsTrigger>
-      <TabsTrigger value="settings" className="flex items-center gap-2">
-       <Settings className="w-4 h-4" />
-       Settings
-      </TabsTrigger>
-     </TabsList>
+    {/* Main Content Grid */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+     {/* Left Column - Main Content */}
+     <div className="xl:col-span-2 space-y-3">
+      {/* Basic Information - Compact */}
+      <div className="p-2.5 bg-white border rounded-lg">
+       <h3 className="text-sm font-semibold mb-2 text-gray-800">
+        Basic Information
+       </h3>
+       <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+         <div>
+          <Label htmlFor="slug" className="text-sm font-medium">
+           URL Slug *
+          </Label>
+          <Input
+           id="slug"
+           value={formData.slug || ""}
+           onChange={(e) => handleInputChange("slug", e.target.value)}
+           placeholder="post-url-slug"
+           className="h-8 text-sm"
+          />
+         </div>
 
-     <TabsContent value="content" className="space-y-6">
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <Sparkles className="w-5 h-5" />
-         Basic Information
-        </CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-4">
-        <div>
-         <Label htmlFor="title" className="flex items-center gap-2">
-          Title *
-          {errors.title && (
-           <Badge variant="destructive" className="text-xs">
-            Error
-           </Badge>
-          )}
-          {warnings.title && (
-           <Badge variant="secondary" className="text-xs">
-            Warning
-           </Badge>
-          )}
-         </Label>
-         <Input
-          id="title"
-          value={formData.title || ""}
-          onChange={(e) => handleInputChange("title", e.target.value)}
-          placeholder="Enter an engaging title..."
-          className={`mt-1 ${
-           errors.title
-            ? "border-red-500"
-            : warnings.title
-            ? "border-yellow-500"
-            : ""
-          }`}
-         />
-         {(errors.title || warnings.title) && (
-          <p
-           className={`text-xs mt-1 ${
-            errors.title ? "text-red-600" : "text-yellow-600"
+         <div>
+          <Label htmlFor="title" className="text-sm font-medium">
+           Title *
+          </Label>
+          <Input
+           id="title"
+           value={formData.title || ""}
+           onChange={(e) => handleInputChange("title", e.target.value)}
+           placeholder="Enter an engaging title..."
+           className={`h-8 text-sm mt-0.5 ${
+            errors.title ? "border-red-500" : ""
            }`}
-          >
-           {errors.title || warnings.title}
-          </p>
-         )}
+          />
+         </div>
         </div>
 
         <div>
-         <Label htmlFor="excerpt" className="flex items-center gap-2">
+         <Label htmlFor="excerpt" className="text-sm font-medium">
           Excerpt
-          {warnings.excerpt && (
-           <Badge variant="secondary" className="text-xs">
-            SEO
-           </Badge>
-          )}
-          <Button
-           type="button"
-           variant="ghost"
-           size="sm"
-           onClick={() => {
-            const autoExcerpt = generateExcerpt(formData.content || "");
-            handleInputChange("excerpt", autoExcerpt);
-           }}
-           className="ml-auto text-xs"
-          >
-           <Sparkles className="w-3 h-3 mr-1" />
-           Auto-generate
-          </Button>
          </Label>
          <Textarea
           id="excerpt"
           value={formData.excerpt || ""}
           onChange={(e) => handleInputChange("excerpt", e.target.value)}
           placeholder="Brief description for SEO and social sharing..."
-          rows={3}
-          className={`mt-1 ${warnings.excerpt ? "border-yellow-500" : ""}`}
+          rows={2}
+          className="h-16 text-sm resize-none"
          />
-         <div className="flex justify-between text-xs text-gray-500 mt-1">
+         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
           <span>{warnings.excerpt || "Recommended: 120-160 characters"}</span>
           <span>{(formData.excerpt || "").length}/160</span>
          </div>
         </div>
-       </CardContent>
-      </Card>
 
-      <Card>
-       <CardHeader>
-        <CardTitle>Content Editor</CardTitle>
-       </CardHeader>
-       <CardContent>
-        <MonacoEditor
-         content={formData.content || ""}
-         onChange={(content: string) => handleInputChange("content", content)}
-         onImageUpload={uploadImageToSupabase}
-        />
-       </CardContent>
-      </Card>
-     </TabsContent>
-
-     <TabsContent value="metadata" className="space-y-6">
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <Tag className="w-5 h-5" />
-         Tags
-        </CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-4">
         <div>
-         <Label className="flex items-center gap-2">
+         <Label className="text-sm font-medium mb-1 block">
           Tags (comma-separated)
+         </Label>
+         <div className="flex gap-1.5">
+          <Input
+           value={
+            Array.isArray(formData.tags)
+             ? formData.tags.join(", ")
+             : formData.tags || ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "tags",
+             e.target.value
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+            )
+           }
+           placeholder="javascript, react, web-development, tutorial"
+           className="flex-1 h-8 text-sm"
+          />
           <Button
            type="button"
-           variant="ghost"
+           variant="outline"
            size="sm"
+           className="h-8 px-2"
            onClick={() => {
             const autoTags = generateTags(
              formData.content || "",
@@ -1208,359 +1202,253 @@ export default function EditPostPage({ params }: EditPostPageProps) {
             );
             handleInputChange("tags", autoTags);
            }}
-           className="ml-auto text-xs"
           >
            <Sparkles className="w-3 h-3 mr-1" />
-           Suggest Tags
+           Auto
           </Button>
+         </div>
+        </div>
+       </div>
+      </div>
+
+      {/* Content Editor */}
+      <div className="bg-white border rounded-lg overflow-hidden">
+       <div className="p-2.5 border-b">
+        <h3 className="text-sm font-semibold text-gray-800">Content Editor</h3>
+       </div>
+       <div className="p-0">
+        <MonacoEditor
+         content={formData.content || ""}
+         onChange={(content: string) => handleInputChange("content", content)}
+         onImageUpload={uploadImageToSupabase}
+        />
+       </div>
+      </div>
+     </div>
+
+     {/* Right Column - Sidebar */}
+     <div className="space-y-2">
+      {/* Publishing Settings - Compact */}
+      <div className="p-2.5 bg-white border rounded-lg">
+       <h3 className="text-sm font-semibold mb-2 text-gray-800">Publishing</h3>
+       <div className="space-y-2">
+        <div className="flex items-center justify-between">
+         <div className="flex items-center gap-2">
+          <div
+           className={`p-1 rounded-full ${
+            formData.published ? "bg-green-100" : "bg-gray-100"
+           }`}
+          >
+           {formData.published ? (
+            <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+           ) : (
+            <Clock className="w-3.5 h-3.5 text-gray-600" />
+           )}
+          </div>
+          <div>
+           <Label className="text-sm font-medium">Published</Label>
+           {formData.published && formData.published_at && (
+            <p className="text-xs text-gray-500">
+             {new Date(formData.published_at).toLocaleDateString()}
+            </p>
+           )}
+          </div>
+         </div>
+         <Switch
+          checked={formData.published || false}
+          onCheckedChange={(checked) => handleInputChange("published", checked)}
+         />
+        </div>
+
+        <div className="flex items-center justify-between">
+         <div className="flex items-center gap-2">
+          <div
+           className={`p-1 rounded-full ${
+            formData.featured ? "bg-purple-100" : "bg-gray-100"
+           }`}
+          >
+           <Sparkles
+            className={`w-3.5 h-3.5 ${
+             formData.featured ? "text-purple-600" : "text-gray-600"
+            }`}
+           />
+          </div>
+          <div>
+           <Label className="text-sm font-medium">Featured</Label>
+           <p className="text-xs text-gray-500">Highlight on homepage</p>
+          </div>
+         </div>
+         <Switch
+          checked={formData.featured || false}
+          onCheckedChange={(checked) => handleInputChange("featured", checked)}
+         />
+        </div>
+
+        <div className="flex items-center justify-between">
+         <div className="flex items-center gap-2">
+          <div
+           className={`p-1 rounded-full ${
+            autoSaveEnabled ? "bg-green-100" : "bg-gray-100"
+           }`}
+          >
+           <Save
+            className={`w-3.5 h-3.5 ${
+             autoSaveEnabled ? "text-green-600" : "text-gray-600"
+            }`}
+           />
+          </div>
+          <div>
+           <Label className="text-sm font-medium">Auto-save</Label>
+           <p className="text-xs text-gray-500">Saves every 2s</p>
+          </div>
+         </div>
+         <Switch
+          checked={autoSaveEnabled}
+          onCheckedChange={setAutoSaveEnabled}
+         />
+        </div>
+
+        {/* Date/Time Fields */}
+        <div className="pt-3 border-t space-y-3">
+         <div>
+          <Label htmlFor="published_at" className="text-sm font-medium">
+           Published Date
+          </Label>
+          <Input
+           id="published_at"
+           type="datetime-local"
+           value={
+            formData.published_at
+             ? new Date(formData.published_at).toISOString().slice(0, 16)
+             : ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "published_at",
+             e.target.value ? new Date(e.target.value).toISOString() : null
+            )
+           }
+           className="h-8 text-sm"
+          />
+          <p className="text-xs text-gray-500 mt-0.5">
+           When this post was/will be published
+          </p>
+         </div>
+
+         <div>
+          <Label htmlFor="created_at" className="text-sm font-medium">
+           Created Date
+          </Label>
+          <Input
+           id="created_at"
+           type="datetime-local"
+           value={
+            formData.created_at
+             ? new Date(formData.created_at).toISOString().slice(0, 16)
+             : ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "created_at",
+             e.target.value
+              ? new Date(e.target.value).toISOString()
+              : new Date().toISOString()
+            )
+           }
+           className="h-8 text-sm"
+          />
+          <p className="text-xs text-gray-500 mt-0.5">Original creation date</p>
+         </div>
+        </div>
+       </div>
+      </div>
+
+      {/* Cover Image */}
+      <div className="p-2.5 bg-white border rounded-lg">
+       <ImageDropZone
+        currentImage={coverImagePreview}
+        onImageSelect={handleCoverImageSelect}
+        onRemove={removeCoverImage}
+        showMetadata={false}
+       />
+      </div>
+
+      {/* GitHub Information - Compact */}
+      <div className="p-2.5 bg-white border rounded-lg">
+       <h3 className="text-sm font-semibold mb-2 text-gray-800">GitHub</h3>
+       <div className="space-y-2">
+        <div>
+         <Label htmlFor="github_repo_url" className="text-sm font-medium">
+          Repository URL
          </Label>
          <Input
-          value={
-           Array.isArray(formData.tags)
-            ? formData.tags.join(", ")
-            : formData.tags || ""
-          }
-          onChange={(e) =>
-           handleInputChange(
-            "tags",
-            e.target.value
-             .split(",")
-             .map((tag) => tag.trim())
-             .filter(Boolean)
-           )
-          }
-          placeholder="javascript, react, web-development, tutorial"
-          className="mt-1"
+          id="github_repo_url"
+          value={formData.github_repo_url || ""}
+          onChange={(e) => handleInputChange("github_repo_url", e.target.value)}
+          placeholder="https://github.com/username/repo"
+          className="h-8 text-sm"
          />
-         <div className="flex flex-wrap gap-1 mt-2">
-          {(Array.isArray(formData.tags) ? formData.tags : []).map(
-           (tag: string, index: number) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-             {tag}
-            </Badge>
-           )
-          )}
-         </div>
-        </div>
-       </CardContent>
-      </Card>
-     </TabsContent>
-
-     <TabsContent value="media" className="space-y-6">
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <Image className="w-5 h-5" />
-         Cover Image
-         {warnings.coverImage && (
-          <Badge variant="secondary" className="text-xs">
-           Recommended
-          </Badge>
-         )}
-        </CardTitle>
-       </CardHeader>
-       <CardContent>
-        <ImageDropZone
-         currentImage={coverImagePreview}
-         onImageSelect={handleCoverImageSelect}
-         onRemove={removeCoverImage}
-         showMetadata={true}
-        />
-       </CardContent>
-      </Card>
-     </TabsContent>
-
-     <TabsContent value="github" className="space-y-6">
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-         </svg>
-         GitHub Repository Information
-        </CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-4">
-        <div>
-         <Label htmlFor="githubRepoUrl">GitHub Repository URL</Label>
-         <Input
-          id="githubRepoUrl"
-          value={formData.githubRepoUrl || ""}
-          onChange={(e) => handleInputChange("githubRepoUrl", e.target.value)}
-          placeholder="https://github.com/username/repository"
-          className="mt-1"
-         />
-         <p className="text-xs text-gray-500 mt-1">
-          Full URL to the GitHub repository (e.g.,
-          https://github.com/facebook/react)
-         </p>
         </div>
 
         <div>
-         <Label htmlFor="homepageUrl">Homepage URL</Label>
+         <Label htmlFor="homepage_url" className="text-sm font-medium">
+          Homepage URL
+         </Label>
          <Input
-          id="homepageUrl"
-          value={formData.homepageUrl || ""}
-          onChange={(e) => handleInputChange("homepageUrl", e.target.value)}
+          id="homepage_url"
+          value={formData.homepage_url || ""}
+          onChange={(e) => handleInputChange("homepage_url", e.target.value)}
           placeholder="https://project-website.com"
-          className="mt-1"
+          className="h-8 text-sm"
          />
-         <p className="text-xs text-gray-500 mt-1">
-          Project homepage or documentation URL (if different from repo)
-         </p>
         </div>
-       </CardContent>
-      </Card>
+       </div>
+      </div>
+     </div>
+    </div>
 
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <Info className="w-5 h-5" />
-         GitHub Information Preview
-        </CardTitle>
-       </CardHeader>
-       <CardContent>
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-          This is how the GitHub information will appear on your post:
-         </p>
-         <div className="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700">
-          {formData.githubRepoUrl && (
-           <a
-            href={formData.githubRepoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
-           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            <span className="text-sm font-medium">View Repository</span>
-           </a>
-          )}
-
-          {formData.homepageUrl && (
-           <a
-            href={formData.homepageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800"
-           >
-            <svg
-             className="w-4 h-4"
-             fill="none"
-             stroke="currentColor"
-             viewBox="0 0 24 24"
-            >
-             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-             />
-            </svg>
-            <span className="text-sm font-medium">Homepage</span>
-           </a>
-          )}
-         </div>
-         {!formData.githubRepoUrl && !formData.homepageUrl && (
-          <p className="text-sm text-gray-500 italic">
-           No GitHub information added yet. Fill in the fields above to see the
-           preview.
-          </p>
-         )}
-        </div>
-       </CardContent>
-      </Card>
-     </TabsContent>
-
-     <TabsContent value="settings" className="space-y-6">
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <Settings className="w-5 h-5" />
-         Publishing Settings
-        </CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-6">
-        <div className="space-y-4">
-         <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
-          <div className="flex items-center space-x-3">
-           <div
-            className={`p-2 rounded-full ${
-             formData.published ? "bg-green-100" : "bg-gray-100"
-            }`}
-           >
-            {formData.published ? (
-             <CheckCircle className="w-5 h-5 text-green-600" />
-            ) : (
-             <Clock className="w-5 h-5 text-gray-600" />
-            )}
-           </div>
-           <div>
-            <div className="flex items-center gap-2">
-             <Label className="text-base font-medium">Published</Label>
-             {formData.published && formData.published_at && (
-              <Badge variant="secondary" className="text-xs">
-               Published {new Date(formData.published_at).toLocaleDateString()}
-              </Badge>
-             )}
-            </div>
-            <p className="text-sm text-gray-600">
-             {formData.published
-              ? "This post is live and visible to readers"
-              : "This post is in draft mode and not visible to readers"}
-            </p>
-           </div>
-          </div>
-          <Switch
-           checked={formData.published || false}
-           onCheckedChange={(checked) =>
-            handleInputChange("published", checked)
-           }
-           className="data-[state=checked]:bg-green-600"
-          />
-         </div>
-
-         <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-pink-50">
-          <div className="flex items-center space-x-3">
-           <div
-            className={`p-2 rounded-full ${
-             formData.featured ? "bg-purple-100" : "bg-gray-100"
-            }`}
-           >
-            <Sparkles
-             className={`w-5 h-5 ${
-              formData.featured ? "text-purple-600" : "text-gray-600"
-             }`}
-            />
-           </div>
-           <div>
-            <Label className="text-base font-medium">Featured Post</Label>
-            <p className="text-sm text-gray-600">
-             {formData.featured
-              ? "This post will be highlighted on the homepage"
-              : "Feature this post to give it more visibility"}
-            </p>
-           </div>
-          </div>
-          <Switch
-           checked={formData.featured || false}
-           onCheckedChange={(checked) => handleInputChange("featured", checked)}
-           className="data-[state=checked]:bg-purple-600"
-          />
-         </div>
-
-         <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-green-50 to-emerald-50">
-          <div className="flex items-center space-x-3">
-           <div
-            className={`p-2 rounded-full ${
-             autoSaveEnabled ? "bg-green-100" : "bg-gray-100"
-            }`}
-           >
-            <Save
-             className={`w-5 h-5 ${
-              autoSaveEnabled ? "text-green-600" : "text-gray-600"
-             }`}
-            />
-           </div>
-           <div>
-            <Label className="text-base font-medium">Auto-save</Label>
-            <p className="text-sm text-gray-600">
-             {autoSaveEnabled
-              ? "Changes are automatically saved every 2 seconds"
-              : "Enable auto-save to prevent data loss"}
-            </p>
-           </div>
-          </div>
-          <Switch
-           checked={autoSaveEnabled}
-           onCheckedChange={setAutoSaveEnabled}
-           className="data-[state=checked]:bg-green-600"
-          />
-         </div>
-        </div>
-       </CardContent>
-      </Card>
-
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         📊 Content Statistics
-        </CardTitle>
-       </CardHeader>
-       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-         <div className="p-3 bg-blue-50 rounded-lg">
-          <div className="font-medium text-blue-800">Words</div>
-          <div className="text-2xl font-bold text-blue-600">
-           {formData.wordCount || 0}
-          </div>
-         </div>
-         <div className="p-3 bg-green-50 rounded-lg">
-          <div className="font-medium text-green-800">Reading Time</div>
-          <div className="text-2xl font-bold text-green-600">
-           {formData.readingTime || 0}m
-          </div>
-         </div>
-         <div className="p-3 bg-purple-50 rounded-lg">
-          <div className="font-medium text-purple-800">Headers</div>
-          <div className="text-2xl font-bold text-purple-600">
-           {formData.headers || 0}
-          </div>
-         </div>
-         <div className="p-3 bg-orange-50 rounded-lg">
-          <div className="font-medium text-orange-800">Images</div>
-          <div className="text-2xl font-bold text-orange-600">
-           {formData.images || 0}
-          </div>
-         </div>
-        </div>
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-         <p>📈 Statistics update automatically as you type</p>
-         <p>🎯 Recommended: 300+ words, 2-3 minute reading time</p>
-        </div>
-       </CardContent>
-      </Card>
-     </TabsContent>
-    </Tabs>
-
-    {/* Action Buttons */}
-    <div className="flex justify-between items-center mt-8 p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border shadow-sm">
-     <div className="flex items-center gap-4 text-sm">
-      <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border">
+    {/* Action Buttons - Compact */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 p-2.5 bg-white rounded-lg border gap-3">
+     <div className="flex items-center gap-3 text-sm flex-wrap">
+      <div className="flex items-center gap-1.5">
        {isValid ? (
         <>
          <CheckCircle className="w-4 h-4 text-green-600" />
-         <span className="text-green-700 font-medium">Ready to publish</span>
+         <span className="text-green-700 font-medium">Ready</span>
         </>
        ) : (
         <>
          <AlertCircle className="w-4 h-4 text-red-600" />
-         <span className="text-red-700 font-medium">Has validation errors</span>
+         <span className="text-red-700 font-medium">Has errors</span>
         </>
        )}
       </div>
       {autoSaveEnabled && (
-       <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-50 border border-blue-200">
+       <div className="flex items-center gap-1.5">
         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-        <span className="text-blue-700 font-medium">Auto-save enabled</span>
+        <span className="text-blue-700 font-medium">Auto-saving</span>
        </div>
+      )}
+      {lastSaved && (
+       <span className="text-green-600 text-sm">
+        Saved {lastSaved.toLocaleTimeString()}
+       </span>
       )}
      </div>
 
-     <div className="flex gap-3">
+     <div className="flex gap-2">
       <Button
        variant="outline"
+       size="sm"
        onClick={() => (window.location.href = `/${slug}`)}
-       className="px-6"
       >
        Cancel
       </Button>
       <Button
        onClick={handleSave}
        disabled={saving || !isValid}
-       className={`min-w-[140px] transition-all duration-200 ${
+       size="sm"
+       className={`min-w-[100px] ${
         formData.published
          ? "bg-green-600 hover:bg-green-700"
          : "bg-blue-600 hover:bg-blue-700"
@@ -1568,13 +1456,13 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       >
        {saving ? (
         <>
-         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+         <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
          Saving...
         </>
        ) : (
         <>
-         <Save className="w-4 h-4 mr-2" />
-         {formData.published ? "Update Post" : "Save Changes"}
+         <Save className="w-3 h-3 mr-1.5" />
+         {formData.published ? "Update" : "Save"}
         </>
        )}
       </Button>

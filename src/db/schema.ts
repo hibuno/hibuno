@@ -1,7 +1,6 @@
 import {
 	boolean,
 	index,
-	integer,
 	pgTable,
 	text,
 	timestamp,
@@ -18,14 +17,14 @@ export const posts = pgTable(
 		title: text("title").notNull(),
 		excerpt: text("excerpt"),
 		content: text("content").notNull(),
-		coverImageUrl: text("cover_image_url"),
+		cover_image_url: text("cover_image_url"),
 		tags: text("tags").array(),
 		featured: boolean("featured").default(false).notNull(),
 		published: boolean("published").default(false).notNull(),
 		published_at: timestamp("published_at", { withTimezone: true }),
 		// GitHub repository information
-		githubRepoUrl: text("github_repo_url"),
-		homepageUrl: text("homepage_url"),
+		github_repo_url: text("github_repo_url"),
+		homepage_url: text("homepage_url"),
 		created_at: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),

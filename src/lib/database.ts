@@ -8,15 +8,15 @@ export type PostListItem = Pick<
 	| "slug"
 	| "title"
 	| "excerpt"
-	| "coverImageUrl"
+	| "cover_image_url"
 	| "tags"
 	| "featured"
 	| "published"
 	| "published_at"
 	| "created_at"
 	| "updated_at"
-	| "githubRepoUrl"
-	| "homepageUrl"
+	| "github_repo_url"
+	| "homepage_url"
 >;
 
 export type PostSummary = Pick<
@@ -25,12 +25,12 @@ export type PostSummary = Pick<
 	| "slug"
 	| "title"
 	| "excerpt"
-	| "coverImageUrl"
+	| "cover_image_url"
 	| "tags"
 	| "published"
 	| "published_at"
-	| "githubRepoUrl"
-	| "homepageUrl"
+	| "github_repo_url"
+	| "homepage_url"
 >;
 
 // Query builders for better performance and reusability

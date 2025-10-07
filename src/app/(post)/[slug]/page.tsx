@@ -9,7 +9,6 @@ import PostTOC from "@/components/post-toc";
 import { ReadingProgress } from "@/components/reading-progress";
 import SimilarPosts from "@/components/similar-posts";
 import { SiteHeader } from "@/components/site-header";
-import { SocialShare, SocialShareCompact } from "@/components/social-share";
 import { StructuredData } from "@/components/structured-data";
 import type { SelectPost } from "@/db/schema";
 import { postQueries } from "@/lib/database";
@@ -47,97 +46,39 @@ function normalizeTags(tags: SelectPost["tags"] | null | undefined): string[] {
 function TagList({ tags }: { tags: string[] }) {
  if (!tags.length) return null;
  return (
-  <div className="flex gap-2 flex-wrap justify-center">
+  <>
    {tags.map((tag) => (
     <span
      key={tag}
-     className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+     className="text-xs px-3 py-1.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors cursor-pointer"
     >
-     {tag}
+     #{tag}
     </span>
    ))}
-  </div>
+  </>
  );
 }
 
-function PostMeta({ post }: { post: SelectPost }) {
- const tags = normalizeTags(post.tags);
- const publishedISO = post.published_at || undefined;
+function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
+ if (process.env.NODE_ENV !== "development") return null;
 
  return (
-  <div className="mt-8 space-y-6">
-   {/* Author and Date Info */}
-   <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-    <AuthorAvatar src="/placeholder.svg" alt="hibuno" className="h-8 w-8" />
-    <span className="font-medium text-foreground">hibuno</span>
-    {publishedISO && (
-     <>
-      <span className="text-muted-foreground/70">•</span>
-      <time
-       dateTime={new Date(publishedISO).toISOString()}
-       className="font-medium"
-      >
-       {formatDate(post.published_at ? new Date(post.published_at) : null)}
-      </time>
-     </>
-    )}
-    <span className="text-muted-foreground/70">•</span>
-    <span className="font-medium">
-     {calculateStats(post.content)?.readingTime} min read
-    </span>
-   </div>
-
-   {/* GitHub Repository Information */}
-   {(post.githubRepoUrl || post.homepageUrl) && (
-    <div className="flex justify-center">
-     <GitHubInfo post={post} />
+  <div className="bg-black text-white">
+   <div className="max-w-3xl mx-auto px-6 py-2.5 flex items-center justify-between text-sm">
+    <div className="flex items-center gap-3">
+     <span className="font-mono text-xs opacity-60">ADMIN MODE</span>
+     {post.published === false && (
+      <span className="text-xs px-2 py-0.5 bg-white/10 rounded">
+       UNPUBLISHED
+      </span>
+     )}
     </div>
-   )}
-
-   {/* Tags */}
-   {tags.length > 0 && (
-    <div className="flex justify-center">
-     <TagList tags={tags} />
-    </div>
-   )}
-  </div>
- );
-}
-
-function GitHubInfo({ post }: { post: SelectPost }) {
- return (
-  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-   {/* GitHub Repository Link */}
-   {post.githubRepoUrl && (
     <a
-     href={post.githubRepoUrl}
-     target="_blank"
-     rel="noopener noreferrer"
-     className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors group"
+     href={`/admin/edit/${slug}`}
+     className="hover:opacity-70 transition-opacity flex items-center gap-1.5"
     >
      <svg
-      className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-     >
-      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-     </svg>
-     <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white">
-      View Repository
-     </span>
-    </a>
-   )}
-
-   {/* Homepage Link */}
-   {post.homepageUrl && post.homepageUrl !== post.githubRepoUrl && (
-    <a
-     href={post.homepageUrl}
-     target="_blank"
-     rel="noopener noreferrer"
-     className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group"
-    >
-     <svg
-      className="w-4 h-4"
+      className="w-3.5 h-3.5"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -146,64 +87,139 @@ function GitHubInfo({ post }: { post: SelectPost }) {
        strokeLinecap="round"
        strokeLinejoin="round"
        strokeWidth={2}
-       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
       />
      </svg>
-     <span className="text-sm font-medium">Homepage</span>
+     <span className="text-xs">Edit</span>
     </a>
-   )}
+   </div>
   </div>
  );
 }
 
 function PostHeader({ post }: { post: SelectPost }) {
+ const publishedISO = post.published_at || undefined;
+ const readingTime = calculateStats(post.content)?.readingTime || 0;
+
  return (
-  <header className="mb-12 text-center">
-   <h1 className="font-serif text-balance text-4xl font-bold leading-tight md:text-5xl mb-6">
+  <header className="space-y-6 mb-12">
+   {/* Title */}
+   <h1 className="font-serif text-3xl md:text-5xl font-bold leading-[1.15] text-black dark:text-white tracking-tight">
     {post.title}
    </h1>
-   {process.env.NODE_ENV === "development" && post.published === false && (
-    <div className="mx-auto mb-4 inline-block rounded bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
-     Unpublished
-    </div>
-   )}
+
+   {/* Excerpt */}
    {post.excerpt && (
-    <p className="mt-6 text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+    <p className="text-base md:text-lg text-black/60 dark:text-white/60 leading-relaxed">
      {post.excerpt}
     </p>
    )}
-   <PostMeta post={post} />
+
+   {/* Meta */}
+   <div className="flex items-center gap-3 text-xs text-black/50 dark:text-white/50">
+    <div className="flex items-center gap-2">
+     <AuthorAvatar
+      src="/placeholder.svg"
+      alt="hibuno"
+      className="h-6 w-6 rounded-full"
+     />
+     <span className="text-black/70 dark:text-white/70">hibuno</span>
+    </div>
+    {publishedISO && (
+     <>
+      <span>·</span>
+      <time dateTime={new Date(publishedISO).toISOString()}>
+       {formatDate(post.published_at ? new Date(post.published_at) : null)}
+      </time>
+     </>
+    )}
+    <span>·</span>
+    <span>{readingTime} min read</span>
+   </div>
+
+   {/* Tags */}
+   {normalizeTags(post.tags).length > 0 && (
+    <div className="pt-2 flex flex-wrap gap-2">
+     <TagList tags={normalizeTags(post.tags)} />
+
+     {post.github_repo_url && (
+      <a
+       href={post.github_repo_url}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="text-xs px-3 py-1.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-md inline-flex items-center gap-1.5"
+      >
+       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+       </svg>
+       GitHub
+      </a>
+     )}
+
+     {post.homepage_url && (
+      <a
+       href={post.homepage_url}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="text-xs px-3 py-1.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-md inline-flex items-center gap-1.5"
+      >
+       <svg
+        className="w-3.5 h-3.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+       >
+        <path
+         strokeLinecap="round"
+         strokeLinejoin="round"
+         strokeWidth={2}
+         d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+        />
+       </svg>
+       Homepage
+      </a>
+     )}
+    </div>
+   )}
   </header>
  );
 }
 
+function PostImage({ post }: { post: SelectPost }) {
+ if (!post.cover_image_url) return null;
+ return (
+  <>
+   <PostCoverImage
+    src={post.cover_image_url}
+    alt={post.title}
+    className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 opacity-5"
+   />
+   <div className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 bg-gradient-to-b from-transparent via-85% via-white to-white"></div>
+  </>
+ );
+}
+
 function PostContent({ post }: { post: SelectPost }) {
- // If we have full content, render it with TOC and markdown
  if (post.content) {
   return (
-   <div className="mt-8 space-y-4">
-    {/* Show excerpt as introduction if available */}
-    {post.excerpt && (
-     <div className="prose prose-zinc dark:prose-invert max-w-none border-b border-border pb-6">
-      <p className="text-lg leading-relaxed text-muted-foreground font-medium">
-       {post.excerpt}
-      </p>
-     </div>
-    )}
-    {/* Table of contents for long content */}
+   <div className="space-y-8">
+    {/* Table of contents */}
     <PostTOC markdown={post.content} />
+
     {/* Main content */}
     <MarkdownRenderer markdown={post.content} />
    </div>
   );
  }
 
- // Fallback to excerpt if no full content
  if (post.excerpt) {
   return (
-   <div className="prose prose-zinc dark:prose-invert mt-8 max-w-none">
+   <div className="prose prose-lg max-w-none">
     {post.excerpt.split(/\n{2,}/g).map((para, i) => (
-     <p key={`${para.slice(0, 20)}-${i}`} className="mb-4 last:mb-0">
+     <p
+      key={`${para.slice(0, 20)}-${i}`}
+      className="mb-6 last:mb-0 text-base md:text-lg leading-relaxed text-black/80 dark:text-white/80"
+     >
       {para}
      </p>
     ))}
@@ -211,23 +227,11 @@ function PostContent({ post }: { post: SelectPost }) {
   );
  }
 
- // If no content or excerpt, show a message
  return (
-  <div className="prose prose-zinc dark:prose-invert mt-8 max-w-none">
-   <p className="text-muted-foreground italic">Content coming soon...</p>
-  </div>
- );
-}
-
-function PostImage({ post }: { post: SelectPost }) {
- if (!post.coverImageUrl) return null;
- return (
-  <div className="mb-12">
-   <PostCoverImage
-    src={post.coverImageUrl}
-    alt={post.title}
-    className="w-full"
-   />
+  <div className="text-center py-20">
+   <p className="text-black/40 dark:text-white/40 text-sm">
+    Content coming soon
+   </p>
   </div>
  );
 }
@@ -253,6 +257,8 @@ export async function generateMetadata({
  }
 }
 
+export const revalidate = 0;
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
  try {
   const { slug } = await params;
@@ -263,76 +269,55 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const tags = normalizeTags(post.tags);
-
   const structuredData = generatePostStructuredData(post);
   const breadcrumbData = generateBreadcrumbStructuredData([
    { name: "Home", url: "/" },
    { name: post.title, url: `/${slug}` },
   ]);
 
+  const isDevMode = process.env.NODE_ENV === "development";
+
   return (
    <ErrorBoundary>
     <StructuredData data={structuredData} />
     <StructuredData data={breadcrumbData} />
     <ReadingProgress />
+    <AdminToolbar slug={slug} post={post} />
     <MediaProvider>
-     <main className="min-h-screen">
+     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white relative">
       <SiteHeader />
-      <div className="mx-auto max-w-4xl px-4 py-8 lg:py-12">
-       {/* Development-only edit button */}
-       {process.env.NODE_ENV === "development" && (
-        <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
-         <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-          Development Mode: Edit this post
-         </p>
-         <a
-          href={`/admin/edit/${slug}`}
-          className="inline-flex items-center px-4 py-2 bg-black hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors"
-         >
-          Edit Post
-         </a>
-         <a
-          href={`/admin/generator/${slug}`}
-          className="inline-flex items-center px-4 py-2 bg-black hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors"
-         >
-          Generate Video
-         </a>
-        </div>
-       )}
-       <article className="mx-auto max-w-3xl">
+
+      {/* Cover Image */}
+      <PostImage post={post} />
+
+      {/* Main Content Container */}
+      <main
+       className={`max-w-3xl mx-auto px-6 relative z-10 ${
+        isDevMode ? "pt-16" : "pt-8"
+       } pb-20`}
+      >
+       <article className="space-y-12">
+        {/* Header */}
         <PostHeader post={post} />
-        <PostImage post={post} />
+
+        {/* Content */}
         <PostContent post={post} />
+       </article>
 
-        {/* Social sharing section */}
-        <div className="mt-12 pt-8 border-t border-border">
-         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <SocialShare
-           url={`${
-            process.env.NEXT_PUBLIC_SITE_URL || "https://hibuno.com"
-           }/${slug}`}
-           title={post.title}
-           className="w-full sm:w-auto"
-          />
-          <SocialShareCompact
-           url={`${
-            process.env.NEXT_PUBLIC_SITE_URL || "https://hibuno.com"
-           }/${slug}`}
-           title={post.title}
-           className="self-end sm:self-auto"
-          />
-         </div>
-        </div>
-
-        <div className="mt-16 space-y-12">
+       {/* Navigation & Related Content */}
+       <div className="mt-20 space-y-12">
+        <div className="pt-8 border-t border-black/5 dark:border-white/5">
          <PostNavigation
           published_at={(post.published_at || null) as string | null}
          />
+        </div>
+
+        <div className="pt-8 border-t border-black/5 dark:border-white/5">
          <SimilarPosts currentSlug={slug} tags={tags} />
         </div>
-       </article>
-      </div>
-     </main>
+       </div>
+      </main>
+     </div>
     </MediaProvider>
    </ErrorBoundary>
   );
