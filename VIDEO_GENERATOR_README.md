@@ -280,5 +280,4 @@ DEBUG=video-generator:*
 - Custom video templates
 - Advanced asset management
 - Video editing capabilities
-- Social media optimization
 - Analytics integration

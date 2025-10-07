@@ -23,13 +23,12 @@ CREATE TABLE "posts" (
 	"github_repo_url" text,
 	"github_stars" integer,
 	"github_forks" integer,
-	"github_homepage_url" text,
-	"github_pricing_url" text,
+	"homepage_url" text,
+	"pricing_url" text,
 	"github_license" text,
 	"min_price" integer,
 	"max_price" integer,
 	"offer_free" boolean DEFAULT false NOT NULL,
-	"social_medias" text[],
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

@@ -10,7 +10,6 @@ import { PricingInfo } from "@/components/pricing-info";
 import { ReadingProgress } from "@/components/reading-progress";
 import SimilarPosts from "@/components/similar-posts";
 import { SiteHeader } from "@/components/site-header";
-import { SocialMediaInfo } from "@/components/social-media-info";
 import { SocialShare, SocialShareCompact } from "@/components/social-share";
 import { StructuredData } from "@/components/structured-data";
 import type { SelectPost } from "@/db/schema";
@@ -90,7 +89,7 @@ function PostMeta({ post }: { post: SelectPost }) {
    </div>
 
    {/* GitHub Repository Information */}
-   {(post.githubRepoUrl || post.githubHomepageUrl) && (
+   {(post.githubRepoUrl || post.homepageUrl) && (
     <div className="flex justify-center">
      <GitHubInfo post={post} />
     </div>
@@ -100,13 +99,6 @@ function PostMeta({ post }: { post: SelectPost }) {
    {(post.minPrice || post.maxPrice || post.offerFree) && (
     <div className="flex justify-center">
      <PricingInfo post={post} />
-    </div>
-   )}
-
-   {/* Social Media Links */}
-   {post.socialMedias && post.socialMedias.length > 0 && (
-    <div className="flex justify-center">
-     <SocialMediaInfo socialMedias={post.socialMedias} />
     </div>
    )}
 
@@ -176,9 +168,9 @@ function GitHubInfo({ post }: { post: SelectPost }) {
    </div>
 
    {/* Homepage Link */}
-   {post.githubHomepageUrl && post.githubHomepageUrl !== post.githubRepoUrl && (
+   {post.homepageUrl && post.homepageUrl !== post.githubRepoUrl && (
     <a
-     href={post.githubHomepageUrl}
+     href={post.homepageUrl}
      target="_blank"
      rel="noopener noreferrer"
      className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group"
@@ -201,9 +193,9 @@ function GitHubInfo({ post }: { post: SelectPost }) {
    )}
 
    {/* Pricing Link */}
-   {post.githubPricingUrl && (
+   {post.pricingUrl && (
     <a
-     href={post.githubPricingUrl}
+     href={post.pricingUrl}
      target="_blank"
      rel="noopener noreferrer"
      className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-md border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors group"

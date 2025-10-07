@@ -1,5 +1,5 @@
 {
-  "id": "3af5e5ca-86d6-4520-827d-db4c8474f241",
+  "id": "c70a0407-072c-4ac1-8280-c358dbc6fd16",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -185,14 +185,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "github_homepage_url": {
-          "name": "github_homepage_url",
+        "homepage_url": {
+          "name": "homepage_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "github_pricing_url": {
-          "name": "github_pricing_url",
+        "pricing_url": {
+          "name": "pricing_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -221,12 +221,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
-        },
-        "social_medias": {
-          "name": "social_medias",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",
