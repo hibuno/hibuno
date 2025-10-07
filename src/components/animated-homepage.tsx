@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { NewsletterForm } from "@/components/newsletter-form";
 import { type Post, PostCard } from "@/components/post-card";
 
 interface AnimatedHomepageProps {
@@ -45,18 +44,15 @@ export function AnimatedHomepage({ recentPosts }: AnimatedHomepageProps) {
        className="font-serif text-balance text-4xl font-bold leading-tight md:text-5xl"
        variants={itemVariants}
       >
-       Stories and ideas to deepen your understanding
+       Stories and article to deepen your understanding
       </motion.h1>
       <motion.p
        className="mt-3 max-w-prose text-lg text-muted-foreground"
        variants={itemVariants}
       >
-       Read, learn, and subscribe for weekly updates. No noise, just thoughtful
-       writing.
+       Read, learn, and share for more insightful articles. No noise, just
+       thoughtful writing with easy to follow explanations and drawings.
       </motion.p>
-      <motion.div className="mt-6" variants={itemVariants}>
-       <NewsletterForm />
-      </motion.div>
      </motion.div>
     </div>
    </motion.section>

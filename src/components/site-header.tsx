@@ -1,11 +1,9 @@
 import Link from "next/link";
 import type React from "react";
-import { HomeIcon, TikTokIcon, YouTubeIcon } from "@/components/icons";
 
 interface SocialLink {
  name: string;
  href: string;
- icon: React.ComponentType<{ size?: number; className?: string }>;
  label: string;
 }
 
@@ -17,19 +15,16 @@ const socialLinks: SocialLink[] = [
  {
   name: "Home",
   href: "/",
-  icon: HomeIcon,
   label: "Home",
  },
  {
   name: "YouTube",
-  href: "https://youtube.com",
-  icon: YouTubeIcon,
+  href: "https://youtube.com/@hibuno_id",
   label: "YouTube channel",
  },
  {
   name: "TikTok",
-  href: "https://tiktok.com",
-  icon: TikTokIcon,
+  href: "https://tiktok.com/@hibuno_id",
   label: "TikTok channel",
  },
 ];
@@ -53,7 +48,6 @@ export function SiteHeader({ className }: SiteHeaderProps) {
      aria-label="Main navigation"
     >
      {socialLinks.map((link) => {
-      const IconComponent = link.icon;
       return (
        <Link
         key={link.name}
@@ -64,7 +58,6 @@ export function SiteHeader({ className }: SiteHeaderProps) {
          rel: "noopener noreferrer",
         })}
        >
-        <IconComponent className="h-5 w-5" />
         <span className="sr-only">{link.label}</span>
         <span aria-hidden="true">{link.name}</span>
        </Link>

@@ -187,45 +187,5 @@ export class PostQueries {
 	}
 }
 
-// Newsletter queries
-export class NewsletterQueries {
-	private supabase = getSupabaseServerClient();
-
-	/**
-	 * Subscribe email to newsletter
-	 */
-	async subscribeEmail(email: string, source?: string) {
-		const { data, error } = await this.supabase
-			.from("newsletter")
-			.insert({
-				email,
-				source,
-				is_active: true,
-			})
-			.select()
-			.single();
-
-		if (error) throw error;
-
-		return data;
-	}
-
-	/**
-	 * Check if email is already subscribed
-	 */
-	async isEmailSubscribed() {
-		const { data, error } = await this.supabase
-			.from("newsletter")
-			.select("id, is_active")
-			.eq("is_active", true)
-			.single();
-
-		if (error && error.code !== "PGRST116") throw error;
-
-		return !!data;
-	}
-}
-
 // Singleton instances
 export const postQueries = new PostQueries();
-export const newsletterQueries = new NewsletterQueries();

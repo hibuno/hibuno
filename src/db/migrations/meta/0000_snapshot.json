@@ -1,292 +1,196 @@
 {
-	"id": "19a534de-bd74-45f2-bcad-bd3db70d5716",
-	"prevId": "00000000-0000-0000-0000-000000000000",
-	"version": "7",
-	"dialect": "postgresql",
-	"tables": {
-		"public.newsletter": {
-			"name": "newsletter",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "uuid",
-					"primaryKey": true,
-					"notNull": true,
-					"default": "gen_random_uuid()"
-				},
-				"email": {
-					"name": "email",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"source": {
-					"name": "source",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"subscribed_at": {
-					"name": "subscribed_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				},
-				"confirmed_at": {
-					"name": "confirmed_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"unsubscribed_at": {
-					"name": "unsubscribed_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"is_active": {
-					"name": "is_active",
-					"type": "boolean",
-					"primaryKey": false,
-					"notNull": true,
-					"default": true
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				}
-			},
-			"indexes": {
-				"newsletter_email_idx": {
-					"name": "newsletter_email_idx",
-					"columns": [
-						{
-							"expression": "email",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"newsletter_active_idx": {
-					"name": "newsletter_active_idx",
-					"columns": [
-						{
-							"expression": "is_active",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.posts": {
-			"name": "posts",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "uuid",
-					"primaryKey": true,
-					"notNull": true,
-					"default": "gen_random_uuid()"
-				},
-				"slug": {
-					"name": "slug",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"title": {
-					"name": "title",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"excerpt": {
-					"name": "excerpt",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"content": {
-					"name": "content",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"cover_image_url": {
-					"name": "cover_image_url",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"tags": {
-					"name": "tags",
-					"type": "text[]",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"published": {
-					"name": "published",
-					"type": "boolean",
-					"primaryKey": false,
-					"notNull": true,
-					"default": false
-				},
-				"published_at": {
-					"name": "published_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"github_repo_url": {
-					"name": "github_repo_url",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"homepage_url": {
-					"name": "homepage_url",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				},
-				"updated_at": {
-					"name": "updated_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				}
-			},
-			"indexes": {
-				"posts_slug_idx": {
-					"name": "posts_slug_idx",
-					"columns": [
-						{
-							"expression": "slug",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": true,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"posts_published_idx": {
-					"name": "posts_published_idx",
-					"columns": [
-						{
-							"expression": "published",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"posts_published_at_idx": {
-					"name": "posts_published_at_idx",
-					"columns": [
-						{
-							"expression": "published_at",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"posts_tags_idx": {
-					"name": "posts_tags_idx",
-					"columns": [
-						{
-							"expression": "tags",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"posts_published_date_idx": {
-					"name": "posts_published_date_idx",
-					"columns": [
-						{
-							"expression": "published",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "published_at",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		}
-	},
-	"enums": {},
-	"schemas": {},
-	"sequences": {},
-	"roles": {},
-	"policies": {},
-	"views": {},
-	"_meta": {
-		"columns": {},
-		"schemas": {},
-		"tables": {}
-	}
+  "id": "0e926056-c328-42d2-8959-a308b9e6a69f",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.posts": {
+      "name": "posts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "excerpt": {
+          "name": "excerpt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cover_image_url": {
+          "name": "cover_image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published": {
+          "name": "published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "github_repo_url": {
+          "name": "github_repo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "homepage_url": {
+          "name": "homepage_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "posts_slug_idx": {
+          "name": "posts_slug_idx",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_published_idx": {
+          "name": "posts_published_idx",
+          "columns": [
+            {
+              "expression": "published",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_published_at_idx": {
+          "name": "posts_published_at_idx",
+          "columns": [
+            {
+              "expression": "published_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_tags_idx": {
+          "name": "posts_tags_idx",
+          "columns": [
+            {
+              "expression": "tags",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_published_date_idx": {
+          "name": "posts_published_date_idx",
+          "columns": [
+            {
+              "expression": "published",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "published_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
 }

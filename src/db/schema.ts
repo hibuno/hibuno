@@ -45,34 +45,6 @@ export const posts = pgTable(
 	}),
 );
 
-// Newsletter subscribers with improved tracking
-export const newsletter = pgTable(
-	"newsletter",
-	{
-		id: uuid("id").primaryKey().defaultRandom(),
-		email: text("email").notNull(),
-		source: text("source"),
-		subscribed_at: timestamp("subscribed_at", { withTimezone: true })
-			.notNull()
-			.defaultNow(),
-		confirmed_at: timestamp("confirmed_at", { withTimezone: true }),
-		unsubscribed_at: timestamp("unsubscribed_at", { withTimezone: true }),
-		isActive: boolean("is_active").default(true).notNull(),
-		created_at: timestamp("created_at", { withTimezone: true })
-			.notNull()
-			.defaultNow(),
-	},
-	(t) => ({
-		emailIdx: index("newsletter_email_idx").on(t.email),
-		activeIdx: index("newsletter_active_idx").on(t.isActive),
-	}),
-);
-
-// GitHub repository information for posts related to projects
-
 // Type definitions
 export type InsertPost = typeof posts.$inferInsert;
 export type SelectPost = typeof posts.$inferSelect;
-
-export type InsertNewsletter = typeof newsletter.$inferInsert;
-export type SelectNewsletter = typeof newsletter.$inferSelect;
