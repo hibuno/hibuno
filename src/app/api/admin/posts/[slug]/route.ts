@@ -107,6 +107,7 @@ export async function PUT(
 		// Prepare update data - map camelCase to snake_case for database
 		const updatePayload = {
 			title: updateData.title,
+			slug: updateData.slug,
 			excerpt: updateData.excerpt,
 			content: updateData.content,
 			cover_image_url: updateData.cover_image_url,

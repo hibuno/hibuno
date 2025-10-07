@@ -61,28 +61,6 @@ function useDebounce<T>(value: T, delay: number, immediate = false): T {
  return debouncedValue;
 }
 
-// Auto-generate excerpt from content
-function generateExcerpt(content: string, maxLength = 160): string {
- const plainText = content
-  .replace(/#{1,6}\s/g, "")
-  .replace(/\*\*([^*]+)\*\*/g, "$1")
-  .replace(/\*([^*]+)\*/g, "$1")
-  .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-  .replace(/```[\s\S]*?```/g, "")
-  .replace(/`([^`]+)`/g, "$1")
-  .replace(/<[^>]*>/g, "")
-  .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
-  .trim();
-
- if (plainText.length <= maxLength) return plainText;
-
- const truncated = plainText.substring(0, maxLength);
- const lastSpace = truncated.lastIndexOf(" ");
- return lastSpace > 0
-  ? `${truncated.substring(0, lastSpace)}...`
-  : `${truncated}...`;
-}
-
 // Auto-generate tags from content
 function generateTags(content: string, title: string): string[] {
  const text = `${content} ${title}`.toLowerCase();
@@ -766,7 +744,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
   null
  );
- const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
  const debouncedContent = useDebounce(formData.content || "", 1000);
@@ -784,14 +761,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     // Only update stats if they've actually changed
     if (JSON.stringify(prev) !== JSON.stringify({ ...prev, ...stats })) {
      Object.assign(newData, stats);
-    }
-
-    // Auto-generate excerpt only if not manually set
-    if (!prev.manualExcerpt && prev.excerpt !== debouncedContent) {
-     const autoExcerpt = generateExcerpt(debouncedContent);
-     if (autoExcerpt && autoExcerpt !== prev.excerpt) {
-      newData.excerpt = autoExcerpt;
-     }
     }
 
     // Auto-generate tags only if no tags exist
@@ -817,50 +786,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   formData.title,
   formData.excerpt,
   formData.tags,
-  formData.manualExcerpt,
  ]);
-
- // Auto-save functionality - optimized to prevent unnecessary saves
- useEffect(() => {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  if (
-   autoSaveEnabled &&
-   post &&
-   isValid &&
-   debouncedContent &&
-   formData.content
-  ) {
-   const autoSave = async () => {
-    try {
-     // Only save if content has actually changed from the original
-     if (formData.content !== post.content) {
-      const updateData = {
-       ...formData,
-      };
-
-      const response = await fetch(`/api/admin/posts/${slug}`, {
-       method: "PUT",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify(updateData),
-      });
-
-      if (response.ok) {
-       setLastSaved(new Date());
-      }
-     }
-    } catch (error) {
-     console.error("Auto-save failed:", error);
-    }
-   };
-
-   timeoutId = setTimeout(autoSave, 2000);
-  }
-
-  return () => {
-   if (timeoutId) clearTimeout(timeoutId);
-  };
- }, [autoSaveEnabled, post, isValid, debouncedContent, formData.content, slug]);
 
  useEffect(() => {
   const fetchPost = async () => {
@@ -898,7 +824,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    return {
     ...prev,
     [field]: value,
-    ...(field === "excerpt" ? { manualExcerpt: true } : {}),
    };
   });
  }, []);
@@ -1003,7 +928,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  return (
   <MediaProvider>
-   <div className="container mx-auto px-4 py-4 max-w-3xl">
+   <div className="container mx-auto px-4 py-4 w-full">
     {/* Compact Header */}
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
      <div className="flex items-center gap-3">
@@ -1252,32 +1177,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          />
         </div>
 
-        <div className="flex items-center justify-between py-2">
-         <div className="flex items-center gap-3">
-          <div
-           className={`p-1.5 rounded-full ${
-            autoSaveEnabled ? "bg-blue-100" : "bg-gray-100"
-           }`}
-          >
-           <Save
-            className={`w-4 h-4 ${
-             autoSaveEnabled ? "text-blue-600" : "text-gray-600"
-            }`}
-           />
-          </div>
-          <div>
-           <div className="text-sm font-medium text-gray-900">Auto-save</div>
-           <div className="text-xs text-gray-500 mt-0.5">Every 2 seconds</div>
-          </div>
-         </div>
-         <Switch
-          checked={autoSaveEnabled}
-          onCheckedChange={setAutoSaveEnabled}
-         />
-        </div>
-
-        <Separator className="my-3" />
-
         <div>
          <Label
           htmlFor="published_at"
@@ -1406,12 +1305,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
         </>
        )}
       </div>
-      {autoSaveEnabled && (
-       <div className="flex items-center gap-1.5">
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-        <span className="text-blue-700 font-medium">Auto-saving</span>
-       </div>
-      )}
       {lastSaved && (
        <span className="text-green-600 text-sm">
         Saved {lastSaved.toLocaleTimeString()}
