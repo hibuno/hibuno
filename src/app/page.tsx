@@ -37,11 +37,7 @@ async function getHomepageData(): Promise<{
     published: "published" in post ? post.published ?? true : true,
     published_at: (post.published_at || new Date().toISOString()) as string,
     github_repo_url: post.githubRepoUrl,
-    github_stars: post.githubStars,
-    github_forks: post.githubForks,
     homepage_url: post.homepageUrl,
-    pricing_url: post.pricingUrl,
-    github_license: post.githubLicense,
    })),
    recentPosts: recentPosts.map((post) => ({
     id: post.id,
@@ -52,14 +48,7 @@ async function getHomepageData(): Promise<{
     published: "published" in post ? post.published ?? true : true,
     published_at: (post.published_at || new Date().toISOString()) as string,
     github_repo_url: post.githubRepoUrl,
-    github_stars: post.githubStars,
-    github_forks: post.githubForks,
     homepage_url: post.homepageUrl,
-    pricing_url: post.pricingUrl,
-    github_license: post.githubLicense,
-    min_price: post.minPrice,
-    max_price: post.maxPrice,
-    offer_free: post.offerFree,
    })),
   };
  } catch (err: unknown) {

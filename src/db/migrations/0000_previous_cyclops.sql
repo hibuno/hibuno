@@ -21,14 +21,7 @@ CREATE TABLE "posts" (
 	"published" boolean DEFAULT false NOT NULL,
 	"published_at" timestamp with time zone,
 	"github_repo_url" text,
-	"github_stars" integer,
-	"github_forks" integer,
 	"homepage_url" text,
-	"pricing_url" text,
-	"github_license" text,
-	"min_price" integer,
-	"max_price" integer,
-	"offer_free" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

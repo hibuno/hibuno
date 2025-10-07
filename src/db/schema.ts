@@ -25,15 +25,7 @@ export const posts = pgTable(
 		published_at: timestamp("published_at", { withTimezone: true }),
 		// GitHub repository information
 		githubRepoUrl: text("github_repo_url"),
-		githubStars: integer("github_stars"),
-		githubForks: integer("github_forks"),
 		homepageUrl: text("homepage_url"),
-		pricingUrl: text("pricing_url"),
-		githubLicense: text("github_license"),
-		// Pricing information
-		minPrice: integer("min_price"),
-		maxPrice: integer("max_price"),
-		offerFree: boolean("offer_free").default(false).notNull(),
 		created_at: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),

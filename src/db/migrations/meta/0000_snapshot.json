@@ -1,5 +1,5 @@
 {
-  "id": "c70a0407-072c-4ac1-8280-c358dbc6fd16",
+  "id": "19a534de-bd74-45f2-bcad-bd3db70d5716",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -173,54 +173,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "github_stars": {
-          "name": "github_stars",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "github_forks": {
-          "name": "github_forks",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "homepage_url": {
           "name": "homepage_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "pricing_url": {
-          "name": "pricing_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "github_license": {
-          "name": "github_license",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "min_price": {
-          "name": "min_price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_price": {
-          "name": "max_price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "offer_free": {
-          "name": "offer_free",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "created_at": {
           "name": "created_at",

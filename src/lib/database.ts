@@ -16,11 +16,7 @@ export type PostListItem = Pick<
 	| "created_at"
 	| "updated_at"
 	| "githubRepoUrl"
-	| "githubStars"
-	| "githubForks"
 	| "homepageUrl"
-	| "pricingUrl"
-	| "githubLicense"
 >;
 
 export type PostSummary = Pick<
@@ -34,14 +30,7 @@ export type PostSummary = Pick<
 	| "published"
 	| "published_at"
 	| "githubRepoUrl"
-	| "githubStars"
-	| "githubForks"
 	| "homepageUrl"
-	| "pricingUrl"
-	| "githubLicense"
-	| "minPrice"
-	| "maxPrice"
-	| "offerFree"
 >;
 
 // Query builders for better performance and reusability
@@ -65,8 +54,7 @@ export class PostQueries {
 			.select(`
 			 id, slug, title, excerpt, cover_image_url,
 			 tags, featured, published, published_at, created_at, updated_at,
-			 github_repo_url, github_stars, github_forks, homepage_url, pricing_url, github_license,
-			 min_price, max_price, offer_free
+			 github_repo_url, homepage_url
 		`)
 			.order("published_at", { ascending: false });
 
@@ -142,8 +130,7 @@ export class PostQueries {
 			.select(`
 			 id, slug, title, excerpt, cover_image_url,
 			 tags, published, published_at,
-			 github_repo_url, github_stars, github_forks, homepage_url, pricing_url, github_license,
-			 min_price, max_price, offer_free
+			 github_repo_url, homepage_url
 		`)
 			.eq("featured", false)
 			.order("published_at", { ascending: false })

@@ -1296,44 +1296,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-         <div>
-          <Label htmlFor="githubStars">Stars Count</Label>
-          <Input
-           id="githubStars"
-           type="number"
-           value={formData.githubStars || ""}
-           onChange={(e) =>
-            handleInputChange(
-             "githubStars",
-             e.target.value ? parseInt(e.target.value, 10) : null
-            )
-           }
-           placeholder="0"
-           className="mt-1"
-          />
-          <p className="text-xs text-gray-500 mt-1">Number of GitHub stars</p>
-         </div>
-
-         <div>
-          <Label htmlFor="githubForks">Forks Count</Label>
-          <Input
-           id="githubForks"
-           type="number"
-           value={formData.githubForks || ""}
-           onChange={(e) =>
-            handleInputChange(
-             "githubForks",
-             e.target.value ? parseInt(e.target.value, 10) : null
-            )
-           }
-           placeholder="0"
-           className="mt-1"
-          />
-          <p className="text-xs text-gray-500 mt-1">Number of GitHub forks</p>
-         </div>
-        </div>
-
         <div>
          <Label htmlFor="homepageUrl">Homepage URL</Label>
          <Input
@@ -1345,34 +1307,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          />
          <p className="text-xs text-gray-500 mt-1">
           Project homepage or documentation URL (if different from repo)
-         </p>
-        </div>
-
-        <div>
-         <Label htmlFor="pricingUrl">Pricing URL</Label>
-         <Input
-          id="pricingUrl"
-          value={formData.pricingUrl || ""}
-          onChange={(e) => handleInputChange("pricingUrl", e.target.value)}
-          placeholder="https://project-website.com/pricing"
-          className="mt-1"
-         />
-         <p className="text-xs text-gray-500 mt-1">
-          Link to pricing information for commercial projects
-         </p>
-        </div>
-
-        <div>
-         <Label htmlFor="githubLicense">License</Label>
-         <Input
-          id="githubLicense"
-          value={formData.githubLicense || ""}
-          onChange={(e) => handleInputChange("githubLicense", e.target.value)}
-          placeholder="MIT, Apache 2.0, GPL, etc."
-          className="mt-1"
-         />
-         <p className="text-xs text-gray-500 mt-1">
-          Software license (e.g., MIT, Apache 2.0, GPL-3.0)
          </p>
         </div>
        </CardContent>
@@ -1405,40 +1339,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
            </a>
           )}
 
-          <div className="flex items-center gap-3">
-           {formData.githubStars && formData.githubStars > 0 && (
-            <div className="flex items-center gap-1 text-sm">
-             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-             </svg>
-             <span className="font-medium">
-              {formData.githubStars.toLocaleString()}
-             </span>
-            </div>
-           )}
-
-           {formData.githubForks && formData.githubForks > 0 && (
-            <div className="flex items-center gap-1 text-sm">
-             <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-             >
-              <path
-               strokeLinecap="round"
-               strokeLinejoin="round"
-               strokeWidth={2}
-               d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-              />
-             </svg>
-             <span className="font-medium">
-              {formData.githubForks.toLocaleString()}
-             </span>
-            </div>
-           )}
-          </div>
-
           {formData.homepageUrl && (
            <a
             href={formData.homepageUrl}
@@ -1462,129 +1362,13 @@ export default function EditPostPage({ params }: EditPostPageProps) {
             <span className="text-sm font-medium">Homepage</span>
            </a>
           )}
-
-          {formData.pricingUrl && (
-           <a
-            href={formData.pricingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-md border border-green-200 dark:border-green-800"
-           >
-            <svg
-             className="w-4 h-4"
-             fill="none"
-             stroke="currentColor"
-             viewBox="0 0 24 24"
-            >
-             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-             />
-            </svg>
-            <span className="text-sm font-medium">Pricing</span>
-           </a>
-          )}
          </div>
-         {!formData.githubRepoUrl &&
-          !formData.githubStars &&
-          !formData.githubForks &&
-          !formData.homepageUrl &&
-          !formData.pricingUrl && (
-           <p className="text-sm text-gray-500 italic">
-            No GitHub information added yet. Fill in the fields above to see the
-            preview.
-           </p>
-          )}
-        </div>
-       </CardContent>
-      </Card>
-
-      <Card>
-       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-         <svg
-          className="w-5 h-5 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-         >
-          <path
-           strokeLinecap="round"
-           strokeLinejoin="round"
-           strokeWidth={2}
-           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-          />
-         </svg>
-         Pricing Information
-        </CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-         <div>
-          <Label htmlFor="minPrice">Minimum Price ($)</Label>
-          <Input
-           id="minPrice"
-           type="number"
-           value={formData.minPrice || ""}
-           onChange={(e) =>
-            handleInputChange(
-             "minPrice",
-             e.target.value ? parseInt(e.target.value, 10) : null
-            )
-           }
-           placeholder="0"
-           className="mt-1"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-           Starting price (e.g., 29)
+         {!formData.githubRepoUrl && !formData.homepageUrl && (
+          <p className="text-sm text-gray-500 italic">
+           No GitHub information added yet. Fill in the fields above to see the
+           preview.
           </p>
-         </div>
-
-         <div>
-          <Label htmlFor="maxPrice">Maximum Price ($)</Label>
-          <Input
-           id="maxPrice"
-           type="number"
-           value={formData.maxPrice || ""}
-           onChange={(e) =>
-            handleInputChange(
-             "maxPrice",
-             e.target.value ? parseInt(e.target.value, 10) : null
-            )
-           }
-           placeholder="0"
-           className="mt-1"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-           Highest price tier (e.g., 299)
-          </p>
-         </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-         <Switch
-          id="offerFree"
-          checked={formData.offerFree || false}
-          onCheckedChange={(checked) => handleInputChange("offerFree", checked)}
-         />
-         <Label htmlFor="offerFree" className="flex items-center gap-2">
-          <svg
-           className="w-4 h-4"
-           fill="none"
-           stroke="currentColor"
-           viewBox="0 0 24 24"
-          >
-           <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-           />
-          </svg>
-          Offer Free Version
-         </Label>
+         )}
         </div>
        </CardContent>
       </Card>
