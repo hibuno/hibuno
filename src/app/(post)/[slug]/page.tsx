@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
-import MarkdownRenderer from "@/components/markdown-renderer";
 import { MediaProvider } from "@/components/media-provider";
 import { AuthorAvatar, PostCoverImage } from "@/components/optimized-image";
 import PostNavigation from "@/components/post-navigation";
-import PostTOC from "@/components/post-toc";
+import DynamicTOCPostContent from "@/components/dynamic-toc-post-content";
+import ArticleSignature from "@/components/article-signature";
 import { ReadingProgress } from "@/components/reading-progress";
 import SimilarPosts from "@/components/similar-posts";
 import { SiteHeader } from "@/components/site-header";
@@ -116,7 +116,7 @@ function PostHeader({ post }: { post: SelectPost }) {
    )}
 
    {/* Meta */}
-   <div className="flex items-center gap-3 text-xs text-black/50 dark:text-white/50">
+   <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
     <div className="flex items-center gap-2">
      <AuthorAvatar
       src="/placeholder.svg"
@@ -127,13 +127,13 @@ function PostHeader({ post }: { post: SelectPost }) {
     </div>
     {publishedISO && (
      <>
-      <span>·</span>
+      <span>•</span>
       <time dateTime={new Date(publishedISO).toISOString()}>
        {formatDate(post.published_at ? new Date(post.published_at) : null)}
       </time>
      </>
     )}
-    <span>·</span>
+    <span>•</span>
     <span>{readingTime} min read</span>
    </div>
 
@@ -203,11 +203,8 @@ function PostContent({ post }: { post: SelectPost }) {
  if (post.content) {
   return (
    <div className="space-y-8">
-    {/* Table of contents */}
-    <PostTOC markdown={post.content} />
-
-    {/* Main content */}
-    <MarkdownRenderer markdown={post.content} />
+    {/* Main content with dynamic TOC insertion */}
+    <DynamicTOCPostContent post={post} />
    </div>
   );
  }
@@ -302,19 +299,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Content */}
         <PostContent post={post} />
+
+        {/* Signature */}
+        <ArticleSignature />
        </article>
 
        {/* Navigation & Related Content */}
-       <div className="mt-20 space-y-12">
-        <div className="pt-8 border-t border-black/5 dark:border-white/5">
-         <PostNavigation
-          published_at={(post.published_at || null) as string | null}
-         />
-        </div>
-
-        <div className="pt-8 border-t border-black/5 dark:border-white/5">
-         <SimilarPosts currentSlug={slug} tags={tags} />
-        </div>
+       <div className="mt-20 space-y-12 divide-y divide-black/5 dark:divide-white/5">
+        <PostNavigation
+         published_at={(post.published_at || null) as string | null}
+        />
+        <SimilarPosts currentSlug={slug} tags={tags} />
        </div>
       </main>
      </div>
