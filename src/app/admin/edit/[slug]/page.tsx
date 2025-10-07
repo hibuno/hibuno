@@ -892,7 +892,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    setLastSaved(new Date());
 
    // Force refresh the current page to show updated data
-   window.location.href = `/${slug}`;
+   //  window.location.href = `/${slug}`;
   } catch (error) {
    console.error("Save error:", error);
    alert(
