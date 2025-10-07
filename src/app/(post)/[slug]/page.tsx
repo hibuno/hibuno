@@ -13,7 +13,6 @@ import { SiteHeader } from "@/components/site-header";
 import { SocialMediaInfo } from "@/components/social-media-info";
 import { SocialShare, SocialShareCompact } from "@/components/social-share";
 import { StructuredData } from "@/components/structured-data";
-import { VoucherInfo } from "@/components/voucher-info";
 import type { SelectPost } from "@/db/schema";
 import { postQueries } from "@/lib/database";
 import {
@@ -21,6 +20,7 @@ import {
  generatePostMetadata,
  generatePostStructuredData,
 } from "@/lib/seo";
+import { calculateStats } from "@/lib/utils";
 
 interface BlogPostPageProps {
  params: { slug: string };
@@ -70,14 +70,8 @@ function PostMeta({ post }: { post: SelectPost }) {
   <div className="mt-8 space-y-6">
    {/* Author and Date Info */}
    <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-    {post.authorAvatarUrl && (
-     <AuthorAvatar
-      src={post.authorAvatarUrl}
-      alt={`${post.authorName} avatar`}
-      className="h-8 w-8"
-     />
-    )}
-    <span className="font-medium text-foreground">{post.authorName}</span>
+    <AuthorAvatar src="/placeholder.svg" alt="hibuno" className="h-8 w-8" />
+    <span className="font-medium text-foreground">hibuno</span>
     {publishedISO && (
      <>
       <span className="text-muted-foreground/70">•</span>
@@ -89,12 +83,10 @@ function PostMeta({ post }: { post: SelectPost }) {
       </time>
      </>
     )}
-    {post.readingTime && (
-     <>
-      <span className="text-muted-foreground/70">•</span>
-      <span className="font-medium">{post.readingTime} min read</span>
-     </>
-    )}
+    <span className="text-muted-foreground/70">•</span>
+    <span className="font-medium">
+     {calculateStats(post.content)?.readingTime} min read
+    </span>
    </div>
 
    {/* GitHub Repository Information */}
@@ -105,7 +97,7 @@ function PostMeta({ post }: { post: SelectPost }) {
    )}
 
    {/* Pricing Information */}
-   {(post.minPrice || post.maxPrice || post.offerFree || post.inPromotion) && (
+   {(post.minPrice || post.maxPrice || post.offerFree) && (
     <div className="flex justify-center">
      <PricingInfo post={post} />
     </div>
@@ -115,13 +107,6 @@ function PostMeta({ post }: { post: SelectPost }) {
    {post.socialMedias && post.socialMedias.length > 0 && (
     <div className="flex justify-center">
      <SocialMediaInfo socialMedias={post.socialMedias} />
-    </div>
-   )}
-
-   {/* Voucher Codes */}
-   {post.voucherCodes && post.voucherCodes.length > 0 && (
-    <div className="flex justify-center">
-     <VoucherInfo voucherCodes={post.voucherCodes} />
     </div>
    )}
 
@@ -254,9 +239,9 @@ function PostHeader({ post }: { post: SelectPost }) {
      Unpublished
     </div>
    )}
-   {post.subtitle && (
+   {post.excerpt && (
     <p className="mt-6 text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-     {post.subtitle}
+     {post.excerpt}
     </p>
    )}
    <PostMeta post={post} />
@@ -312,7 +297,7 @@ function PostImage({ post }: { post: SelectPost }) {
   <div className="mb-12">
    <PostCoverImage
     src={post.coverImageUrl}
-    alt={post.coverImageAlt || post.title}
+    alt={post.title}
     className="w-full"
    />
   </div>

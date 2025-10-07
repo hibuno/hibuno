@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1759586104334,
-      "tag": "0000_minor_thunderbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1759589201520,
-      "tag": "0001_bitter_payback",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1759765596049,
-      "tag": "0002_abnormal_true_believers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1759766483595,
-      "tag": "0003_noisy_songbird",
+      "when": 1759831850853,
+      "tag": "0000_quiet_namora",
       "breakpoints": true
     }
   ]

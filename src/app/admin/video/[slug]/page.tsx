@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { calculateStats } from "@/lib/utils";
 
 // Asset extraction from article content
 function extractAssetsFromContent(content: string) {
@@ -365,11 +366,11 @@ export default function VideoGeneratorPage({
      <div className="flex items-center gap-6 text-sm text-gray-600">
       <span className="flex items-center gap-1">
        <FileText className="w-4 h-4" />
-       {post.wordCount || 0} words
+       {calculateStats(post.content)?.wordCount || 0} words
       </span>
       <span className="flex items-center gap-1">
        <Clock className="w-4 h-4" />
-       {post.readingTime || 0} min read
+       {calculateStats(post.content)?.readingTime || 0} min read
       </span>
       <span className="flex items-center gap-1">
        <Image className="w-4 h-4" />

@@ -10,7 +10,7 @@ import {
  useVideoConfig,
  Video as RemotionVideo,
 } from "remotion";
-import { Oscilloscope, Spectrum } from "./Visualizers";
+import { Oscilloscope } from "./Visualizers";
 import { PaginatedCaptions } from "./Captions";
 import {
  BASE_SIZE,
@@ -298,7 +298,6 @@ const ThumbnailFrame: React.FC<ThumbnailFrameProps> = ({
 };
 
 export const Video: React.FC<VideoCompositionSchemaType> = ({
- mode = "video",
  visualizer,
  audioFileUrl,
  coverImageUrl,
@@ -313,101 +312,121 @@ export const Video: React.FC<VideoCompositionSchemaType> = ({
  transitionDurationInSeconds = 0.5,
  mediaFitMode = "cover",
  backgroundSoundUrl,
- backgroundSoundVolume = 0.15,
  captions,
 }) => {
  const { durationInFrames, fps, width, height } = useVideoConfig();
+ const currentFrame = useCurrentFrame();
 
  const audioOffsetInFrames = Math.round(audioOffsetInSeconds * fps);
  const transitionFrames = Math.round(transitionDurationInSeconds * fps);
+ const baseNumberOfSamples = Number(visualizer.numberOfSamples);
+ const textBoxWidth = width - BASE_SIZE * 2;
 
- // Render original video mode
- if (mode === "video") {
-  if (!visualizer || !coverImageUrl) {
-   throw new Error("Video mode requires visualizer and coverImageUrl");
-  }
+ // Render video
+ if (!mediaUrls || mediaUrls.length === 0) {
+  throw new Error("Video mode requires at least one media URL");
+ }
 
-  if (!captions) {
-   throw new Error(
-    "Subtitles should have been provided through calculateMetadata"
-   );
-  }
+ // Calculate timing for each media item (starting from frame 1, frame 0 is thumbnail)
+ const totalMedia = mediaUrls.length;
+ const availableFrames = durationInFrames - 1; // Subtract 1 for thumbnail frame
+ const framesPerMedia = Math.floor(availableFrames / totalMedia);
 
-  const baseNumberOfSamples = Number(visualizer.numberOfSamples);
-  const textBoxWidth = width - BASE_SIZE * 2;
+ const mediaTimings = mediaUrls.map((_, index) => ({
+  startFrame: 1 + index * framesPerMedia, // Start from frame 1
+  endFrame: Math.min(1 + (index + 1) * framesPerMedia, durationInFrames),
+ }));
 
-  return (
-   <AbsoluteFill>
-    <Sequence from={-audioOffsetInFrames}>
-     <Audio pauseWhenBuffering src={audioFileUrl} />
-     {/* Background sound with reduced volume */}
-     {backgroundSoundUrl && (
-      <Audio
-       pauseWhenBuffering
-       src={backgroundSoundUrl}
-       volume={backgroundSoundVolume}
-      />
-     )}
+ // Check if media is video (simple check by extension)
+ const isVideoFile = (url: string) => {
+  const videoExtensions = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
+  return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+ };
+
+ return (
+  <AbsoluteFill>
+   <Sequence from={-audioOffsetInFrames}>
+    <Audio pauseWhenBuffering src={audioFileUrl} />
+    {/* Background sound with sophisticated volume curve */}
+    {backgroundSoundUrl && (
+     <Audio
+      pauseWhenBuffering
+      src={backgroundSoundUrl}
+      volume={(f) => {
+       const startFadeOutFrame = 60;
+       const endFadeInFrame = durationInFrames - 60;
+
+       // Start at normal volume, fade to 30% after 60 frames
+       if (f <= startFadeOutFrame) {
+        return interpolate(f, [0, startFadeOutFrame], [1, 0.3], {
+         extrapolateLeft: "clamp",
+         extrapolateRight: "clamp",
+         easing: Easing.out(Easing.quad),
+        });
+       }
+
+       // Stay at 30% until last 60 frames
+       if (f < endFadeInFrame) {
+        return 0.3;
+       }
+
+       // Fade back to normal volume in last 60 frames
+       return interpolate(f, [endFadeInFrame, durationInFrames], [0.3, 1], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+        easing: Easing.in(Easing.quad),
+       });
+      }}
+     />
+    )}
+
+    {/* Background */}
+    <div
+     style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor,
+     }}
+    />
+
+    {/* Thumbnail frame (frame 0) */}
+    <ThumbnailFrame
+     mediaUrl={coverImageUrl}
+     titleText={titleText || ""}
+     titleColor={titleColor}
+     titleFontSize={titleFontSize}
+     backgroundColor={backgroundColor}
+     isVideo={isVideoFile(coverImageUrl)}
+    />
+
+    {/* Media slides (starting from frame 1) */}
+    {mediaUrls.map((mediaUrl, index) => (
+     <MediaSlide
+      key={index}
+      src={mediaUrl}
+      startFrame={mediaTimings[index]?.startFrame || 0}
+      endFrame={mediaTimings[index]?.endFrame || durationInFrames}
+      transitionFrames={transitionFrames}
+      mediaFitMode={mediaFitMode}
+      isVideo={isVideoFile(mediaUrl)}
+     />
+    ))}
+
+    {/* Professional captions overlay */}
+    {captions && (
      <div
       style={{
-       display: "flex",
-       flexDirection: "column",
-       width: "100%",
-       height: "100%",
-       color: "white",
-       padding: "48px",
-       backgroundColor,
-       fontFamily: FONT_FAMILY,
+       position: "absolute",
+       bottom: height > 1080 ? "12%" : "8%",
+       left: 0,
+       right: 0,
+       padding: "0 50px",
+       zIndex: 10,
       }}
      >
-      <div
-       style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-       }}
-      >
-       <Img
-        style={{
-         borderRadius: "6px",
-         maxHeight: "250px",
-        }}
-        src={coverImageUrl}
-       />
-       <div
-        style={{
-         marginLeft: "48px",
-         lineHeight: "1.25",
-         fontWeight: 800,
-         color: titleColor,
-         fontSize: `${titleFontSize}px`,
-        }}
-       >
-        {titleText}
-       </div>
-      </div>
-      <div>
-       {visualizer.type === "oscilloscope" ? (
-        <Oscilloscope
-         waveColor={visualizer.color}
-         padding={visualizer.padding}
-         audioSrc={audioFileUrl}
-         numberOfSamples={baseNumberOfSamples}
-         windowInSeconds={visualizer.windowInSeconds}
-         posterization={visualizer.posterization}
-         amplitude={visualizer.amplitude}
-        />
-       ) : visualizer.type === "spectrum" ? (
-        <Spectrum
-         barColor={visualizer.color}
-         audioSrc={audioFileUrl}
-         mirrorWave={visualizer.mirrorWave}
-         numberOfSamples={baseNumberOfSamples * 4}
-         freqRangeStartIndex={visualizer.freqRangeStartIndex}
-         waveLinesToDisplay={visualizer.linesToDisplay}
-        />
-       ) : null}
-      </div>
       <WaitForFonts>
        <div
         style={{
@@ -429,133 +448,20 @@ export const Video: React.FC<VideoCompositionSchemaType> = ({
         />
        </div>
       </WaitForFonts>
+      {currentFrame > 0 && (
+       <Oscilloscope
+        waveColor={visualizer.color}
+        padding={visualizer.padding}
+        audioSrc={audioFileUrl}
+        numberOfSamples={baseNumberOfSamples}
+        windowInSeconds={visualizer.windowInSeconds}
+        posterization={visualizer.posterization}
+        amplitude={visualizer.amplitude}
+       />
+      )}
      </div>
-    </Sequence>
-   </AbsoluteFill>
-  );
- }
-
- // Render video mode
- if (mode === "video") {
-  if (!mediaUrls || mediaUrls.length === 0) {
-   throw new Error("Video mode requires at least one media URL");
-  }
-
-  // Calculate timing for each media item (starting from frame 1, frame 0 is thumbnail)
-  const totalMedia = mediaUrls.length;
-  const availableFrames = durationInFrames - 1; // Subtract 1 for thumbnail frame
-  const framesPerMedia = Math.floor(availableFrames / totalMedia);
-
-  const mediaTimings = mediaUrls.map((_, index) => ({
-   startFrame: 1 + index * framesPerMedia, // Start from frame 1
-   endFrame: Math.min(1 + (index + 1) * framesPerMedia, durationInFrames),
-  }));
-
-  // Check if media is video (simple check by extension)
-  const isVideoFile = (url: string) => {
-   const videoExtensions = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
-   return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
-  };
-
-  return (
-   <AbsoluteFill>
-    <Sequence from={-audioOffsetInFrames}>
-     <Audio pauseWhenBuffering src={audioFileUrl} />
-     {/* Background sound with reduced volume */}
-     {backgroundSoundUrl && (
-      <Audio
-       pauseWhenBuffering
-       src={backgroundSoundUrl}
-       volume={backgroundSoundVolume}
-      />
-     )}
-
-     {/* Background */}
-     <div
-      style={{
-       position: "absolute",
-       top: 0,
-       left: 0,
-       width: "100%",
-       height: "100%",
-       backgroundColor,
-      }}
-     />
-
-     {/* Thumbnail frame (frame 0) */}
-     <ThumbnailFrame
-      mediaUrl={mediaUrls[0] || ""}
-      titleText={titleText || ""}
-      titleColor={titleColor}
-      titleFontSize={titleFontSize}
-      backgroundColor={backgroundColor}
-      isVideo={isVideoFile(mediaUrls[0] || "")}
-     />
-
-     {/* Media slides (starting from frame 1) */}
-     {mediaUrls.map((mediaUrl, index) => (
-      <MediaSlide
-       key={index}
-       src={mediaUrl}
-       startFrame={mediaTimings[index]?.startFrame || 0}
-       endFrame={mediaTimings[index]?.endFrame || durationInFrames}
-       transitionFrames={transitionFrames}
-       mediaFitMode={mediaFitMode}
-       isVideo={isVideoFile(mediaUrl)}
-      />
-     ))}
-
-     {/* Professional captions overlay */}
-     {captions && (
-      <div
-       style={{
-        position: "absolute",
-        bottom: height > 1080 ? "12%" : "8%",
-        left: 0,
-        right: 0,
-        padding: "0 50px",
-        zIndex: 10,
-       }}
-      >
-       <WaitForFonts>
-        <div
-         style={{
-          background:
-           "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)",
-          backdropFilter: "blur(15px)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "20px",
-          padding: "24px 32px",
-          textAlign: "center",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-         }}
-        >
-         <div
-          style={{
-           fontSize: "18px",
-           fontWeight: 600,
-           letterSpacing: "0.01em",
-           lineHeight: 1.4,
-          }}
-         >
-          <PaginatedCaptions
-           captions={captions}
-           startFrame={audioOffsetInFrames}
-           endFrame={audioOffsetInFrames + durationInFrames}
-           linesPerPage={2}
-           subtitlesTextColor={captionsTextColor}
-           onlyDisplayCurrentSentence={onlyDisplayCurrentSentence}
-           textBoxWidth={width - 100}
-          />
-         </div>
-        </div>
-       </WaitForFonts>
-      </div>
-     )}
-    </Sequence>
-   </AbsoluteFill>
-  );
- }
-
- return null;
+    )}
+   </Sequence>
+  </AbsoluteFill>
+ );
 };

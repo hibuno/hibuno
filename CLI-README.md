@@ -66,7 +66,6 @@ npm run example
  "onlyDisplayCurrentSentence": true,
  "transitionDurationInSeconds": 0.8,
  "mediaFitMode": "cover",
- "backgroundSoundVolume": 0.15,
  "audioOffsetInSeconds": 0
 }
 ```
@@ -89,7 +88,6 @@ npm run example
 
 - `speechStartsAtSecond`: When speech begins (helps with transcription)
 - `audioOffsetInSeconds`: Audio start offset
-- `backgroundSoundVolume`: Background music volume (0.0-1.0)
 
 ## 🔄 Workflow
 

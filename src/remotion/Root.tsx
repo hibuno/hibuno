@@ -8,10 +8,9 @@ import { getSubtitles } from "./helpers/fetch-captions";
 import { FPS } from "./helpers/ms-to-frame";
 
 export interface RemotionRootProps {
- mode?: "video";
  audioFileUrl?: string;
  backgroundSoundUrl?: string;
- backgroundSoundVolume?: number;
+ coverImageUrl?: string;
  mediaUrls?: string[];
  backgroundColor?: string;
  titleText?: string;
@@ -26,10 +25,9 @@ export interface RemotionRootProps {
 
 export const RemotionRoot: React.FC<RemotionRootProps> = (props) => {
  const {
-  mode = "video",
   audioFileUrl = staticFile("audio.wav"),
+  coverImageUrl = staticFile("podcast-cover.jpeg"),
   backgroundSoundUrl = getRandomBackgroundSound(),
-  backgroundSoundVolume = 0.15,
   mediaUrls = [
    staticFile("sample-image-1.svg"),
    staticFile("sample-image-2.svg"),
@@ -54,18 +52,24 @@ export const RemotionRoot: React.FC<RemotionRootProps> = (props) => {
    height={1920}
    schema={videoSchema}
    defaultProps={{
-    // mode settings
-    mode: mode as "video",
     // audio settings
     audioOffsetInSeconds,
     audioFileUrl,
+    visualizer: {
+     color: "#FFFFFF",
+     numberOfSamples: "256",
+     windowInSeconds: 0.1,
+     posterization: 3,
+     amplitude: 4,
+     padding: 50,
+    },
     // background sound settings
     backgroundSoundUrl,
-    backgroundSoundVolume,
     // media settings for video mode
     mediaUrls,
     // visual settings
     backgroundColor,
+    coverImageUrl,
     titleText,
     titleColor,
     titleFontSize,

@@ -30,7 +30,6 @@ interface VideoGenerationInput {
 	onlyDisplayCurrentSentence?: boolean;
 	transitionDurationInSeconds?: number;
 	mediaFitMode?: "cover" | "contain" | "fill";
-	backgroundSoundVolume?: number;
 	audioOffsetInSeconds?: number;
 }
 
@@ -117,7 +116,6 @@ function prepareAssets(input: VideoGenerationInput): VideoGenerationConfig {
 		onlyDisplayCurrentSentence: input.onlyDisplayCurrentSentence !== false,
 		transitionDurationInSeconds: input.transitionDurationInSeconds || 0.8,
 		mediaFitMode: input.mediaFitMode || "cover",
-		backgroundSoundVolume: input.backgroundSoundVolume || 0.15,
 		audioOffsetInSeconds: input.audioOffsetInSeconds || 0,
 	};
 }
@@ -168,11 +166,9 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         schema={videoSchema}
         defaultProps={{
-          mode: "video" as const,
           audioOffsetInSeconds: ${config.audioOffsetInSeconds},
           audioFileUrl: staticFile("${config.audioFileUrl}"),
           backgroundSoundUrl: staticFile("${config.backgroundSoundUrl}"),
-          backgroundSoundVolume: ${config.backgroundSoundVolume},
           mediaUrls: [${config.mediaUrls.map((url) => `staticFile("${url}")`).join(", ")}],
           backgroundColor: "${config.backgroundColor}",
           titleText: "${config.titleText.replace(/"/g, '\\"')}",

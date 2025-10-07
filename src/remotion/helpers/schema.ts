@@ -7,36 +7,20 @@ const baseVisualizerSchema = z.object({
 	numberOfSamples: z.enum(["32", "64", "128", "256", "512"]),
 });
 
-const spectrumVisualizerSchema = baseVisualizerSchema.extend({
-	type: z.literal("spectrum"),
-	linesToDisplay: z.number().int().min(0).default(65),
-	freqRangeStartIndex: z.number().int().min(0).default(0),
-	mirrorWave: z.boolean(),
-});
-
 const oscilloscopeVisualizerSchema = baseVisualizerSchema.extend({
-	type: z.literal("oscilloscope"),
 	windowInSeconds: z.number().min(0.1).default(0.1),
 	posterization: z.number().int().min(0.1).default(3),
 	amplitude: z.number().int().min(0.1).default(4),
 	padding: z.number().int().min(0).default(50),
 });
 
-const visualizerSchema = z.discriminatedUnion("type", [
-	spectrumVisualizerSchema,
-	oscilloscopeVisualizerSchema,
-]);
-
 export const videoSchema = z.object({
-	// mode selection (keeping for backward compatibility but defaulting to video)
-	mode: z.enum(["video"]).default("video"),
-
-	// visualizer settings (for video mode - optional for backward compatibility)
-	visualizer: visualizerSchema.optional(),
+	// visualizer settings
+	visualizer: oscilloscopeVisualizerSchema,
 
 	// media content
-	coverImageUrl: z.string().optional(), // for backward compatibility
-	mediaUrls: z.array(z.string()).default([]), // for video mode - images/videos
+	coverImageUrl: z.string(), // for backward compatibility
+	mediaUrls: z.array(z.string()).default([]), // images/videos
 
 	// text settings
 	titleText: z.string(),
@@ -61,7 +45,6 @@ export const videoSchema = z.object({
 
 	// background sound settings
 	backgroundSoundUrl: z.string().optional(),
-	backgroundSoundVolume: z.number().min(0).max(1).default(0.15),
 });
 
 export type VideoCompositionSchemaType = z.infer<typeof videoSchema> & {

@@ -1,6 +1,5 @@
 import {
  createSmoothSvgPath,
- visualizeAudio,
  visualizeAudioWaveform,
 } from "@remotion/media-utils";
 import React from "react";
@@ -50,21 +49,6 @@ const OscilloscopeContainer: React.FC<{
    {children}
   </svg>
  );
-};
-
-// Bar component for spectrum visualizer
-const Bar: React.FC<{ height: number; color: string }> = ({
- height,
- color,
-}) => {
- const barStyle: React.CSSProperties = {
-  borderRadius: `${BASE_SIZE * 0.25}px`,
-  width: `${BASE_SIZE * 0.5}px`,
-  height: `${height}px`,
-  backgroundColor: color,
- };
-
- return <div style={barStyle} />;
 };
 
 // Oscilloscope visualizer component
@@ -130,64 +114,5 @@ export const Oscilloscope: React.FC<{
     d={p}
    />
   </OscilloscopeContainer>
- );
-};
-
-// Spectrum visualizer component
-export const Spectrum: React.FC<{
- readonly barColor: string;
- readonly numberOfSamples: number;
- readonly freqRangeStartIndex: number;
- readonly waveLinesToDisplay: number;
- readonly mirrorWave: boolean;
- readonly audioSrc: string;
-}> = ({
- barColor,
- numberOfSamples,
- freqRangeStartIndex,
- waveLinesToDisplay,
- mirrorWave,
- audioSrc,
-}) => {
- const frame = useCurrentFrame();
- const { fps } = useVideoConfig();
-
- const { audioData, dataOffsetInSeconds } = useWindowedAudioDataIfPossible({
-  src: audioSrc,
-  fps,
-  frame,
-  windowInSeconds: 10,
- });
-
- if (!audioData) {
-  return <AudioVizContainer />;
- }
-
- const frequencyData = visualizeAudio({
-  fps,
-  frame,
-  audioData,
-  numberOfSamples,
-  optimizeFor: "speed",
-  dataOffsetInSeconds,
- });
-
- // Pick the low values because they look nicer than high values
- const frequencyDataSubset = frequencyData.slice(
-  freqRangeStartIndex,
-  freqRangeStartIndex +
-   (mirrorWave ? Math.round(waveLinesToDisplay / 2) : waveLinesToDisplay)
- );
-
- const frequenciesToDisplay = mirrorWave
-  ? [...frequencyDataSubset.slice(1).reverse(), ...frequencyDataSubset]
-  : frequencyDataSubset;
-
- return (
-  <AudioVizContainer>
-   {frequenciesToDisplay.map((v, i) => {
-    return <Bar key={i} height={300 * Math.sqrt(v)} color={barColor} />;
-   })}
-  </AudioVizContainer>
  );
 };

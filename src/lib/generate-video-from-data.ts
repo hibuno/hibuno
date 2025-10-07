@@ -58,7 +58,6 @@ export async function generateVideoFromData(
 			onlyDisplayCurrentSentence: true,
 			transitionDurationInSeconds: config.transitionDurationInSeconds || 0.8,
 			mediaFitMode: config.mediaFitMode || "cover",
-			backgroundSoundVolume: 0.15,
 			audioOffsetInSeconds: 0,
 		};
 
