@@ -491,9 +491,9 @@ function MonacoEditor({
  };
 
  return (
-  <div className="space-y-4">
+  <div className="divide-y">
    {/* Enhanced Toolbar */}
-   <div className="flex items-center gap-2 p-3 border rounded-lg bg-gradient-to-r from-gray-50 to-white flex-wrap">
+   <div className="flex items-center gap-2 p-3 flex-wrap">
     {/* History Controls */}
     <div className="flex gap-1">
      <Button
@@ -675,7 +675,7 @@ function MonacoEditor({
    <div className="relative">
     <div
      ref={editorRef}
-     className="h-[500px] border rounded-lg overflow-hidden"
+     className="h-[500px] overflow-hidden"
      onDragOver={handleDragOver}
      onDragLeave={handleDragLeave}
      onDrop={handleDrop}
@@ -700,10 +700,8 @@ function MonacoEditor({
     )}
    </div>
 
-   <div className="flex items-center justify-between text-xs text-gray-500">
-    <span>
-     Lines: {content.split("\n").length} | Characters: {content.length}
-    </span>
+   <div className="text-xs text-gray-500 text-center w-full py-2">
+    Lines: {content.split("\n").length} | Characters: {content.length}
    </div>
   </div>
  );
@@ -1110,47 +1108,46 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     )}
 
     {/* Main Content Grid */}
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+    {/* Main Content Grid */}
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4">
      {/* Left Column - Main Content */}
-     <div className="xl:col-span-2 space-y-3">
-      {/* Basic Information - Compact */}
-      <div className="p-2.5 bg-white border rounded-lg">
-       <h3 className="text-sm font-semibold mb-2 text-gray-800">
-        Basic Information
-       </h3>
-       <div className="space-y-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-         <div>
-          <Label htmlFor="slug" className="text-sm font-medium">
-           URL Slug *
-          </Label>
-          <Input
-           id="slug"
-           value={formData.slug || ""}
-           onChange={(e) => handleInputChange("slug", e.target.value)}
-           placeholder="post-url-slug"
-           className="h-8 text-sm"
-          />
-         </div>
-
-         <div>
-          <Label htmlFor="title" className="text-sm font-medium">
-           Title *
-          </Label>
-          <Input
-           id="title"
-           value={formData.title || ""}
-           onChange={(e) => handleInputChange("title", e.target.value)}
-           placeholder="Enter an engaging title..."
-           className={`h-8 text-sm mt-0.5 ${
-            errors.title ? "border-red-500" : ""
-           }`}
-          />
-         </div>
+     <div className="space-y-4">
+      {/* Basic Information */}
+      <div className="bg-white border rounded-lg">
+       <div className="px-4 py-3 border-b bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900">
+         Basic Information
+        </h3>
+       </div>
+       <div className="p-4 space-y-4">
+        <div>
+         <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+          Title *
+         </Label>
+         <Input
+          id="title"
+          value={formData.title || ""}
+          onChange={(e) => handleInputChange("title", e.target.value)}
+          placeholder="Enter an engaging title..."
+          className={`mt-1.5 ${errors.title ? "border-red-500" : ""}`}
+         />
         </div>
 
         <div>
-         <Label htmlFor="excerpt" className="text-sm font-medium">
+         <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
+          URL Slug *
+         </Label>
+         <Input
+          id="slug"
+          value={formData.slug || ""}
+          onChange={(e) => handleInputChange("slug", e.target.value)}
+          placeholder="post-url-slug"
+          className="mt-1.5"
+         />
+        </div>
+
+        <div>
+         <Label htmlFor="excerpt" className="text-sm font-medium text-gray-700">
           Excerpt
          </Label>
          <Textarea
@@ -1158,20 +1155,20 @@ export default function EditPostPage({ params }: EditPostPageProps) {
           value={formData.excerpt || ""}
           onChange={(e) => handleInputChange("excerpt", e.target.value)}
           placeholder="Brief description for SEO and social sharing..."
-          rows={2}
-          className="h-16 text-sm resize-none"
+          rows={3}
+          className="mt-1.5 resize-none"
          />
-         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
+         <div className="flex justify-between text-xs text-gray-500 mt-1.5">
           <span>{warnings.excerpt || "Recommended: 120-160 characters"}</span>
           <span>{(formData.excerpt || "").length}/160</span>
          </div>
         </div>
 
         <div>
-         <Label className="text-sm font-medium mb-1 block">
-          Tags (comma-separated)
+         <Label className="text-sm font-medium text-gray-700 mb-1.5 block">
+          Tags
          </Label>
-         <div className="flex gap-1.5">
+         <div className="flex gap-2">
           <Input
            value={
             Array.isArray(formData.tags)
@@ -1187,14 +1184,13 @@ export default function EditPostPage({ params }: EditPostPageProps) {
               .filter(Boolean)
             )
            }
-           placeholder="javascript, react, web-development, tutorial"
-           className="flex-1 h-8 text-sm"
+           placeholder="javascript, react, web-development"
+           className="flex-1"
           />
           <Button
            type="button"
            variant="outline"
            size="sm"
-           className="h-8 px-2"
            onClick={() => {
             const autoTags = generateTags(
              formData.content || "",
@@ -1203,8 +1199,8 @@ export default function EditPostPage({ params }: EditPostPageProps) {
             handleInputChange("tags", autoTags);
            }}
           >
-           <Sparkles className="w-3 h-3 mr-1" />
-           Auto
+           <Sparkles className="w-4 h-4 mr-1.5" />
+           Generate
           </Button>
          </div>
         </div>
@@ -1213,8 +1209,8 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
       {/* Content Editor */}
       <div className="bg-white border rounded-lg overflow-hidden">
-       <div className="p-2.5 border-b">
-        <h3 className="text-sm font-semibold text-gray-800">Content Editor</h3>
+       <div className="px-4 py-3 border-b bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900">Content Editor</h3>
        </div>
        <div className="p-0">
         <MonacoEditor
@@ -1227,30 +1223,32 @@ export default function EditPostPage({ params }: EditPostPageProps) {
      </div>
 
      {/* Right Column - Sidebar */}
-     <div className="space-y-2">
-      {/* Publishing Settings - Compact */}
-      <div className="p-2.5 bg-white border rounded-lg">
-       <h3 className="text-sm font-semibold mb-2 text-gray-800">Publishing</h3>
-       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-         <div className="flex items-center gap-2">
+     <div className="space-y-4">
+      {/* Publishing Settings */}
+      <div className="bg-white border rounded-lg">
+       <div className="px-4 py-3 border-b bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900">Publishing</h3>
+       </div>
+       <div className="p-4 space-y-4">
+        <div className="flex items-center justify-between py-2">
+         <div className="flex items-center gap-3">
           <div
-           className={`p-1 rounded-full ${
+           className={`p-1.5 rounded-full ${
             formData.published ? "bg-green-100" : "bg-gray-100"
            }`}
           >
            {formData.published ? (
-            <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+            <CheckCircle className="w-4 h-4 text-green-600" />
            ) : (
-            <Clock className="w-3.5 h-3.5 text-gray-600" />
+            <Clock className="w-4 h-4 text-gray-600" />
            )}
           </div>
           <div>
-           <Label className="text-sm font-medium">Published</Label>
+           <div className="text-sm font-medium text-gray-900">Published</div>
            {formData.published && formData.published_at && (
-            <p className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 mt-0.5">
              {new Date(formData.published_at).toLocaleDateString()}
-            </p>
+            </div>
            )}
           </div>
          </div>
@@ -1260,22 +1258,24 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          />
         </div>
 
-        <div className="flex items-center justify-between">
-         <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between py-2">
+         <div className="flex items-center gap-3">
           <div
-           className={`p-1 rounded-full ${
+           className={`p-1.5 rounded-full ${
             formData.featured ? "bg-purple-100" : "bg-gray-100"
            }`}
           >
            <Sparkles
-            className={`w-3.5 h-3.5 ${
+            className={`w-4 h-4 ${
              formData.featured ? "text-purple-600" : "text-gray-600"
             }`}
            />
           </div>
           <div>
-           <Label className="text-sm font-medium">Featured</Label>
-           <p className="text-xs text-gray-500">Highlight on homepage</p>
+           <div className="text-sm font-medium text-gray-900">Featured</div>
+           <div className="text-xs text-gray-500 mt-0.5">
+            Highlight on homepage
+           </div>
           </div>
          </div>
          <Switch
@@ -1284,22 +1284,22 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          />
         </div>
 
-        <div className="flex items-center justify-between">
-         <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between py-2">
+         <div className="flex items-center gap-3">
           <div
-           className={`p-1 rounded-full ${
-            autoSaveEnabled ? "bg-green-100" : "bg-gray-100"
+           className={`p-1.5 rounded-full ${
+            autoSaveEnabled ? "bg-blue-100" : "bg-gray-100"
            }`}
           >
            <Save
-            className={`w-3.5 h-3.5 ${
-             autoSaveEnabled ? "text-green-600" : "text-gray-600"
+            className={`w-4 h-4 ${
+             autoSaveEnabled ? "text-blue-600" : "text-gray-600"
             }`}
            />
           </div>
           <div>
-           <Label className="text-sm font-medium">Auto-save</Label>
-           <p className="text-xs text-gray-500">Saves every 2s</p>
+           <div className="text-sm font-medium text-gray-900">Auto-save</div>
+           <div className="text-xs text-gray-500 mt-0.5">Every 2 seconds</div>
           </div>
          </div>
          <Switch
@@ -1308,98 +1308,113 @@ export default function EditPostPage({ params }: EditPostPageProps) {
          />
         </div>
 
-        {/* Date/Time Fields */}
-        <div className="pt-3 border-t space-y-3">
-         <div>
-          <Label htmlFor="published_at" className="text-sm font-medium">
-           Published Date
-          </Label>
-          <Input
-           id="published_at"
-           type="datetime-local"
-           value={
-            formData.published_at
-             ? new Date(formData.published_at).toISOString().slice(0, 16)
-             : ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "published_at",
-             e.target.value ? new Date(e.target.value).toISOString() : null
-            )
-           }
-           className="h-8 text-sm"
-          />
-          <p className="text-xs text-gray-500 mt-0.5">
-           When this post was/will be published
-          </p>
-         </div>
+        <Separator className="my-3" />
 
-         <div>
-          <Label htmlFor="created_at" className="text-sm font-medium">
-           Created Date
-          </Label>
-          <Input
-           id="created_at"
-           type="datetime-local"
-           value={
-            formData.created_at
-             ? new Date(formData.created_at).toISOString().slice(0, 16)
-             : ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "created_at",
-             e.target.value
-              ? new Date(e.target.value).toISOString()
-              : new Date().toISOString()
-            )
-           }
-           className="h-8 text-sm"
-          />
-          <p className="text-xs text-gray-500 mt-0.5">Original creation date</p>
-         </div>
+        <div>
+         <Label
+          htmlFor="published_at"
+          className="text-sm font-medium text-gray-700"
+         >
+          Published Date
+         </Label>
+         <Input
+          id="published_at"
+          type="datetime-local"
+          value={
+           formData.published_at
+            ? new Date(formData.published_at).toISOString().slice(0, 16)
+            : ""
+          }
+          onChange={(e) =>
+           handleInputChange(
+            "published_at",
+            e.target.value ? new Date(e.target.value).toISOString() : null
+           )
+          }
+          className="mt-1.5"
+         />
+        </div>
+
+        <div>
+         <Label
+          htmlFor="created_at"
+          className="text-sm font-medium text-gray-700"
+         >
+          Created Date
+         </Label>
+         <Input
+          id="created_at"
+          type="datetime-local"
+          value={
+           formData.created_at
+            ? new Date(formData.created_at).toISOString().slice(0, 16)
+            : ""
+          }
+          onChange={(e) =>
+           handleInputChange(
+            "created_at",
+            e.target.value
+             ? new Date(e.target.value).toISOString()
+             : new Date().toISOString()
+           )
+          }
+          className="mt-1.5"
+         />
         </div>
        </div>
       </div>
 
       {/* Cover Image */}
-      <div className="p-2.5 bg-white border rounded-lg">
-       <ImageDropZone
-        currentImage={coverImagePreview}
-        onImageSelect={handleCoverImageSelect}
-        onRemove={removeCoverImage}
-        showMetadata={false}
-       />
+      <div className="bg-white border rounded-lg">
+       <div className="px-4 py-3 border-b bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900">Cover Image</h3>
+       </div>
+       <div className="p-4">
+        <ImageDropZone
+         currentImage={coverImagePreview}
+         onImageSelect={handleCoverImageSelect}
+         onRemove={removeCoverImage}
+         showMetadata={false}
+         label=""
+        />
+       </div>
       </div>
 
-      {/* GitHub Information - Compact */}
-      <div className="p-2.5 bg-white border rounded-lg">
-       <h3 className="text-sm font-semibold mb-2 text-gray-800">GitHub</h3>
-       <div className="space-y-2">
+      {/* GitHub Information */}
+      <div className="bg-white border rounded-lg">
+       <div className="px-4 py-3 border-b bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900">Project Links</h3>
+       </div>
+       <div className="p-4 space-y-3">
         <div>
-         <Label htmlFor="github_repo_url" className="text-sm font-medium">
-          Repository URL
+         <Label
+          htmlFor="github_repo_url"
+          className="text-sm font-medium text-gray-700"
+         >
+          Repository
          </Label>
          <Input
           id="github_repo_url"
           value={formData.github_repo_url || ""}
           onChange={(e) => handleInputChange("github_repo_url", e.target.value)}
-          placeholder="https://github.com/username/repo"
-          className="h-8 text-sm"
+          placeholder="https://github.com/user/repo"
+          className="mt-1.5"
          />
         </div>
 
         <div>
-         <Label htmlFor="homepage_url" className="text-sm font-medium">
-          Homepage URL
+         <Label
+          htmlFor="homepage_url"
+          className="text-sm font-medium text-gray-700"
+         >
+          Homepage
          </Label>
          <Input
           id="homepage_url"
           value={formData.homepage_url || ""}
           onChange={(e) => handleInputChange("homepage_url", e.target.value)}
-          placeholder="https://project-website.com"
-          className="h-8 text-sm"
+          placeholder="https://project-site.com"
+          className="mt-1.5"
          />
         </div>
        </div>
