@@ -10,7 +10,6 @@ import {
  FileText,
  FileVideo,
  Image,
- Info,
  Loader2,
  Mic,
  Play,
@@ -88,7 +87,24 @@ export default function VideoGeneratorPage({
  const [post, setPost] = useState<any>(null);
  const [loading, setLoading] = useState(true);
  const [generating, setGenerating] = useState(false);
- const [formData, setFormData] = useState<any>({
+ const [formData, setFormData] = useState<{
+  videoTitle: string;
+  narrationStyle: string;
+  voiceSettings: {
+   voiceId: string;
+   model: string;
+   voiceSettings: {
+    stability: number;
+    similarity_boost: number;
+    style: number;
+    use_speaker_boost: boolean;
+   };
+  };
+  assets: Array<{ type: string; url: string; alt?: string }>;
+  narration: string;
+  audioUrl: string;
+  videoUrl: string;
+ }>({
   videoTitle: "",
   narrationStyle: "engaging",
   voiceSettings: {
@@ -148,7 +164,7 @@ export default function VideoGeneratorPage({
 
     // Auto-populate form data
     const assets = extractAssetsFromContent(postData.content || "");
-    setFormData((prev: any) => ({
+    setFormData((prev) => ({
      ...prev,
      videoTitle: postData.title ? `${postData.title} - Video Summary` : "",
      assets: assets,
@@ -163,8 +179,8 @@ export default function VideoGeneratorPage({
   fetchPost();
  }, [slug]);
 
- const handleInputChange = (field: string, value: any) => {
-  setFormData((prev: any) => ({
+ const handleInputChange = (field: string, value: string | object) => {
+  setFormData((prev) => ({
    ...prev,
    [field]: value,
   }));
@@ -201,17 +217,19 @@ export default function VideoGeneratorPage({
    }
 
    const data = await response.json();
-   setFormData((prev: any) => ({
+   setFormData((prev) => ({
     ...prev,
     narration: data.narration,
    }));
    setCurrentStep(2);
-  } catch (error: any) {
+  } catch (error: unknown) {
    console.error("Error generating narration:", error);
    setErrors((prev) => ({
     ...prev,
     narration:
-     error.message || "Failed to generate narration. Please try again.",
+     error instanceof Error
+      ? error.message
+      : "Failed to generate narration. Please try again.",
    }));
   } finally {
    setGenerating(false);
@@ -249,16 +267,19 @@ export default function VideoGeneratorPage({
    }
 
    const data = await response.json();
-   setFormData((prev: any) => ({
+   setFormData((prev) => ({
     ...prev,
     audioUrl: data.audioUrl,
    }));
    setCurrentStep(3);
-  } catch (error: any) {
+  } catch (error: unknown) {
    console.error("Error generating audio:", error);
    setErrors((prev) => ({
     ...prev,
-    audio: error.message || "Failed to generate audio. Please try again.",
+    audio:
+     error instanceof Error
+      ? error.message
+      : "Failed to generate audio. Please try again.",
    }));
   } finally {
    setGenerating(false);
@@ -306,16 +327,19 @@ export default function VideoGeneratorPage({
    }
 
    const data = await response.json();
-   setFormData((prev: any) => ({
+   setFormData((prev) => ({
     ...prev,
     videoUrl: data.videoUrl,
    }));
    setCurrentStep(4);
-  } catch (error: any) {
+  } catch (error: unknown) {
    console.error("Error generating video:", error);
    setErrors((prev) => ({
     ...prev,
-    video: error.message || "Failed to generate video. Please try again.",
+    video:
+     error instanceof Error
+      ? error.message
+      : "Failed to generate video. Please try again.",
    }));
   } finally {
    setGenerating(false);
@@ -348,7 +372,9 @@ export default function VideoGeneratorPage({
     <Button
      variant="outline"
      size="sm"
-     onClick={() => (window.location.href = `/${slug}`)}
+     onClick={() => {
+      window.location.href = `/${slug}`;
+     }}
      className="shrink-0"
     >
      <ArrowLeft className="w-4 h-4 mr-2" />
@@ -468,26 +494,31 @@ export default function VideoGeneratorPage({
       <CardContent>
        {formData.assets.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-         {formData.assets.map((asset: any, index: number) => (
-          <div key={index} className="relative group">
-           {asset.type === "image" ? (
-            <img
-             src={asset.url}
-             alt={asset.alt}
-             className="w-full h-24 object-cover rounded-lg border"
-            />
-           ) : (
-            <div className="w-full h-24 bg-gray-100 rounded-lg border flex items-center justify-center">
-             <Video className="w-8 h-8 text-gray-400" />
+         {formData.assets.map(
+          (
+           asset: { type: string; url: string; alt?: string },
+           index: number
+          ) => (
+           <div key={index} className="relative group">
+            {asset.type === "image" ? (
+             <img
+              src={asset.url}
+              alt={asset.alt}
+              className="w-full h-24 object-cover rounded-lg border"
+             />
+            ) : (
+             <div className="w-full h-24 bg-gray-100 rounded-lg border flex items-center justify-center">
+              <Video className="w-8 h-8 text-gray-400" />
+             </div>
+            )}
+            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+             <Badge variant="secondary" className="text-xs">
+              {asset.type}
+             </Badge>
             </div>
-           )}
-           <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-            <Badge variant="secondary" className="text-xs">
-             {asset.type}
-            </Badge>
            </div>
-          </div>
-         ))}
+          )
+         )}
         </div>
        ) : (
         <p className="text-gray-500 text-center py-8">

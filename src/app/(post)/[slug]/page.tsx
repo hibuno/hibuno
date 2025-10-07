@@ -364,7 +364,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           Edit Post
          </a>
          <a
-          href={`/admin/video/${slug}`}
+          href={`/admin/generator/${slug}`}
           className="inline-flex items-center px-4 py-2 bg-black hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors"
          >
           Generate Video
