@@ -29,7 +29,7 @@ export default async function SimilarPosts({
 
   return (
    <section aria-label="Similar posts" className="mt-12">
-    <h3 className="mb-4 text-lg font-semibold">Similar posts</h3>
+    <h3 className="mb-4 text-lg font-semibold">Postingan Serupa</h3>
     <ul className="grid gap-6 sm:grid-cols-2">
      {data.map((p) => (
       <li key={p.slug} className="group">
@@ -73,7 +73,7 @@ export default async function SimilarPosts({
    if (!data?.length) return null;
    return (
     <section aria-label="Similar posts" className="mt-12">
-     <h3 className="mb-4 text-lg font-semibold">Similar posts</h3>
+     <h3 className="mb-4 text-lg font-semibold">Postingan Serupa</h3>
      <ul className="grid gap-6 sm:grid-cols-2">
       {data.map((p) => (
        <li key={p.slug} className="group">

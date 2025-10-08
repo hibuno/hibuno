@@ -24,7 +24,7 @@ interface BlogPostPageProps {
 }
 
 // Helpers
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat("id-ID", {
  year: "numeric",
  month: "long",
  day: "numeric",
@@ -98,8 +98,9 @@ function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
 }
 
 function PostHeader({ post }: { post: SelectPost }) {
- const publishedISO = post.published_at || undefined;
+ const publishedISO = post.published_at || Date.now();
  const readingTime = calculateStats(post.content)?.readingTime || 0;
+ const date = new Date(publishedISO);
 
  return (
   <header className="space-y-6 mb-12">
@@ -125,16 +126,16 @@ function PostHeader({ post }: { post: SelectPost }) {
      />
      <span className="text-black/70 dark:text-white/70">hibuno</span>
     </div>
-    {publishedISO && (
-     <>
-      <span>•</span>
-      <time dateTime={new Date(publishedISO).toISOString()}>
-       {formatDate(post.published_at ? new Date(post.published_at) : null)}
-      </time>
-     </>
-    )}
     <span>•</span>
-    <span>{readingTime} min read</span>
+    <time className="font-medium text-gray-500 dark:text-gray-400">
+     {date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+     })}
+    </time>
+    <span>•</span>
+    <span>{readingTime} menit baca</span>
    </div>
 
    {/* Tags */}

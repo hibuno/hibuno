@@ -92,7 +92,7 @@ function generateTOCHTML(
     <nav aria-label="In this article">
       <div class="rounded-xl border bg-background/40 p-4 prose-custom prose max-w-none">
         <h3 class="mb-2 text-sm font-semibold text-muted-foreground">
-          In this article
+          Dalam artikel ini
         </h3>
         <ol class="space-y-2">
 ${tocListItems}

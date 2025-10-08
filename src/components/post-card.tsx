@@ -49,7 +49,7 @@ export function PostCard({ post }: { post: Post }) {
         animate={{ opacity: 1, scale: 1 }}
         className="absolute left-2 top-2 rounded bg-yellow-500/90 px-2 py-1 text-xs font-semibold text-white shadow"
        >
-        Unpublished
+        Belum diterbitkan
        </motion.span>
       )}
      </div>
@@ -61,15 +61,15 @@ export function PostCard({ post }: { post: Post }) {
        transition={{ delay: 0.2 }}
       >
        <span className="font-medium text-gray-900">
-        {date.toLocaleDateString("en-US", {
-         month: "long",
+        {date.toLocaleDateString("id-ID", {
          day: "numeric",
+         month: "long",
          year: "numeric",
         })}
        </span>
        {isUnpublished && (
         <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
-         Unpublished
+         Belum diterbitkan
         </span>
        )}
       </motion.div>

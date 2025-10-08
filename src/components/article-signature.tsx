@@ -4,17 +4,15 @@ export default function ArticleSignature() {
    <div className="text-center space-y-4">
     <div className="space-y-2">
      <p className="text-xl text-black dark:text-white font-display font-bold">
-      Thanks for reading!
+      Terima kasih telah membaca!
      </p>
      <p className="text-sm text-black/60 dark:text-white/60">
-      If you found this article helpful, consider sharing it with others who
-      might benefit from it.
+      Jika Anda merasa artikel ini bermanfaat, pertimbangkan untuk membagikannya
+      kepada orang lain yang mungkin juga mendapat manfaat darinya.
      </p>
 
      <div className="flex items-center justify-center gap-2 text-xs text-black/50 dark:text-white/50">
-      <span>Written by hibuno</span>
-      <span>•</span>
-      <span>Sharing knowledge, one post at a time</span>
+      <span>Ditulis oleh hibuno</span>
      </div>
     </div>
    </div>

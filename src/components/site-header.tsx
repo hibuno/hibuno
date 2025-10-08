@@ -13,19 +13,19 @@ interface SiteHeaderProps {
 
 const socialLinks: SocialLink[] = [
  {
-  name: "Home",
+  name: "Beranda",
   href: "/",
-  label: "Home",
+  label: "Beranda",
  },
  {
   name: "YouTube",
   href: "https://youtube.com/@hibuno_id",
-  label: "YouTube channel",
+  label: "Kanal YouTube",
  },
  {
   name: "TikTok",
   href: "https://tiktok.com/@hibuno_id",
-  label: "TikTok channel",
+  label: "Kanal TikTok",
  },
 ];
 

@@ -44,14 +44,14 @@ export function AnimatedHomepage({ recentPosts }: AnimatedHomepageProps) {
        className="font-serif text-balance text-4xl font-bold leading-tight md:text-5xl"
        variants={itemVariants}
       >
-       Stories and article to deepen your understanding
+       Tempat singgah untuk memperdalam pemahaman Anda
       </motion.h1>
       <motion.p
        className="mt-3 max-w-prose text-lg text-muted-foreground"
        variants={itemVariants}
       >
-       Read, learn, and share for more insightful articles. No noise, just
-       thoughtful writing with easy to follow explanations and drawings.
+       Dengan kalimat yang mudah dibaca dan gambar yang mudah dipahami,
+       menjadikan setiap artikel menjadi sumber pengetahuan yang bermanfaat.
       </motion.p>
      </motion.div>
     </div>
@@ -65,7 +65,7 @@ export function AnimatedHomepage({ recentPosts }: AnimatedHomepageProps) {
    >
     <div className="mx-auto max-w-3xl px-4 py-10">
      <motion.h2 className="sr-only" variants={itemVariants}>
-      Recent Posts
+      Postingan Terbaru
      </motion.h2>
      <motion.div
       className="grid gap-10 md:grid-cols-2"

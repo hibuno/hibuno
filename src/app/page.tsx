@@ -39,8 +39,8 @@ async function getHomepageData(): Promise<{
   return {
    recentPosts: [],
    error: isMissingTable
-    ? "Database tables not found. Run `npm run db:migrate` to apply Drizzle migrations, then refresh."
-    : `Failed to load posts: ${message}`,
+    ? "Tabel database tidak ditemukan. Jalankan `npm run db:migrate` untuk menerapkan migrasi Drizzle, lalu muat ulang."
+    : `Gagal memuat posting: ${message}`,
   };
  }
 }
@@ -51,7 +51,7 @@ function ErrorState({ error }: { error: string }) {
    <SiteHeader />
    <div className="mx-auto max-w-3xl px-4 py-16">
     <div className="text-center">
-     <h2 className="text-2xl font-semibold mb-2">Unable to load content</h2>
+     <h2 className="text-2xl font-semibold mb-2">Tidak dapat memuat konten</h2>
      <p className="text-muted-foreground">{error}</p>
     </div>
    </div>
