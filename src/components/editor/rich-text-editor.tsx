@@ -8,8 +8,8 @@ import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Link from "@tiptap/extension-link";
-import { TextStyle } from "@tiptap/extension-text-style";
-import { Color } from "@tiptap/extension-color";
+import { TextStyle, Color } from "@tiptap/extension-text-style";
+import Dropcursor from "@tiptap/extension-dropcursor";
 import { useEffect, useState } from "react";
 import Toolbar from "./toolbar";
 import CommandMenu from "./command-menu";
@@ -17,7 +17,6 @@ import ImageDialog from "./image-dialog";
 import LinkDialog from "./link-dialog";
 import { CustomImage } from "./extensions/custom-image";
 import { Columns, Column } from "./extensions/columns";
-import { DragHandle } from "./extensions/drag-handle";
 import { uploadImage } from "./utils";
 
 // Simplified HTML content handler - no markdown conversion needed
@@ -88,7 +87,11 @@ export default function RichTextEditor({
    }),
    Highlight.configure({
     multicolor: true,
+    HTMLAttributes: {
+     style: "background-color: var(--highlight-color);",
+    },
    }),
+   TextStyle,
    TaskList,
    TaskItem.configure({
     nested: true,
@@ -100,12 +103,15 @@ export default function RichTextEditor({
      style: "cursor: pointer;",
     },
    }),
-   TextStyle,
    Color,
+   Dropcursor.configure({
+    color: "#3b82f6",
+    width: 2,
+    class: "custom-dropcursor",
+   }),
    CustomImage,
    Columns,
    Column,
-   DragHandle,
   ],
   content: ensureValidHtml(content),
   editorProps: {

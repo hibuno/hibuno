@@ -47,8 +47,24 @@ export default function Toolbar({
  // Close color pickers when clicking outside
  useEffect(() => {
   const handleClickOutside = (e: MouseEvent) => {
-   if (showTextColorPicker || showBgColorPicker) {
+   const target = e.target as Element;
+   const isClickInsideTextColorPicker = target.closest(".text-color-picker");
+   const isClickInsideBgColorPicker = target.closest(".bg-color-picker");
+   const isClickOnTextColorButton = target.closest('[title="Text Color"]');
+   const isClickOnBgColorButton = target.closest('[title="Background Color"]');
+
+   if (
+    showTextColorPicker &&
+    !isClickInsideTextColorPicker &&
+    !isClickOnTextColorButton
+   ) {
     setShowTextColorPicker(false);
+   }
+   if (
+    showBgColorPicker &&
+    !isClickInsideBgColorPicker &&
+    !isClickOnBgColorButton
+   ) {
     setShowBgColorPicker(false);
    }
   };
@@ -276,7 +292,7 @@ export default function Toolbar({
        <Palette size={18} />
       </ToolbarButton>
       {showTextColorPicker && (
-       <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
+       <div className="text-color-picker absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
         <div className="text-xs font-medium text-gray-600 mb-3">Text Color</div>
         <div className="grid grid-cols-4 gap-2">
          {textColors.map((color) => (
@@ -313,7 +329,7 @@ export default function Toolbar({
        <Highlighter size={18} />
       </ToolbarButton>
       {showBgColorPicker && (
-       <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
+       <div className="bg-color-picker absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
         <div className="text-xs font-medium text-gray-600 mb-3">
          Background Color
         </div>
@@ -323,11 +339,12 @@ export default function Toolbar({
            key={color.name}
            onClick={() => {
             if (color.value) {
-             editor
-              .chain()
-              .focus()
-              .toggleHighlight({ color: color.value })
-              .run();
+             // Set CSS variable for highlight color and apply highlight
+             document.documentElement.style.setProperty(
+              "--highlight-color",
+              color.value
+             );
+             editor.chain().focus().setHighlight({ color: color.value }).run();
             } else {
              editor.chain().focus().unsetHighlight().run();
             }

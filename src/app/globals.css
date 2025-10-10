@@ -731,3 +731,23 @@
 .animate-in {
 	animation: fade-in 0.2s ease-out, slide-in-from-top 0.2s ease-out;
 }
+
+/* Custom Dropcursor Styling */
+.ProseMirror .custom-dropcursor {
+	@apply bg-blue-500;
+	border-radius: 1px;
+	pointer-events: none;
+	z-index: 1000;
+}
+
+.ProseMirror .custom-dropcursor::before {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: rgba(59, 130, 246, 0.2);
+	border-radius: 3px;
+	z-index: -1;
+}

@@ -454,10 +454,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   }
  };
 
- const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text);
- };
-
  if (loading) {
   return (
    <div className="container mx-auto px-4 py-8">
@@ -480,70 +476,25 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  return (
   <div className="container mx-auto px-4 py-4 w-full">
    {/* Compact Header */}
-   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
+   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 py-3 px-4 bg-white rounded-lg border">
     <div className="flex items-center gap-3">
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() => (window.location.href = `/${slug}`)}
-     >
-      <ArrowLeft className="w-4 h-4 mr-2" />
-      Back
-     </Button>
-
-     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
-      <div className="flex items-center gap-2 mt-1">
-       {formData.published ? (
-        <Badge className="bg-green-100 text-green-800">
-         <CheckCircle className="w-3 h-3 mr-1" />
-         Published
-        </Badge>
-       ) : (
-        <Badge variant="secondary">
-         <Clock className="w-3 h-3 mr-1" />
-         Draft
-        </Badge>
-       )}
-      </div>
+     <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
+     <div className="flex items-center gap-2 mt-1">
+      {formData.published ? (
+       <Badge className="bg-green-100 text-green-800">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        Published
+       </Badge>
+      ) : (
+       <Badge variant="secondary">
+        <Clock className="w-3 h-3 mr-1" />
+        Draft
+       </Badge>
+      )}
      </div>
     </div>
 
     <div className="flex items-center gap-2">
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={async () => {
-       try {
-        const timestamp = new Date().getTime();
-        const response = await fetch(
-         `/api/admin/posts/${slug}?t=${timestamp}`,
-         {
-          headers: { "Cache-Control": "no-cache" },
-         }
-        );
-        if (response.ok) {
-         const freshData = await response.json();
-         setPost(freshData);
-         setFormData(freshData);
-         setCoverImagePreview(freshData.cover_image_url || null);
-         alert("Data refreshed from database");
-        }
-       } catch (error) {
-        console.error("Refresh failed:", error);
-       }
-      }}
-     >
-      🔄 Refresh
-     </Button>
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() => copyToClipboard(`${window.location.origin}/${slug}`)}
-     >
-      <Copy className="w-4 h-4 mr-2" />
-      Copy URL
-     </Button>
      <Button
       variant="outline"
       size="sm"
