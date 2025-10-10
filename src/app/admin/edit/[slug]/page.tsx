@@ -302,7 +302,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   null
  );
  const [lastSaved, setLastSaved] = useState<Date | null>(null);
- const [showSettings, setShowSettings] = useState(false);
+ const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
  const debouncedContent = useDebounce(formData.content || "", 1000);
  const { errors, warnings, isValid } = useFormValidation(formData);
@@ -510,14 +510,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
        <Button
         variant="outline"
         size="sm"
-        onClick={() => setShowSettings(!showSettings)}
-       >
-        <Settings className="w-4 h-4 sm:mr-2" />
-        <span className="hidden sm:inline">Settings</span>
-       </Button>
-       <Button
-        variant="outline"
-        size="sm"
         onClick={() =>
          window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
         }
@@ -564,7 +556,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
      </Alert>
     )}
 
-    {Object.keys(warnings).length > 0 && !showSettings && (
+    {Object.keys(warnings).length > 0 && (
      <Alert className="mb-4 border-yellow-200 bg-yellow-50">
       <Info className="h-4 w-4 text-yellow-600" />
       <AlertDescription className="text-yellow-800 text-sm">
@@ -576,24 +568,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
      {/* Main Editor Column */}
      <div className="space-y-4">
-      {/* Title Input */}
-      <div className="bg-white rounded-lg border shadow-sm p-6">
-       <Input
-        value={formData.title || ""}
-        onChange={(e) => handleInputChange("title", e.target.value)}
-        placeholder="Post title..."
-        className={`text-3xl font-bold border-0 px-0 focus-visible:ring-0 placeholder:text-gray-300 ${
-         errors.title ? "text-red-600" : ""
-        }`}
-       />
-       <Input
-        value={formData.slug || ""}
-        onChange={(e) => handleInputChange("slug", e.target.value)}
-        placeholder="post-url-slug"
-        className="text-sm text-gray-500 border-0 px-0 mt-2 focus-visible:ring-0"
-       />
-      </div>
-
       {/* Rich Text Editor */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
        <RichTextEditor
@@ -603,56 +577,87 @@ export default function EditPostPage({ params }: EditPostPageProps) {
       </div>
      </div>
 
-     {/* Settings Sidebar */}
-     {showSettings && (
-      <div className="lg:block hidden">
-       <div className="sticky top-20 space-y-4">
-        {/* Publishing Settings */}
-        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-         <div className="px-4 py-3 border-b bg-gray-50">
-          <h3 className="text-sm font-semibold text-gray-900">Settings</h3>
+     {/* Right Sidebar - Always Visible */}
+     <div className="space-y-4">
+      <div className="sticky top-20">
+       {/* Basic Info Card */}
+       <div className="bg-white rounded-lg border shadow-sm overflow-hidden mb-4">
+        <div className="px-4 py-3 border-b bg-gray-50">
+         <h3 className="text-sm font-semibold text-gray-900">Post Info</h3>
+        </div>
+        <div className="p-4 space-y-4">
+         <div>
+          <Label className="text-xs text-gray-600 mb-1.5 block">Title *</Label>
+          <Input
+           value={formData.title || ""}
+           onChange={(e) => handleInputChange("title", e.target.value)}
+           placeholder="Enter post title..."
+           className={`text-sm ${errors.title ? "border-red-500" : ""}`}
+          />
          </div>
 
-         <CollapsibleSection
-          title="Publishing"
-          badge={
-           formData.published ? (
-            <Badge className="bg-green-100 text-green-800 text-xs">Live</Badge>
-           ) : (
-            <Badge variant="secondary" className="text-xs">
-             Draft
-            </Badge>
-           )
-          }
-         >
-          <div className="space-y-4">
-           <div className="flex items-center justify-between">
-            <Label className="text-sm">Published</Label>
-            <Switch
-             checked={formData.published || false}
-             onCheckedChange={(checked) =>
-              handleInputChange("published", checked)
-             }
-            />
-           </div>
-           <div>
-            <Label className="text-xs text-gray-600">Published Date</Label>
-            <Input
-             type="datetime-local"
-             value={
-              formData.published_at
-               ? new Date(formData.published_at).toISOString().slice(0, 16)
-               : ""
-             }
-             onChange={(e) =>
-              handleInputChange(
-               "published_at",
-               e.target.value ? new Date(e.target.value).toISOString() : null
-              )
-             }
-             className="mt-1.5 text-sm"
-            />
-           </div>
+         <div>
+          <Label className="text-xs text-gray-600 mb-1.5 block">
+           URL Slug *
+          </Label>
+          <Input
+           value={formData.slug || ""}
+           onChange={(e) => handleInputChange("slug", e.target.value)}
+           placeholder="post-url-slug"
+           className="text-sm"
+          />
+         </div>
+        </div>
+       </div>
+
+       {/* Settings Card */}
+       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b bg-gray-50">
+         <h3 className="text-sm font-semibold text-gray-900">Settings</h3>
+        </div>
+
+        <CollapsibleSection
+         title="Publishing"
+         badge={
+          formData.published ? (
+           <Badge className="bg-green-100 text-green-800 text-xs">Live</Badge>
+          ) : (
+           <Badge variant="secondary" className="text-xs">
+            Draft
+           </Badge>
+          )
+         }
+        >
+         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+           <Label className="text-sm">Published</Label>
+           <Switch
+            checked={formData.published || false}
+            onCheckedChange={(checked) =>
+             handleInputChange("published", checked)
+            }
+           />
+          </div>
+          <div>
+           <Label className="text-xs text-gray-600">Published Date</Label>
+           <Input
+            type="datetime-local"
+            value={
+             formData.published_at
+              ? new Date(formData.published_at).toISOString().slice(0, 16)
+              : ""
+            }
+            onChange={(e) =>
+             handleInputChange(
+              "published_at",
+              e.target.value ? new Date(e.target.value).toISOString() : null
+             )
+            }
+            className="mt-1.5 text-sm"
+           />
+          </div>
+
+          {showAdvancedSettings && (
            <div>
             <Label className="text-xs text-gray-600">Created Date</Label>
             <Input
@@ -673,222 +678,89 @@ export default function EditPostPage({ params }: EditPostPageProps) {
              className="mt-1.5 text-sm"
             />
            </div>
-          </div>
-         </CollapsibleSection>
+          )}
 
-         <CollapsibleSection title="SEO & Metadata">
-          <div className="space-y-4">
-           <div>
-            <Label className="text-xs text-gray-600">Excerpt</Label>
-            <Textarea
-             value={formData.excerpt || ""}
-             onChange={(e) => handleInputChange("excerpt", e.target.value)}
-             placeholder="Brief description..."
-             rows={3}
-             className="mt-1.5 text-sm resize-none"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-             <span>120-200 chars recommended</span>
-             <span>{(formData.excerpt || "").length}/200</span>
-            </div>
-           </div>
-           <div>
-            <div className="flex items-center justify-between mb-1.5">
-             <Label className="text-xs text-gray-600">Tags</Label>
-             <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-               const autoTags = generateTags(
-                formData.content || "",
-                formData.title || ""
-               );
-               handleInputChange("tags", autoTags);
-              }}
-              className="h-6 text-xs"
-             >
-              <Sparkles className="w-3 h-3 mr-1" />
-              Generate
-             </Button>
-            </div>
-            <Input
-             value={
-              Array.isArray(formData.tags)
-               ? formData.tags.join(", ")
-               : formData.tags || ""
-             }
-             onChange={(e) =>
-              handleInputChange(
-               "tags",
-               e.target.value
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter(Boolean)
-              )
-             }
-             placeholder="javascript, react, ..."
-             className="text-sm"
-            />
+          <Button
+           variant="ghost"
+           size="sm"
+           onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+           className="w-full text-xs"
+          >
+           {showAdvancedSettings ? "Hide" : "Show"} advanced options
+          </Button>
+         </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="SEO & Metadata">
+         <div className="space-y-4">
+          <div>
+           <Label className="text-xs text-gray-600">Excerpt</Label>
+           <Textarea
+            value={formData.excerpt || ""}
+            onChange={(e) => handleInputChange("excerpt", e.target.value)}
+            placeholder="Brief description..."
+            rows={3}
+            className="mt-1.5 text-sm resize-none"
+           />
+           <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>120-200 chars recommended</span>
+            <span>{(formData.excerpt || "").length}/200</span>
            </div>
           </div>
-         </CollapsibleSection>
-
-         <CollapsibleSection title="Cover Image">
-          <ImageDropZone
-           currentImage={coverImagePreview}
-           onImageSelect={handleCoverImageSelect}
-           onRemove={removeCoverImage}
-          />
-         </CollapsibleSection>
-        </div>
-       </div>
-      </div>
-     )}
-    </div>
-   </div>
-
-   {/* Mobile Settings Drawer */}
-   {showSettings && (
-    <div
-     className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
-     onClick={() => setShowSettings(false)}
-    >
-     <div
-      className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl overflow-y-auto"
-      onClick={(e) => e.stopPropagation()}
-     >
-      <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
-       <h2 className="font-semibold">Post Settings</h2>
-       <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>
-        <X className="w-4 h-4" />
-       </Button>
-      </div>
-
-      <div className="p-4 space-y-6">
-       <div>
-        <h3 className="text-sm font-semibold mb-3">Publishing</h3>
-        <div className="space-y-4">
-         <div className="flex items-center justify-between">
-          <Label className="text-sm">Published</Label>
-          <Switch
-           checked={formData.published || false}
-           onCheckedChange={(checked) =>
-            handleInputChange("published", checked)
-           }
-          />
-         </div>
-         <div>
-          <Label className="text-xs text-gray-600">Published Date</Label>
-          <Input
-           type="datetime-local"
-           value={
-            formData.published_at
-             ? new Date(formData.published_at).toISOString().slice(0, 16)
-             : ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "published_at",
-             e.target.value ? new Date(e.target.value).toISOString() : null
-            )
-           }
-           className="mt-1.5"
-          />
-         </div>
-         <div>
-          <Label className="text-xs text-gray-600">Created Date</Label>
-          <Input
-           type="datetime-local"
-           value={
-            formData.created_at
-             ? new Date(formData.created_at).toISOString().slice(0, 16)
-             : ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "created_at",
-             e.target.value
-              ? new Date(e.target.value).toISOString()
-              : new Date().toISOString()
-            )
-           }
-           className="mt-1.5"
-          />
-         </div>
-        </div>
-       </div>
-
-       <div>
-        <h3 className="text-sm font-semibold mb-3">SEO & Metadata</h3>
-        <div className="space-y-4">
-         <div>
-          <Label className="text-xs text-gray-600">Excerpt</Label>
-          <Textarea
-           value={formData.excerpt || ""}
-           onChange={(e) => handleInputChange("excerpt", e.target.value)}
-           placeholder="Brief description..."
-           rows={3}
-           className="mt-1.5 resize-none"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-           <span>120-200 chars recommended</span>
-           <span>{(formData.excerpt || "").length}/200</span>
+          <div>
+           <div className="flex items-center justify-between mb-1.5">
+            <Label className="text-xs text-gray-600">Tags</Label>
+            <Button
+             type="button"
+             variant="ghost"
+             size="sm"
+             onClick={() => {
+              const autoTags = generateTags(
+               formData.content || "",
+               formData.title || ""
+              );
+              handleInputChange("tags", autoTags);
+             }}
+             className="h-6 text-xs"
+            >
+             <Sparkles className="w-3 h-3 mr-1" />
+             Generate
+            </Button>
+           </div>
+           <Input
+            value={
+             Array.isArray(formData.tags)
+              ? formData.tags.join(", ")
+              : formData.tags || ""
+            }
+            onChange={(e) =>
+             handleInputChange(
+              "tags",
+              e.target.value
+               .split(",")
+               .map((tag) => tag.trim())
+               .filter(Boolean)
+             )
+            }
+            placeholder="javascript, react, ..."
+            className="text-sm"
+           />
           </div>
          </div>
-         <div>
-          <div className="flex items-center justify-between mb-1.5">
-           <Label className="text-xs text-gray-600">Tags</Label>
-           <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-             const autoTags = generateTags(
-              formData.content || "",
-              formData.title || ""
-             );
-             handleInputChange("tags", autoTags);
-            }}
-            className="h-6 text-xs"
-           >
-            <Sparkles className="w-3 h-3 mr-1" />
-            Generate
-           </Button>
-          </div>
-          <Input
-           value={
-            Array.isArray(formData.tags)
-             ? formData.tags.join(", ")
-             : formData.tags || ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "tags",
-             e.target.value
-              .split(",")
-              .map((tag) => tag.trim())
-              .filter(Boolean)
-            )
-           }
-           placeholder="javascript, react, ..."
-          />
-         </div>
-        </div>
-       </div>
+        </CollapsibleSection>
 
-       <div>
-        <h3 className="text-sm font-semibold mb-3">Cover Image</h3>
-        <ImageDropZone
-         currentImage={coverImagePreview}
-         onImageSelect={handleCoverImageSelect}
-         onRemove={removeCoverImage}
-        />
+        <CollapsibleSection title="Cover Image">
+         <ImageDropZone
+          currentImage={coverImagePreview}
+          onImageSelect={handleCoverImageSelect}
+          onRemove={removeCoverImage}
+         />
+        </CollapsibleSection>
        </div>
       </div>
      </div>
     </div>
-   )}
+   </div>
   </div>
  );
 }

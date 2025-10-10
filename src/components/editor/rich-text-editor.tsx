@@ -7,6 +7,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import { Gapcursor } from "@tiptap/extensions";
 import Link from "@tiptap/extension-link";
 import { TextStyle, Color } from "@tiptap/extension-text-style";
 import Dropcursor from "@tiptap/extension-dropcursor";
@@ -15,9 +16,14 @@ import Toolbar from "./toolbar";
 import CommandMenu from "./command-menu";
 import ImageDialog from "./image-dialog";
 import LinkDialog from "./link-dialog";
+import TableContextMenu from "./table-context-menu";
+import TableTemplateSelector from "./table-template-selector";
 import { CustomImage } from "./extensions/custom-image";
 import { Columns, Column } from "./extensions/columns";
+import { TableKit } from "./extensions/table";
 import { uploadImage } from "./utils";
+import { createTableHTML, advancedTableTemplates } from "./table-utils";
+import "./table-styles.css";
 
 // Simplified HTML content handler - no markdown conversion needed
 const ensureValidHtml = (content: string) => {
@@ -50,6 +56,8 @@ export default function RichTextEditor({
  });
  const [showImageDialog, setShowImageDialog] = useState(false);
  const [showLinkDialog, setShowLinkDialog] = useState(false);
+ const [showTableTemplateSelector, setShowTableTemplateSelector] =
+  useState(false);
  const [editingImage, setEditingImage] = useState<{
   src?: string;
   alt?: string;
@@ -67,6 +75,7 @@ export default function RichTextEditor({
  const editor = useEditor({
   immediatelyRender: false,
   extensions: [
+   Gapcursor,
    StarterKit.configure({
     heading: {
      levels: [1, 2, 3],
@@ -112,6 +121,10 @@ export default function RichTextEditor({
    CustomImage,
    Columns,
    Column,
+   TableKit.table,
+   TableKit.tableRow,
+   TableKit.tableHeader,
+   TableKit.tableCell,
   ],
   content: ensureValidHtml(content),
   editorProps: {
@@ -254,6 +267,18 @@ export default function RichTextEditor({
    case "twoColumns":
     editor.chain().focus().setTwoColumns().run();
     break;
+   case "table":
+    editor.chain().focus().insertContent(createTableHTML(3, 3)).run();
+    break;
+   case "table-2x2":
+    editor.chain().focus().insertContent(createTableHTML(2, 2)).run();
+    break;
+   case "table-3x3":
+    editor.chain().focus().insertContent(createTableHTML(3, 3)).run();
+    break;
+   case "table-large":
+    editor.chain().focus().insertContent(createTableHTML(5, 5)).run();
+    break;
   }
 
   setShowCommandMenu(false);
@@ -268,6 +293,55 @@ export default function RichTextEditor({
  }) => {
   if (editor) {
    editor.chain().focus().setImage(data).run();
+  }
+ };
+
+ const handleTableTemplateSelect = (templateId: string) => {
+  if (editor) {
+   const template = advancedTableTemplates[templateId];
+   if (template && template.data) {
+    // Create table using Tiptap's table commands
+    const { rows, cols } = template.template;
+
+    // Insert empty table first
+    editor
+     .chain()
+     .focus()
+     .insertTable({ rows, cols, withHeaderRow: true })
+     .run();
+
+    // For now, just create the table structure
+    // TODO: Add logic to populate cells with template data
+    console.log("Template selected:", templateId, "Data:", template.data);
+   } else {
+    // Fallback for basic table creation based on template ID
+    let rows = 3;
+    let cols = 3;
+
+    switch (templateId) {
+     case "table-2x2":
+      rows = 2;
+      cols = 2;
+      break;
+     case "table-3x3":
+      rows = 3;
+      cols = 3;
+      break;
+     case "table-large":
+      rows = 5;
+      cols = 5;
+      break;
+     default:
+      rows = 3;
+      cols = 3;
+    }
+
+    editor
+     .chain()
+     .focus()
+     .insertTable({ rows, cols, withHeaderRow: true })
+     .run();
+   }
   }
  };
 
@@ -399,6 +473,7 @@ export default function RichTextEditor({
    <Toolbar
     editor={editor}
     onImageClick={() => setShowImageDialog(true)}
+    onTableClick={() => setShowTableTemplateSelector(true)}
     onLinkClick={(initialData) => {
      if (initialData?.href) {
       setEditingLink(initialData);
@@ -407,21 +482,23 @@ export default function RichTextEditor({
     }}
    />
    <div className="relative bg-white">
-    <EditorContent
-     editor={editor}
-     onDoubleClick={(e) => {
-      const target = e.target as HTMLElement;
-      if (target && target.tagName === "IMG") {
-       e.preventDefault();
-       e.stopPropagation();
-       handleImageEdit(target);
-      } else if (target && target.tagName === "A") {
-       e.preventDefault();
-       e.stopPropagation();
-       handleLinkEdit(target);
-      }
-     }}
-    />
+    <TableContextMenu editor={editor}>
+     <EditorContent
+      editor={editor}
+      onDoubleClick={(e) => {
+       const target = e.target as HTMLElement;
+       if (target && target.tagName === "IMG") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleImageEdit(target);
+       } else if (target && target.tagName === "A") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleLinkEdit(target);
+       }
+      }}
+     />
+    </TableContextMenu>
     {showCommandMenu && (
      <CommandMenu
       position={commandMenuPosition}
@@ -449,6 +526,13 @@ export default function RichTextEditor({
       }}
       onInsert={handleLinkInsert}
       {...(editingLink && { initialData: editingLink })}
+     />
+    )}
+    {showTableTemplateSelector && (
+     <TableTemplateSelector
+      open={showTableTemplateSelector}
+      onClose={() => setShowTableTemplateSelector(false)}
+      onSelect={handleTableTemplateSelect}
      />
     )}
    </div>

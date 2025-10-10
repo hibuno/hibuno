@@ -14,6 +14,10 @@ import {
  Columns as ColumnsIcon,
  Link as LinkIcon,
  Table,
+ Table2,
+ Grid3X3,
+ Rows,
+ Columns,
 } from "lucide-react";
 
 interface CommandMenuProps {
@@ -109,6 +113,30 @@ export default function CommandMenu({
    label: "Link",
    icon: <LinkIcon size={18} />,
    keywords: ["link", "url", "hyperlink", "anchor"],
+  },
+  {
+   id: "table",
+   label: "Table",
+   icon: <Table size={18} />,
+   keywords: ["table", "grid", "data"],
+  },
+  {
+   id: "table-2x2",
+   label: "2x2 Table",
+   icon: <Grid3X3 size={18} />,
+   keywords: ["table", "2x2", "grid", "small"],
+  },
+  {
+   id: "table-3x3",
+   label: "3x3 Table",
+   icon: <Table2 size={18} />,
+   keywords: ["table", "3x3", "grid", "medium"],
+  },
+  {
+   id: "table-large",
+   label: "Large Table (5x5)",
+   icon: <Rows size={18} />,
+   keywords: ["table", "large", "5x5", "big"],
   },
  ];
 

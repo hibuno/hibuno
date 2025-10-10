@@ -23,11 +23,13 @@ import {
  Image as ImageIcon,
  Palette,
  Columns as ColumnsIcon,
+ TableIcon,
 } from "lucide-react";
 
 interface ToolbarProps {
  editor: Editor;
  onImageClick: () => void;
+ onTableClick: () => void;
  onLinkClick: (initialData?: {
   href?: string;
   text?: string;
@@ -40,6 +42,7 @@ export default function Toolbar({
  editor,
  onImageClick,
  onLinkClick,
+ onTableClick,
 }: ToolbarProps) {
  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
@@ -383,6 +386,9 @@ export default function Toolbar({
       title="Two Columns"
      >
       <ColumnsIcon size={18} />
+     </ToolbarButton>
+     <ToolbarButton onClick={() => onTableClick()} title="Insert Table">
+      <TableIcon size={18} />
      </ToolbarButton>
     </div>
    </div>
