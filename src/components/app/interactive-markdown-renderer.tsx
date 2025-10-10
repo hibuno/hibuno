@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MediaDialog, useMediaDialog } from "@/components/media-dialog";
+import { MediaDialog, useMediaDialog } from "@/components/app/media-dialog";
 import { cn } from "@/lib/utils";
 
 interface InteractiveMarkdownRendererProps {

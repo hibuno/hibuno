@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { AuthorAvatar, PostCoverImage } from "@/components/optimized-image";
-import PostNavigation from "@/components/post-navigation";
-import DynamicTOCPostContent from "@/components/dynamic-toc-post-content";
-import ArticleSignature from "@/components/article-signature";
-import { ReadingProgress } from "@/components/reading-progress";
-import SimilarPosts from "@/components/similar-posts";
-import { SiteHeader } from "@/components/site-header";
-import { StructuredData } from "@/components/structured-data";
+import { ErrorBoundary } from "@/components/app/error-boundary";
+import { AuthorAvatar, PostCoverImage } from "@/components/app/optimized-image";
+import PostNavigation from "@/components/app/post-navigation";
+import DynamicTOCPostContent from "@/components/app/dynamic-toc-post-content";
+import ArticleSignature from "@/components/app/article-signature";
+import { ReadingProgress } from "@/components/app/reading-progress";
+import SimilarPosts from "@/components/app/similar-posts";
+import { SiteHeader } from "@/components/app/site-header";
+import { StructuredData } from "@/components/app/structured-data";
 import type { SelectPost } from "@/db/schema";
 import { postQueries } from "@/lib/database";
 import {

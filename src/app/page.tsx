@@ -1,8 +1,8 @@
-import { AnimatedHomepage } from "@/components/animated-homepage";
-import { ErrorBoundary } from "@/components/error-boundary";
-import type { Post } from "@/components/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { StructuredData } from "@/components/structured-data";
+import { AnimatedHomepage } from "@/components/app/animated-homepage";
+import { ErrorBoundary } from "@/components/app/error-boundary";
+import type { Post } from "@/components/app/post-card";
+import { SiteHeader } from "@/components/app/site-header";
+import { StructuredData } from "@/components/app/structured-data";
 import { postQueries } from "@/lib/database";
 import { retryDatabaseOperation } from "@/lib/retry";
 import { generateWebsiteStructuredData } from "@/lib/seo";

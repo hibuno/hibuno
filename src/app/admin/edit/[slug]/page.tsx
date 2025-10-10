@@ -4,13 +4,15 @@ import {
  AlertCircle,
  ArrowLeft,
  CheckCircle,
+ ChevronDown,
+ ChevronUp,
  Clock,
- Copy,
  ExternalLink,
  ImagePlus,
  Info,
  Loader2,
  Save,
+ Settings,
  Sparkles,
  Upload,
  X,
@@ -89,17 +91,12 @@ function ImageDropZone({
  onImageSelect,
  currentImage,
  onRemove,
- label = "Cover Image",
- showMetadata = false,
 }: {
  onImageSelect: (file: File, metadata?: any) => void;
  currentImage: string | null;
  onRemove: () => void;
- label?: string;
- showMetadata?: boolean;
 }) {
  const [isDragging, setIsDragging] = useState(false);
- const [imageMetadata, setImageMetadata] = useState<any>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
 
  const extractImageMetadata = useCallback((file: File) => {
@@ -118,7 +115,6 @@ function ImageDropZone({
       aspectRatio: (img.width / img.height).toFixed(2),
       lastModified: new Date(file.lastModified).toISOString(),
      };
-     setImageMetadata(metadata);
      resolve(metadata);
     };
     img.src = e.target?.result as string;
@@ -157,32 +153,28 @@ function ImageDropZone({
  };
 
  return (
-  <div className="space-y-4">
-   <Label className="text-sm font-medium">{label}</Label>
-
+  <div className="space-y-3">
    {currentImage ? (
     <div className="relative group">
      <img
       src={currentImage}
       alt="Cover preview"
-      className="w-full h-48 object-cover rounded-lg border"
+      className="w-full h-32 object-cover rounded-lg border"
      />
-     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-      <div className="flex gap-2">
-       <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        onClick={() => fileInputRef.current?.click()}
-       >
-        <Upload className="w-4 h-4 mr-2" />
-        Replace
-       </Button>
-       <Button type="button" variant="destructive" size="sm" onClick={onRemove}>
-        <X className="w-4 h-4 mr-2" />
-        Remove
-       </Button>
-      </div>
+     <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+      <Button
+       type="button"
+       variant="secondary"
+       size="sm"
+       onClick={() => fileInputRef.current?.click()}
+      >
+       <Upload className="w-3 h-3 mr-1" />
+       Change
+      </Button>
+      <Button type="button" variant="destructive" size="sm" onClick={onRemove}>
+       <X className="w-3 h-3 mr-1" />
+       Remove
+      </Button>
      </div>
     </div>
    ) : (
@@ -191,7 +183,7 @@ function ImageDropZone({
      onDragLeave={handleDragLeave}
      onDrop={handleDrop}
      className={`
-            border-2 border-dashed rounded-lg p-12 text-center cursor-pointer
+            border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
             transition-colors
             ${
              isDragging
@@ -201,27 +193,9 @@ function ImageDropZone({
           `}
      onClick={() => fileInputRef.current?.click()}
     >
-     <ImagePlus className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-     <p className="text-sm text-gray-600 mb-2">
-      Drag and drop an image here, or click to select
-     </p>
-     <p className="text-xs text-gray-500">
-      Supports: JPEG, PNG, WebP, GIF (max 5MB)
-     </p>
-    </div>
-   )}
-
-   {showMetadata && imageMetadata && (
-    <div className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
-     <div className="font-medium text-gray-700">Image Information:</div>
-     <div className="grid grid-cols-2 gap-2 text-gray-600">
-      <span>
-       Dimensions: {imageMetadata.width}×{imageMetadata.height}
-      </span>
-      <span>Size: {(imageMetadata.size / 1024).toFixed(1)} KB</span>
-      <span>Type: {imageMetadata.type}</span>
-      <span>Ratio: {imageMetadata.aspectRatio}:1</span>
-     </div>
+     <ImagePlus className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+     <p className="text-xs text-gray-600 mb-1">Drop image or click to upload</p>
+     <p className="text-xs text-gray-500">JPEG, PNG, WebP (max 5MB)</p>
     </div>
    )}
 
@@ -245,7 +219,6 @@ function useFormValidation(formData: any) {
   const newErrors: Record<string, string> = {};
   const newWarnings: Record<string, string> = {};
 
-  // Required field validation
   if (!formData.title?.trim()) {
    newErrors.title = "Title is required";
   } else if (formData.title.length < 10) {
@@ -257,21 +230,19 @@ function useFormValidation(formData: any) {
   if (!formData.content?.trim()) {
    newErrors.content = "Content is required";
   } else if (formData.content.length < 300) {
-   newWarnings.content =
-    "Content might be too short for a good reading experience";
+   newWarnings.content = "Content might be too short";
   }
 
-  // SEO validation
   if (formData.excerpt && formData.excerpt.length > 200) {
-   newWarnings.excerpt = "Excerpt is too long for SEO meta description";
+   newWarnings.excerpt = "Excerpt too long for SEO";
   }
 
   if (!formData.excerpt && formData.content) {
-   newWarnings.excerpt = "Consider adding an excerpt for better SEO";
+   newWarnings.excerpt = "Add excerpt for better SEO";
   }
 
   if (!formData.cover_image_url) {
-   newWarnings.coverImage = "Cover image recommended for social sharing";
+   newWarnings.coverImage = "Cover image recommended";
   }
 
   setErrors(newErrors);
@@ -279,6 +250,41 @@ function useFormValidation(formData: any) {
  }, [formData]);
 
  return { errors, warnings, isValid: Object.keys(errors).length === 0 };
+}
+
+// Collapsible Section Component
+function CollapsibleSection({
+ title,
+ children,
+ defaultOpen = true,
+ badge = null,
+}: {
+ title: string;
+ children: React.ReactNode;
+ defaultOpen?: boolean;
+ badge?: React.ReactNode;
+}) {
+ const [isOpen, setIsOpen] = useState(defaultOpen);
+
+ return (
+  <div className="border-b last:border-b-0">
+   <button
+    onClick={() => setIsOpen(!isOpen)}
+    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+   >
+    <div className="flex items-center gap-2">
+     <span className="text-sm font-medium text-gray-900">{title}</span>
+     {badge}
+    </div>
+    {isOpen ? (
+     <ChevronUp className="w-4 h-4 text-gray-500" />
+    ) : (
+     <ChevronDown className="w-4 h-4 text-gray-500" />
+    )}
+   </button>
+   {isOpen && <div className="px-4 pb-4">{children}</div>}
+  </div>
+ );
 }
 
 export type EditPostPageProps = {
@@ -296,11 +302,11 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   null
  );
  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+ const [showSettings, setShowSettings] = useState(false);
 
  const debouncedContent = useDebounce(formData.content || "", 1000);
  const { errors, warnings, isValid } = useFormValidation(formData);
 
- // Auto-calculate stats and metadata - optimized to prevent unnecessary updates
  useEffect(() => {
   if (debouncedContent && debouncedContent !== formData.content) {
    const stats = calculateStats(debouncedContent);
@@ -309,12 +315,10 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    setFormData((prev: any) => {
     const newData: any = { ...prev };
 
-    // Only update stats if they've actually changed
     if (JSON.stringify(prev) !== JSON.stringify({ ...prev, ...stats })) {
      Object.assign(newData, stats);
     }
 
-    // Auto-generate tags only if no tags exist
     if (
      (!prev.tags || prev.tags.length === 0) &&
      (debouncedContent || currentTitle)
@@ -325,7 +329,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
      }
     }
 
-    // Only update if something actually changed
     return Object.keys(newData).some((key) => newData[key] !== prev[key])
      ? newData
      : prev;
@@ -342,7 +345,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  useEffect(() => {
   const fetchPost = async () => {
    try {
-    // Add cache-busting timestamp to ensure fresh data
     const timestamp = new Date().getTime();
     const response = await fetch(`/api/admin/posts/${slug}?t=${timestamp}`, {
      headers: {
@@ -369,13 +371,8 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  const handleInputChange = useCallback((field: string, value: any) => {
   setFormData((prev: any) => {
-   // Only update if value actually changed
    if (prev[field] === value) return prev;
-
-   return {
-    ...prev,
-    [field]: value,
-   };
+   return { ...prev, [field]: value };
   });
  }, []);
 
@@ -424,7 +421,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     cover_image_url,
    };
 
-   // Use cache-busting for the save request
    const timestamp = new Date().getTime();
    const response = await fetch(`/api/admin/posts/${slug}?t=${timestamp}`, {
     method: "PUT",
@@ -441,9 +437,6 @@ export default function EditPostPage({ params }: EditPostPageProps) {
    }
 
    setLastSaved(new Date());
-
-   // Force refresh the current page to show updated data
-   //  window.location.href = `/${slug}`;
   } catch (error) {
    console.error("Save error:", error);
    alert(
@@ -456,354 +449,446 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
  if (loading) {
   return (
-   <div className="container mx-auto px-4 py-8">
-    <div className="animate-pulse space-y-6">
-     <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-     <div className="h-96 bg-gray-200 rounded"></div>
-    </div>
+   <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
    </div>
   );
  }
 
  if (!post) {
   return (
-   <div className="container mx-auto px-4 py-8 text-center">
-    <h1 className="text-2xl font-bold mb-4">Post not found</h1>
+   <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center">
+     <h1 className="text-2xl font-bold mb-2">Post not found</h1>
+     <Button variant="outline" onClick={() => window.history.back()}>
+      <ArrowLeft className="w-4 h-4 mr-2" />
+      Go Back
+     </Button>
+    </div>
    </div>
   );
  }
 
  return (
-  <div className="container mx-auto px-4 py-4 w-full">
-   {/* Compact Header */}
-   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 py-3 px-4 bg-white rounded-lg border">
-    <div className="flex items-center gap-3">
-     <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
-     <div className="flex items-center gap-2 mt-1">
-      {formData.published ? (
-       <Badge className="bg-green-100 text-green-800">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        Published
-       </Badge>
-      ) : (
-       <Badge variant="secondary">
-        <Clock className="w-3 h-3 mr-1" />
-        Draft
-       </Badge>
-      )}
-     </div>
-    </div>
+  <div className="min-h-screen bg-gray-50">
+   {/* Fixed Header */}
+   <div className="sticky top-0 z-50 bg-white border-b shadow-sm">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div className="flex items-center justify-between h-14">
+      {/* Left Section */}
+      <div className="flex items-center gap-3">
+       <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => (window.location.href = `/${slug}`)}
+       >
+        <ArrowLeft className="w-4 h-4" />
+       </Button>
+       <div className="flex items-center gap-2">
+        <h1 className="text-lg font-semibold text-gray-900">Editor</h1>
+        {formData.published ? (
+         <Badge className="bg-green-100 text-green-800 text-xs">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Published
+         </Badge>
+        ) : (
+         <Badge variant="secondary" className="text-xs">
+          <Clock className="w-3 h-3 mr-1" />
+          Draft
+         </Badge>
+        )}
+       </div>
+      </div>
 
-    <div className="flex items-center gap-2">
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() =>
-       window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
-      }
-     >
-      <ExternalLink className="w-4 h-4 mr-2" />
-      Preview
-     </Button>
+      {/* Right Section */}
+      <div className="flex items-center gap-2">
+       {lastSaved && (
+        <span className="text-xs text-green-600 hidden sm:block">
+         Saved {lastSaved.toLocaleTimeString()}
+        </span>
+       )}
+       <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setShowSettings(!showSettings)}
+       >
+        <Settings className="w-4 h-4 sm:mr-2" />
+        <span className="hidden sm:inline">Settings</span>
+       </Button>
+       <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+         window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
+        }
+       >
+        <ExternalLink className="w-4 h-4 sm:mr-2" />
+        <span className="hidden sm:inline">Preview</span>
+       </Button>
+       <Button
+        onClick={handleSave}
+        disabled={saving || !isValid}
+        size="sm"
+        className={`min-w-[90px] ${
+         formData.published
+          ? "bg-green-600 hover:bg-green-700"
+          : "bg-blue-600 hover:bg-blue-700"
+        }`}
+       >
+        {saving ? (
+         <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Saving...
+         </>
+        ) : (
+         <>
+          <Save className="w-4 h-4 mr-2" />
+          {formData.published ? "Update" : "Save"}
+         </>
+        )}
+       </Button>
+      </div>
+     </div>
     </div>
    </div>
 
-   {/* Validation Alerts */}
-   {Object.keys(errors).length > 0 && (
-    <Alert className="mb-4 border-red-200 bg-red-50">
-     <AlertCircle className="h-4 w-4 text-red-600" />
-     <AlertDescription className="text-red-800">
-      Please fix: {Object.values(errors).join(", ")}
-     </AlertDescription>
-    </Alert>
-   )}
+   {/* Main Content */}
+   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    {/* Validation Alerts */}
+    {Object.keys(errors).length > 0 && (
+     <Alert className="mb-4 border-red-200 bg-red-50">
+      <AlertCircle className="h-4 w-4 text-red-600" />
+      <AlertDescription className="text-red-800 text-sm">
+       {Object.values(errors).join(", ")}
+      </AlertDescription>
+     </Alert>
+    )}
 
-   {Object.keys(warnings).length > 0 && (
-    <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-     <Info className="h-4 w-4 text-yellow-600" />
-     <AlertDescription className="text-yellow-800">
-      Suggestions: {Object.values(warnings).join(", ")}
-     </AlertDescription>
-    </Alert>
-   )}
+    {Object.keys(warnings).length > 0 && !showSettings && (
+     <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+      <Info className="h-4 w-4 text-yellow-600" />
+      <AlertDescription className="text-yellow-800 text-sm">
+       {Object.values(warnings).join(", ")}
+      </AlertDescription>
+     </Alert>
+    )}
 
-   {/* Main Content Grid */}
-   {/* Main Content Grid */}
-   <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4">
-    {/* Left Column - Main Content */}
-    <div className="space-y-4">
-     {/* Basic Information */}
-     <div className="bg-white border rounded-lg">
-      <div className="px-4 py-3 border-b bg-gray-50">
-       <h3 className="text-sm font-semibold text-gray-900">
-        Basic Information
-       </h3>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+     {/* Main Editor Column */}
+     <div className="space-y-4">
+      {/* Title Input */}
+      <div className="bg-white rounded-lg border shadow-sm p-6">
+       <Input
+        value={formData.title || ""}
+        onChange={(e) => handleInputChange("title", e.target.value)}
+        placeholder="Post title..."
+        className={`text-3xl font-bold border-0 px-0 focus-visible:ring-0 placeholder:text-gray-300 ${
+         errors.title ? "text-red-600" : ""
+        }`}
+       />
+       <Input
+        value={formData.slug || ""}
+        onChange={(e) => handleInputChange("slug", e.target.value)}
+        placeholder="post-url-slug"
+        className="text-sm text-gray-500 border-0 px-0 mt-2 focus-visible:ring-0"
+       />
       </div>
-      <div className="p-4 space-y-4">
-       <div>
-        <Label htmlFor="title" className="text-sm font-medium text-gray-700">
-         Title *
-        </Label>
-        <Input
-         id="title"
-         value={formData.title || ""}
-         onChange={(e) => handleInputChange("title", e.target.value)}
-         placeholder="Enter an engaging title..."
-         className={`mt-1.5 ${errors.title ? "border-red-500" : ""}`}
-        />
-       </div>
 
-       <div>
-        <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
-         URL Slug *
-        </Label>
-        <Input
-         id="slug"
-         value={formData.slug || ""}
-         onChange={(e) => handleInputChange("slug", e.target.value)}
-         placeholder="post-url-slug"
-         className="mt-1.5"
-        />
-       </div>
-
-       <div>
-        <Label htmlFor="excerpt" className="text-sm font-medium text-gray-700">
-         Excerpt
-        </Label>
-        <Textarea
-         id="excerpt"
-         value={formData.excerpt || ""}
-         onChange={(e) => handleInputChange("excerpt", e.target.value)}
-         placeholder="Brief description for SEO and social sharing..."
-         rows={3}
-         className="mt-1.5 resize-none"
-        />
-        <div className="flex justify-between text-xs text-gray-500 mt-1.5">
-         <span>{warnings.excerpt || "Recommended: 120-200 characters"}</span>
-         <span>{(formData.excerpt || "").length}/200</span>
-        </div>
-       </div>
-
-       <div>
-        <Label className="text-sm font-medium text-gray-700 mb-1.5 block">
-         Tags
-        </Label>
-        <div className="flex gap-2">
-         <Input
-          value={
-           Array.isArray(formData.tags)
-            ? formData.tags.join(", ")
-            : formData.tags || ""
-          }
-          onChange={(e) =>
-           handleInputChange(
-            "tags",
-            e.target.value
-             .split(",")
-             .map((tag) => tag.trim())
-             .filter(Boolean)
-           )
-          }
-          placeholder="javascript, react, web-development"
-          className="flex-1"
-         />
-         <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-           const autoTags = generateTags(
-            formData.content || "",
-            formData.title || ""
-           );
-           handleInputChange("tags", autoTags);
-          }}
-         >
-          <Sparkles className="w-4 h-4 mr-1.5" />
-          Generate
-         </Button>
-        </div>
-       </div>
-      </div>
-     </div>
-
-     {/* Content Editor */}
-     <div className="bg-white border rounded-lg overflow-hidden">
-      <div className="px-4 py-3 border-b bg-gray-50">
-       <h3 className="text-sm font-semibold text-gray-900">Content Editor</h3>
-      </div>
-      <div className="p-0">
+      {/* Rich Text Editor */}
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
        <RichTextEditor
         content={formData.content || ""}
         onChange={(content) => handleInputChange("content", content)}
        />
       </div>
      </div>
-    </div>
 
-    {/* Right Column - Sidebar */}
-    <div className="space-y-4">
-     {/* Publishing Settings */}
-     <div className="bg-white border rounded-lg">
-      <div className="px-4 py-3 border-b bg-gray-50">
-       <h3 className="text-sm font-semibold text-gray-900">Publishing</h3>
-      </div>
-      <div className="p-4 space-y-4">
-       <div className="flex items-center justify-between py-2">
-        <div className="flex items-center gap-3">
-         <div
-          className={`p-1.5 rounded-full ${
-           formData.published ? "bg-green-100" : "bg-gray-100"
-          }`}
+     {/* Settings Sidebar */}
+     {showSettings && (
+      <div className="lg:block hidden">
+       <div className="sticky top-20 space-y-4">
+        {/* Publishing Settings */}
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+         <div className="px-4 py-3 border-b bg-gray-50">
+          <h3 className="text-sm font-semibold text-gray-900">Settings</h3>
+         </div>
+
+         <CollapsibleSection
+          title="Publishing"
+          badge={
+           formData.published ? (
+            <Badge className="bg-green-100 text-green-800 text-xs">Live</Badge>
+           ) : (
+            <Badge variant="secondary" className="text-xs">
+             Draft
+            </Badge>
+           )
+          }
          >
-          {formData.published ? (
-           <CheckCircle className="w-4 h-4 text-green-600" />
-          ) : (
-           <Clock className="w-4 h-4 text-gray-600" />
-          )}
-         </div>
-         <div>
-          <div className="text-sm font-medium text-gray-900">Published</div>
-          {formData.published && formData.published_at && (
-           <div className="text-xs text-gray-500 mt-0.5">
-            {new Date(formData.published_at).toLocaleDateString()}
+          <div className="space-y-4">
+           <div className="flex items-center justify-between">
+            <Label className="text-sm">Published</Label>
+            <Switch
+             checked={formData.published || false}
+             onCheckedChange={(checked) =>
+              handleInputChange("published", checked)
+             }
+            />
            </div>
-          )}
-         </div>
+           <div>
+            <Label className="text-xs text-gray-600">Published Date</Label>
+            <Input
+             type="datetime-local"
+             value={
+              formData.published_at
+               ? new Date(formData.published_at).toISOString().slice(0, 16)
+               : ""
+             }
+             onChange={(e) =>
+              handleInputChange(
+               "published_at",
+               e.target.value ? new Date(e.target.value).toISOString() : null
+              )
+             }
+             className="mt-1.5 text-sm"
+            />
+           </div>
+           <div>
+            <Label className="text-xs text-gray-600">Created Date</Label>
+            <Input
+             type="datetime-local"
+             value={
+              formData.created_at
+               ? new Date(formData.created_at).toISOString().slice(0, 16)
+               : ""
+             }
+             onChange={(e) =>
+              handleInputChange(
+               "created_at",
+               e.target.value
+                ? new Date(e.target.value).toISOString()
+                : new Date().toISOString()
+              )
+             }
+             className="mt-1.5 text-sm"
+            />
+           </div>
+          </div>
+         </CollapsibleSection>
+
+         <CollapsibleSection title="SEO & Metadata">
+          <div className="space-y-4">
+           <div>
+            <Label className="text-xs text-gray-600">Excerpt</Label>
+            <Textarea
+             value={formData.excerpt || ""}
+             onChange={(e) => handleInputChange("excerpt", e.target.value)}
+             placeholder="Brief description..."
+             rows={3}
+             className="mt-1.5 text-sm resize-none"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+             <span>120-200 chars recommended</span>
+             <span>{(formData.excerpt || "").length}/200</span>
+            </div>
+           </div>
+           <div>
+            <div className="flex items-center justify-between mb-1.5">
+             <Label className="text-xs text-gray-600">Tags</Label>
+             <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+               const autoTags = generateTags(
+                formData.content || "",
+                formData.title || ""
+               );
+               handleInputChange("tags", autoTags);
+              }}
+              className="h-6 text-xs"
+             >
+              <Sparkles className="w-3 h-3 mr-1" />
+              Generate
+             </Button>
+            </div>
+            <Input
+             value={
+              Array.isArray(formData.tags)
+               ? formData.tags.join(", ")
+               : formData.tags || ""
+             }
+             onChange={(e) =>
+              handleInputChange(
+               "tags",
+               e.target.value
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter(Boolean)
+              )
+             }
+             placeholder="javascript, react, ..."
+             className="text-sm"
+            />
+           </div>
+          </div>
+         </CollapsibleSection>
+
+         <CollapsibleSection title="Cover Image">
+          <ImageDropZone
+           currentImage={coverImagePreview}
+           onImageSelect={handleCoverImageSelect}
+           onRemove={removeCoverImage}
+          />
+         </CollapsibleSection>
         </div>
-        <Switch
-         checked={formData.published || false}
-         onCheckedChange={(checked) => handleInputChange("published", checked)}
-        />
-       </div>
-
-       <div>
-        <Label
-         htmlFor="published_at"
-         className="text-sm font-medium text-gray-700"
-        >
-         Published Date
-        </Label>
-        <Input
-         id="published_at"
-         type="datetime-local"
-         value={
-          formData.published_at
-           ? new Date(formData.published_at).toISOString().slice(0, 16)
-           : ""
-         }
-         onChange={(e) =>
-          handleInputChange(
-           "published_at",
-           e.target.value ? new Date(e.target.value).toISOString() : null
-          )
-         }
-         className="mt-1.5"
-        />
-       </div>
-
-       <div>
-        <Label
-         htmlFor="created_at"
-         className="text-sm font-medium text-gray-700"
-        >
-         Created Date
-        </Label>
-        <Input
-         id="created_at"
-         type="datetime-local"
-         value={
-          formData.created_at
-           ? new Date(formData.created_at).toISOString().slice(0, 16)
-           : ""
-         }
-         onChange={(e) =>
-          handleInputChange(
-           "created_at",
-           e.target.value
-            ? new Date(e.target.value).toISOString()
-            : new Date().toISOString()
-          )
-         }
-         className="mt-1.5"
-        />
        </div>
       </div>
-     </div>
-
-     {/* Cover Image */}
-     <div className="bg-white border rounded-lg">
-      <div className="px-4 py-3 border-b bg-gray-50">
-       <h3 className="text-sm font-semibold text-gray-900">Cover Image</h3>
-      </div>
-      <div className="p-4">
-       <ImageDropZone
-        currentImage={coverImagePreview}
-        onImageSelect={handleCoverImageSelect}
-        onRemove={removeCoverImage}
-        showMetadata={false}
-        label=""
-       />
-      </div>
-     </div>
-    </div>
-   </div>
-
-   {/* Action Buttons - Compact */}
-   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 p-2.5 bg-white rounded-lg border gap-3">
-    <div className="flex items-center gap-3 text-sm flex-wrap">
-     <div className="flex items-center gap-1.5">
-      {isValid ? (
-       <>
-        <CheckCircle className="w-4 h-4 text-green-600" />
-        <span className="text-green-700 font-medium">Ready</span>
-       </>
-      ) : (
-       <>
-        <AlertCircle className="w-4 h-4 text-red-600" />
-        <span className="text-red-700 font-medium">Has errors</span>
-       </>
-      )}
-     </div>
-     {lastSaved && (
-      <span className="text-green-600 text-sm">
-       Saved {lastSaved.toLocaleTimeString()}
-      </span>
      )}
     </div>
-
-    <div className="flex gap-2">
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() => (window.location.href = `/${slug}`)}
-     >
-      Cancel
-     </Button>
-     <Button
-      onClick={handleSave}
-      disabled={saving || !isValid}
-      size="sm"
-      className={`min-w-[100px] ${
-       formData.published
-        ? "bg-green-600 hover:bg-green-700"
-        : "bg-blue-600 hover:bg-blue-700"
-      }`}
-     >
-      {saving ? (
-       <>
-        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-        Saving...
-       </>
-      ) : (
-       <>
-        <Save className="w-3 h-3 mr-1.5" />
-        {formData.published ? "Update" : "Save"}
-       </>
-      )}
-     </Button>
-    </div>
    </div>
+
+   {/* Mobile Settings Drawer */}
+   {showSettings && (
+    <div
+     className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
+     onClick={() => setShowSettings(false)}
+    >
+     <div
+      className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+     >
+      <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+       <h2 className="font-semibold">Post Settings</h2>
+       <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>
+        <X className="w-4 h-4" />
+       </Button>
+      </div>
+
+      <div className="p-4 space-y-6">
+       <div>
+        <h3 className="text-sm font-semibold mb-3">Publishing</h3>
+        <div className="space-y-4">
+         <div className="flex items-center justify-between">
+          <Label className="text-sm">Published</Label>
+          <Switch
+           checked={formData.published || false}
+           onCheckedChange={(checked) =>
+            handleInputChange("published", checked)
+           }
+          />
+         </div>
+         <div>
+          <Label className="text-xs text-gray-600">Published Date</Label>
+          <Input
+           type="datetime-local"
+           value={
+            formData.published_at
+             ? new Date(formData.published_at).toISOString().slice(0, 16)
+             : ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "published_at",
+             e.target.value ? new Date(e.target.value).toISOString() : null
+            )
+           }
+           className="mt-1.5"
+          />
+         </div>
+         <div>
+          <Label className="text-xs text-gray-600">Created Date</Label>
+          <Input
+           type="datetime-local"
+           value={
+            formData.created_at
+             ? new Date(formData.created_at).toISOString().slice(0, 16)
+             : ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "created_at",
+             e.target.value
+              ? new Date(e.target.value).toISOString()
+              : new Date().toISOString()
+            )
+           }
+           className="mt-1.5"
+          />
+         </div>
+        </div>
+       </div>
+
+       <div>
+        <h3 className="text-sm font-semibold mb-3">SEO & Metadata</h3>
+        <div className="space-y-4">
+         <div>
+          <Label className="text-xs text-gray-600">Excerpt</Label>
+          <Textarea
+           value={formData.excerpt || ""}
+           onChange={(e) => handleInputChange("excerpt", e.target.value)}
+           placeholder="Brief description..."
+           rows={3}
+           className="mt-1.5 resize-none"
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+           <span>120-200 chars recommended</span>
+           <span>{(formData.excerpt || "").length}/200</span>
+          </div>
+         </div>
+         <div>
+          <div className="flex items-center justify-between mb-1.5">
+           <Label className="text-xs text-gray-600">Tags</Label>
+           <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+             const autoTags = generateTags(
+              formData.content || "",
+              formData.title || ""
+             );
+             handleInputChange("tags", autoTags);
+            }}
+            className="h-6 text-xs"
+           >
+            <Sparkles className="w-3 h-3 mr-1" />
+            Generate
+           </Button>
+          </div>
+          <Input
+           value={
+            Array.isArray(formData.tags)
+             ? formData.tags.join(", ")
+             : formData.tags || ""
+           }
+           onChange={(e) =>
+            handleInputChange(
+             "tags",
+             e.target.value
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+            )
+           }
+           placeholder="javascript, react, ..."
+          />
+         </div>
+        </div>
+       </div>
+
+       <div>
+        <h3 className="text-sm font-semibold mb-3">Cover Image</h3>
+        <ImageDropZone
+         currentImage={coverImagePreview}
+         onImageSelect={handleCoverImageSelect}
+         onRemove={removeCoverImage}
+        />
+       </div>
+      </div>
+     </div>
+    </div>
+   )}
   </div>
  );
 }
