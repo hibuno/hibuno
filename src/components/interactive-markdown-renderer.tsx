@@ -265,13 +265,11 @@ export default function MarkdownRenderer({
  markdown,
  className,
 }: MarkdownRendererProps) {
- // This will be replaced with the server-side rendered HTML
- // For now, we'll use a simple markdown-to-HTML conversion
- // In a real implementation, you'd use your existing markdownToHtml function
+ // Pass content directly as HTML (no markdown conversion needed)
 
  return (
   <InteractiveMarkdownRenderer
-   html={markdown} // This should be the HTML from your server-side renderer
+   html={markdown} // Content is already HTML
    {...(className && { className })}
   />
  );

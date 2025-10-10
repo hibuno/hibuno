@@ -21,9 +21,6 @@ export const posts = pgTable(
 		tags: text("tags").array(),
 		published: boolean("published").default(false).notNull(),
 		published_at: timestamp("published_at", { withTimezone: true }),
-		// GitHub repository information
-		github_repo_url: text("github_repo_url"),
-		homepage_url: text("homepage_url"),
 		created_at: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),

@@ -10,8 +10,8 @@ import {
  useVideoConfig,
  Video as RemotionVideo,
 } from "remotion";
-import { Oscilloscope } from "./Visualizers";
-import { PaginatedCaptions } from "./Captions";
+import { Oscilloscope } from "./visualizers";
+import { PaginatedCaptions } from "./captions";
 import {
  BASE_SIZE,
  CAPTIONS_FONT_SIZE,
@@ -19,7 +19,7 @@ import {
  LINE_HEIGHT,
  LINES_PER_PAGE,
 } from "../helpers/constants";
-import { FONT_FAMILY, WaitForFonts } from "./Font";
+import { FONT_FAMILY, WaitForFonts } from "./font";
 import type { VideoCompositionSchemaType } from "../helpers/schema";
 
 // Component for rendering media (image or video) with sliding animations

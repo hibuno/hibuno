@@ -2,7 +2,6 @@
 
 import Image, { type ImageProps } from "next/image";
 import React from "react";
-import { useMediaContext } from "@/components/media-provider";
 import { cn } from "@/lib/utils";
 
 interface OptimizedImageProps extends Omit<ImageProps, "src"> {
@@ -48,7 +47,6 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
  const [imageSrc, setImageSrc] = React.useState(src);
  const [isLoading, setIsLoading] = React.useState(true);
- const { openDialog } = useMediaContext();
 
  const handleError = () => {
   if (imageSrc !== fallback) {
@@ -60,20 +58,6 @@ export function OptimizedImage({
   setIsLoading(false);
  };
 
- const handleClick = () => {
-  if (clickable) {
-   const dialogData: Parameters<typeof openDialog>[0] = {
-    src: imageSrc,
-    type: "image",
-   };
-
-   if (alt) dialogData.alt = alt;
-   if (caption) dialogData.caption = caption;
-
-   openDialog(dialogData);
-  }
- };
-
  return (
   <div
    className={cn(
@@ -82,7 +66,6 @@ export function OptimizedImage({
     clickable && "cursor-pointer hover:opacity-90 transition-opacity",
     className
    )}
-   onClick={handleClick}
   >
    <Image
     src={imageSrc}
@@ -118,24 +101,9 @@ export function OptimizedVideo({
  poster,
 }: OptimizedVideoProps) {
  const [isLoading, setIsLoading] = React.useState(true);
- const { openDialog } = useMediaContext();
 
  const handleLoad = () => {
   setIsLoading(false);
- };
-
- const handleClick = (e: React.MouseEvent) => {
-  if (clickable && e.target === e.currentTarget) {
-   // Only open dialog if clicking on the video itself, not controls
-   const dialogData: Parameters<typeof openDialog>[0] = {
-    src,
-    type: "video",
-   };
-
-   if (caption) dialogData.caption = caption;
-
-   openDialog(dialogData);
-  }
  };
 
  return (
@@ -160,7 +128,6 @@ export function OptimizedVideo({
     loop={loop}
     poster={poster}
     onLoadedData={handleLoad}
-    onClick={handleClick}
     preload="metadata"
    >
     Your browser does not support the video tag.

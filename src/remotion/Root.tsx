@@ -1,7 +1,7 @@
 import "./index.css";
 import { parseMedia } from "@remotion/media-parser";
 import { Composition, staticFile } from "remotion";
-import { Video } from "./Video/Main";
+import { Video } from "./video/main";
 import { videoSchema } from "./helpers/schema";
 import { getRandomBackgroundSound } from "./helpers/background-sound";
 import { getSubtitles } from "./helpers/fetch-captions";

@@ -601,3 +601,133 @@
 		}
 	}
 }
+
+.ProseMirror {
+	@apply outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	@apply text-gray-400 float-left h-0 pointer-events-none;
+}
+
+.ProseMirror h1 {
+	@apply text-4xl font-bold mb-4 mt-6;
+}
+
+.ProseMirror h2 {
+	@apply text-3xl font-bold mb-3 mt-5;
+}
+
+.ProseMirror h3 {
+	@apply text-2xl font-bold mb-2 mt-4;
+}
+
+.ProseMirror p {
+	@apply mb-4 leading-relaxed;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+	@apply pl-6 mb-4;
+}
+
+.ProseMirror ul {
+	@apply list-disc;
+}
+
+.ProseMirror ol {
+	@apply list-decimal;
+}
+
+.ProseMirror li {
+	@apply mb-2;
+}
+
+.ProseMirror ul[data-type="taskList"] {
+	@apply list-none pl-0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+	@apply flex items-start gap-2;
+}
+
+.ProseMirror ul[data-type="taskList"] li input[type="checkbox"] {
+	@apply mt-1 cursor-pointer;
+}
+
+.ProseMirror blockquote {
+	@apply border-l-4 border-gray-300 pl-4 italic text-gray-700 my-4;
+}
+
+.ProseMirror code {
+	@apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800;
+}
+
+.ProseMirror pre {
+	@apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.ProseMirror pre code {
+	@apply bg-transparent p-0 text-gray-100;
+}
+
+.ProseMirror mark {
+	@apply bg-yellow-200 px-1 rounded;
+}
+
+.ProseMirror hr {
+	@apply border-t-2 border-gray-300 my-6;
+}
+
+.ProseMirror a {
+	@apply text-blue-600 hover:text-blue-800 underline cursor-pointer;
+}
+
+.ProseMirror .image-wrapper {
+	@apply clear-both;
+}
+
+.ProseMirror .image-wrapper img {
+	@apply max-w-full h-auto;
+}
+
+.ProseMirror .columns-wrapper {
+	@apply my-6;
+}
+
+.ProseMirror .column {
+	@apply min-h-[100px];
+}
+
+.ProseMirror .drag-handle {
+	@apply absolute left-0 -ml-8 opacity-0 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing;
+}
+
+.ProseMirror .block:hover .drag-handle {
+	@apply opacity-100;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slide-in-from-top {
+	from {
+		transform: translateY(-8px);
+	}
+
+	to {
+		transform: translateY(0);
+	}
+}
+
+.animate-in {
+	animation: fade-in 0.2s ease-out, slide-in-from-top 0.2s ease-out;
+}

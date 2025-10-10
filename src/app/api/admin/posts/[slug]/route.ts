@@ -43,8 +43,6 @@ export async function GET(
 			tags: data.tags,
 			published: data.published,
 			published_at: data.published_at,
-			github_repo_url: data.github_repo_url,
-			homepage_url: data.homepage_url,
 			created_at: data.created_at,
 		};
 
@@ -114,8 +112,6 @@ export async function PUT(
 			tags: updateData.tags,
 			published: updateData.published,
 			published_at: updateData.published_at,
-			github_repo_url: updateData.github_repo_url,
-			homepage_url: updateData.homepage_url,
 			// Only update created_at if explicitly provided and different from current value
 			...(updateData.created_at && updateData.created_at !== currentPost.created_at && {
 				created_at: updateData.created_at,

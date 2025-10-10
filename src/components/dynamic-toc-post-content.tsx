@@ -1,6 +1,5 @@
 import "server-only";
-import { extractHeadings } from "./post-toc";
-import { markdownToHtml } from "./markdown-renderer";
+import { extractHeadingsFromHtml } from "./post-toc";
 
 interface DynamicTOCPostContentProps {
  post: {
@@ -19,29 +18,27 @@ export default async function DynamicTOCPostContent({
   );
  }
 
- // Extract headings for TOC
- const tocItems = await extractHeadings(post.content);
+ // Extract headings for TOC from HTML content
+ const tocItems = await extractHeadingsFromHtml(post.content);
 
  // If no headings, just render normally
  if (tocItems.length === 0) {
-  return <MarkdownRendererWithTOC html="" tocItems={[]} />;
+  return <HtmlRendererWithTOC html="" tocItems={[]} />;
  }
 
- // Convert markdown to HTML
- const html = await markdownToHtml(post.content);
-
- return <MarkdownRendererWithTOC html={html} tocItems={tocItems} />;
+ // Content is already HTML, use directly
+ return <HtmlRendererWithTOC html={post.content} tocItems={tocItems} />;
 }
 
-interface MarkdownRendererWithTOCProps {
+interface HtmlRendererWithTOCProps {
  html: string;
  tocItems: Array<{ depth: number; text: string; id: string }>;
 }
 
-async function MarkdownRendererWithTOC({
+async function HtmlRendererWithTOC({
  html,
  tocItems,
-}: MarkdownRendererWithTOCProps) {
+}: HtmlRendererWithTOCProps) {
  // Import the interactive component dynamically to avoid SSR issues
  const { InteractiveMarkdownRenderer } = await import(
   "./interactive-markdown-renderer"

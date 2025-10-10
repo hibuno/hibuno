@@ -5,39 +5,26 @@ import {
  ArrowLeft,
  CheckCircle,
  Clock,
- Code as CodeIcon,
  Copy,
  ExternalLink,
  ImagePlus,
  Info,
- Link,
- List,
- ListOrdered,
  Loader2,
- Quote,
- Redo,
  Save,
  Sparkles,
- Undo,
  Upload,
  X,
- Bold,
- Italic,
- Heading1,
- Heading2,
- Heading3,
 } from "lucide-react";
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import { MediaProvider } from "@/components/media-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { calculateStats } from "@/lib/utils";
+import RichTextEditor from "@/components/editor/rich-text-editor";
 
 // Enhanced debounce hook with immediate option
 function useDebounce<T>(value: T, delay: number, immediate = false): T {
@@ -249,442 +236,6 @@ function ImageDropZone({
  );
 }
 
-// Enhanced Monaco Editor with modern features
-function MonacoEditor({
- content,
- onChange,
- onImageUpload,
-}: {
- content: string;
- onChange: (content: string) => void;
- onImageUpload: (file: File) => Promise<string>;
-}) {
- const [isDragging, setIsDragging] = useState(false);
- const [uploading, setUploading] = useState(false);
- const editorRef = useRef<HTMLDivElement>(null);
- const monacoRef = useRef<any>(null);
- const initializedRef = useRef(false);
-
- // Memoize the onChange callback to prevent unnecessary re-renders
- const memoizedOnChange = useCallback(
-  (newContent: string) => {
-   onChange(newContent);
-  },
-  [onChange]
- );
-
- // Initialize Monaco Editor - only once
- useEffect(() => {
-  if (editorRef.current && !monacoRef.current && !initializedRef.current) {
-   const initializeEditor = async () => {
-    try {
-     // Load Monaco Editor if not already loaded
-     if (!(window as any).monaco) {
-      await new Promise<void>((resolve) => {
-       const script = document.createElement("script");
-       script.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js";
-       script.onload = () => {
-        (window as any).require.config({
-         paths: {
-          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs",
-         },
-        });
-
-        (window as any).require(["vs/editor/editor.main"], () => {
-         resolve();
-        });
-       };
-       document.head.appendChild(script);
-      });
-     }
-
-     // Wait a bit for Monaco to be fully loaded
-     await new Promise((resolve) => setTimeout(resolve, 100));
-
-     if (editorRef.current && !monacoRef.current) {
-      const editor = (window as any).monaco.editor.create(editorRef.current, {
-       value: content || "# Start writing your content here...",
-       language: "markdown",
-       theme: "vs-light",
-       minimap: { enabled: false },
-       fontSize: 14,
-       lineNumbers: "on",
-       wordWrap: "on",
-       automaticLayout: true,
-       scrollBeyondLastLine: false,
-       renderWhitespace: "selection",
-       bracketPairColorization: { enabled: true },
-       guides: {
-        bracketPairs: true,
-        indentation: true,
-       },
-      });
-
-      monacoRef.current = editor;
-      initializedRef.current = true;
-
-      // Listen for content changes
-      editor.onDidChangeModelContent(() => {
-       const newContent = editor.getValue();
-       memoizedOnChange(newContent);
-      });
-     }
-    } catch (error) {
-     console.error("Failed to initialize Monaco Editor:", error);
-    }
-   };
-
-   initializeEditor();
-  }
-
-  return () => {
-   if (monacoRef.current) {
-    monacoRef.current.dispose();
-    monacoRef.current = null;
-    initializedRef.current = false;
-   }
-  };
- }, []); // Remove dependencies to prevent re-initialization
-
- // Update editor content when prop changes (only if significantly different)
- useEffect(() => {
-  if (
-   monacoRef.current &&
-   (window as any).monaco &&
-   content !== undefined &&
-   initializedRef.current
-  ) {
-   const currentValue = monacoRef.current.getValue();
-   // Only update if content is significantly different (not just cursor position changes)
-   if (currentValue.trim() !== content.trim() && content.length > 0) {
-    const selection = monacoRef.current.getSelection();
-    monacoRef.current.pushUndoStop();
-    monacoRef.current.setValue(content);
-    monacoRef.current.pushUndoStop();
-    // Try to restore cursor position if possible
-    try {
-     monacoRef.current.setSelection(selection);
-    } catch (e) {
-     // Ignore cursor position errors
-    }
-   }
-  }
- }, [content]);
-
- const handleDragOver = (e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(true);
- };
-
- const handleDragLeave = () => {
-  setIsDragging(false);
- };
-
- const handleDrop = async (e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(false);
-
-  const file = e.dataTransfer.files[0];
-  if (file?.type.startsWith("image/")) {
-   setUploading(true);
-   try {
-    const imageUrl = await onImageUpload(file);
-
-    // Insert markdown image at cursor position
-    if (monacoRef.current && (window as any).monaco) {
-     const selection = monacoRef.current.getSelection();
-     const text = `\n![${file.name.replace(/\.[^/.]+$/, "")}](${imageUrl})\n`;
-
-     const range = new (window as any).monaco.Range(
-      selection.startLineNumber,
-      selection.startColumn,
-      selection.endLineNumber,
-      selection.endColumn
-     );
-
-     const op = {
-      range: range,
-      text: text,
-      forceMoveMarkers: true,
-     };
-
-     monacoRef.current.executeEdits("insert-image", [op]);
-     monacoRef.current.focus();
-    }
-   } catch (error) {
-    console.error("Upload failed:", error);
-   } finally {
-    setUploading(false);
-   }
-  }
- };
-
- // Insert markdown syntax at cursor position
- const insertMarkdown = (
-  before: string,
-  after: string = "",
-  placeholder = ""
- ) => {
-  if (monacoRef.current && (window as any).monaco) {
-   try {
-    const selection = monacoRef.current.getSelection();
-    const selectedText = monacoRef.current
-     .getModel()
-     .getValueInRange(selection);
-    const insertText = selectedText || placeholder;
-    const text = before + insertText + after;
-
-    // Use Monaco's edit operations
-    const range = new (window as any).monaco.Range(
-     selection.startLineNumber,
-     selection.startColumn,
-     selection.endLineNumber,
-     selection.endColumn
-    );
-
-    const op = {
-     range: range,
-     text: text,
-     forceMoveMarkers: true,
-    };
-
-    monacoRef.current.executeEdits("insert-markdown", [op]);
-
-    // Set cursor position after inserted text if placeholder was used
-    if (insertText === placeholder) {
-     const newPosition = new (window as any).monaco.Position(
-      selection.startLineNumber,
-      selection.startColumn + before.length + insertText.length
-     );
-     monacoRef.current.setPosition(newPosition);
-    }
-
-    // Focus the editor
-    monacoRef.current.focus();
-   } catch (error) {
-    console.error("Error inserting markdown:", error);
-   }
-  }
- };
-
- return (
-  <div className="divide-y">
-   {/* Enhanced Toolbar */}
-   <div className="flex items-center gap-2 p-3 flex-wrap">
-    {/* History Controls */}
-    <div className="flex gap-1">
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-       if (monacoRef.current) {
-        monacoRef.current.getModel()?.undo();
-       }
-      }}
-      title="Undo (Ctrl+Z)"
-      className="hover:bg-white"
-     >
-      <Undo className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-       if (monacoRef.current) {
-        monacoRef.current.getModel()?.redo();
-       }
-      }}
-      title="Redo (Ctrl+Y)"
-      className="hover:bg-white"
-     >
-      <Redo className="w-4 h-4" />
-     </Button>
-    </div>
-
-    <Separator orientation="vertical" className="h-6" />
-
-    {/* Text Formatting */}
-    <div className="flex gap-1">
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("**", "**", "bold text")}
-      title="Bold (Ctrl+B)"
-      className="hover:bg-white"
-     >
-      <Bold className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("*", "*", "italic text")}
-      title="Italic (Ctrl+I)"
-      className="hover:bg-white"
-     >
-      <Italic className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("`", "`", "code")}
-      title="Inline Code"
-      className="hover:bg-white"
-     >
-      <CodeIcon className="w-4 h-4" />
-     </Button>
-    </div>
-
-    <Separator orientation="vertical" className="h-6" />
-
-    {/* Headers */}
-    <div className="flex gap-1">
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("# ", "", "Heading 1")}
-      title="Heading 1"
-      className="hover:bg-white"
-     >
-      <Heading1 className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("## ", "", "Heading 2")}
-      title="Heading 2"
-      className="hover:bg-white"
-     >
-      <Heading2 className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("### ", "", "Heading 3")}
-      title="Heading 3"
-      className="hover:bg-white"
-     >
-      <Heading3 className="w-4 h-4" />
-     </Button>
-    </div>
-
-    <Separator orientation="vertical" className="h-6" />
-
-    {/* Lists and Quotes */}
-    <div className="flex gap-1">
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("- ", "", "List item")}
-      title="Bullet List"
-      className="hover:bg-white"
-     >
-      <List className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("1. ", "", "Numbered item")}
-      title="Numbered List"
-      className="hover:bg-white"
-     >
-      <ListOrdered className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("> ", "", "Quote")}
-      title="Quote"
-      className="hover:bg-white"
-     >
-      <Quote className="w-4 h-4" />
-     </Button>
-    </div>
-
-    <Separator orientation="vertical" className="h-6" />
-
-    {/* Links and Media */}
-    <div className="flex gap-1">
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("[", "](url)", "link text")}
-      title="Link (Ctrl+K)"
-      className="hover:bg-white"
-     >
-      <Link className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("![", "](url)", "alt text")}
-      title="Image"
-      className="hover:bg-white"
-     >
-      <ImagePlus className="w-4 h-4" />
-     </Button>
-     <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => insertMarkdown("```\n", "\n```", "code block")}
-      title="Code Block"
-      className="hover:bg-white"
-     >
-      <CodeIcon className="w-4 h-4" />
-     </Button>
-    </div>
-   </div>
-
-   {/* Editor Area */}
-   <div className="relative">
-    <div
-     ref={editorRef}
-     className="h-[500px] overflow-hidden"
-     onDragOver={handleDragOver}
-     onDragLeave={handleDragLeave}
-     onDrop={handleDrop}
-    />
-    {isDragging && (
-     <div className="absolute inset-0 bg-blue-50 bg-opacity-90 flex items-center justify-center pointer-events-none rounded-lg">
-      <div className="text-center">
-       <Upload className="w-12 h-12 mx-auto mb-2 text-blue-500" />
-       <p className="text-blue-700 font-medium">
-        Drop image to upload and insert
-       </p>
-      </div>
-     </div>
-    )}
-    {uploading && (
-     <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
-      <div className="text-center">
-       <Loader2 className="w-8 h-8 mx-auto mb-2 text-blue-500 animate-spin" />
-       <p className="text-gray-700">Uploading image...</p>
-      </div>
-     </div>
-    )}
-   </div>
-
-   <div className="text-xs text-gray-500 text-center w-full py-2">
-    Lines: {content.split("\n").length} | Characters: {content.length}
-   </div>
-  </div>
- );
-}
-
 // Smart form validation
 function useFormValidation(formData: any) {
  const [errors, setErrors] = useState<Record<string, string>>({});
@@ -711,7 +262,7 @@ function useFormValidation(formData: any) {
   }
 
   // SEO validation
-  if (formData.excerpt && formData.excerpt.length > 160) {
+  if (formData.excerpt && formData.excerpt.length > 200) {
    newWarnings.excerpt = "Excerpt is too long for SEO meta description";
   }
 
@@ -927,424 +478,381 @@ export default function EditPostPage({ params }: EditPostPageProps) {
  }
 
  return (
-  <MediaProvider>
-   <div className="container mx-auto px-4 py-4 w-full">
-    {/* Compact Header */}
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
-     <div className="flex items-center gap-3">
-      <Button
-       variant="outline"
-       size="sm"
-       onClick={() => (window.location.href = `/${slug}`)}
-      >
-       <ArrowLeft className="w-4 h-4 mr-2" />
-       Back
-      </Button>
+  <div className="container mx-auto px-4 py-4 w-full">
+   {/* Compact Header */}
+   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 p-2.5 bg-white rounded-lg border">
+    <div className="flex items-center gap-3">
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={() => (window.location.href = `/${slug}`)}
+     >
+      <ArrowLeft className="w-4 h-4 mr-2" />
+      Back
+     </Button>
 
-      <div>
-       <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
-       <div className="flex items-center gap-2 mt-1">
-        {formData.published ? (
-         <Badge className="bg-green-100 text-green-800">
-          <CheckCircle className="w-3 h-3 mr-1" />
-          Published
-         </Badge>
-        ) : (
-         <Badge variant="secondary">
-          <Clock className="w-3 h-3 mr-1" />
-          Draft
-         </Badge>
-        )}
-       </div>
+     <div>
+      <h1 className="text-2xl font-bold text-gray-900">Edit Post</h1>
+      <div className="flex items-center gap-2 mt-1">
+       {formData.published ? (
+        <Badge className="bg-green-100 text-green-800">
+         <CheckCircle className="w-3 h-3 mr-1" />
+         Published
+        </Badge>
+       ) : (
+        <Badge variant="secondary">
+         <Clock className="w-3 h-3 mr-1" />
+         Draft
+        </Badge>
+       )}
       </div>
      </div>
+    </div>
 
-     <div className="flex items-center gap-2">
-      <Button
-       variant="outline"
-       size="sm"
-       onClick={async () => {
-        try {
-         const timestamp = new Date().getTime();
-         const response = await fetch(
-          `/api/admin/posts/${slug}?t=${timestamp}`,
-          {
-           headers: { "Cache-Control": "no-cache" },
-          }
-         );
-         if (response.ok) {
-          const freshData = await response.json();
-          setPost(freshData);
-          setFormData(freshData);
-          setCoverImagePreview(freshData.cover_image_url || null);
-          alert("Data refreshed from database");
+    <div className="flex items-center gap-2">
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={async () => {
+       try {
+        const timestamp = new Date().getTime();
+        const response = await fetch(
+         `/api/admin/posts/${slug}?t=${timestamp}`,
+         {
+          headers: { "Cache-Control": "no-cache" },
          }
-        } catch (error) {
-         console.error("Refresh failed:", error);
+        );
+        if (response.ok) {
+         const freshData = await response.json();
+         setPost(freshData);
+         setFormData(freshData);
+         setCoverImagePreview(freshData.cover_image_url || null);
+         alert("Data refreshed from database");
         }
-       }}
-      >
-       🔄 Refresh
-      </Button>
-      <Button
-       variant="outline"
-       size="sm"
-       onClick={() => copyToClipboard(`${window.location.origin}/${slug}`)}
-      >
-       <Copy className="w-4 h-4 mr-2" />
-       Copy URL
-      </Button>
-      <Button
-       variant="outline"
-       size="sm"
-       onClick={() =>
-        window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
+       } catch (error) {
+        console.error("Refresh failed:", error);
        }
-      >
-       <ExternalLink className="w-4 h-4 mr-2" />
-       Preview
-      </Button>
-     </div>
+      }}
+     >
+      🔄 Refresh
+     </Button>
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={() => copyToClipboard(`${window.location.origin}/${slug}`)}
+     >
+      <Copy className="w-4 h-4 mr-2" />
+      Copy URL
+     </Button>
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={() =>
+       window.open(`/${slug}?t=${new Date().getTime()}`, "_blank")
+      }
+     >
+      <ExternalLink className="w-4 h-4 mr-2" />
+      Preview
+     </Button>
     </div>
+   </div>
 
-    {/* Validation Alerts */}
-    {Object.keys(errors).length > 0 && (
-     <Alert className="mb-4 border-red-200 bg-red-50">
-      <AlertCircle className="h-4 w-4 text-red-600" />
-      <AlertDescription className="text-red-800">
-       Please fix: {Object.values(errors).join(", ")}
-      </AlertDescription>
-     </Alert>
-    )}
+   {/* Validation Alerts */}
+   {Object.keys(errors).length > 0 && (
+    <Alert className="mb-4 border-red-200 bg-red-50">
+     <AlertCircle className="h-4 w-4 text-red-600" />
+     <AlertDescription className="text-red-800">
+      Please fix: {Object.values(errors).join(", ")}
+     </AlertDescription>
+    </Alert>
+   )}
 
-    {Object.keys(warnings).length > 0 && (
-     <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-      <Info className="h-4 w-4 text-yellow-600" />
-      <AlertDescription className="text-yellow-800">
-       Suggestions: {Object.values(warnings).join(", ")}
-      </AlertDescription>
-     </Alert>
-    )}
+   {Object.keys(warnings).length > 0 && (
+    <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+     <Info className="h-4 w-4 text-yellow-600" />
+     <AlertDescription className="text-yellow-800">
+      Suggestions: {Object.values(warnings).join(", ")}
+     </AlertDescription>
+    </Alert>
+   )}
 
-    {/* Main Content Grid */}
-    {/* Main Content Grid */}
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4">
-     {/* Left Column - Main Content */}
-     <div className="space-y-4">
-      {/* Basic Information */}
-      <div className="bg-white border rounded-lg">
-       <div className="px-4 py-3 border-b bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">
-         Basic Information
-        </h3>
-       </div>
-       <div className="p-4 space-y-4">
-        <div>
-         <Label htmlFor="title" className="text-sm font-medium text-gray-700">
-          Title *
-         </Label>
-         <Input
-          id="title"
-          value={formData.title || ""}
-          onChange={(e) => handleInputChange("title", e.target.value)}
-          placeholder="Enter an engaging title..."
-          className={`mt-1.5 ${errors.title ? "border-red-500" : ""}`}
-         />
-        </div>
-
-        <div>
-         <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
-          URL Slug *
-         </Label>
-         <Input
-          id="slug"
-          value={formData.slug || ""}
-          onChange={(e) => handleInputChange("slug", e.target.value)}
-          placeholder="post-url-slug"
-          className="mt-1.5"
-         />
-        </div>
-
-        <div>
-         <Label htmlFor="excerpt" className="text-sm font-medium text-gray-700">
-          Excerpt
-         </Label>
-         <Textarea
-          id="excerpt"
-          value={formData.excerpt || ""}
-          onChange={(e) => handleInputChange("excerpt", e.target.value)}
-          placeholder="Brief description for SEO and social sharing..."
-          rows={3}
-          className="mt-1.5 resize-none"
-         />
-         <div className="flex justify-between text-xs text-gray-500 mt-1.5">
-          <span>{warnings.excerpt || "Recommended: 120-160 characters"}</span>
-          <span>{(formData.excerpt || "").length}/160</span>
-         </div>
-        </div>
-
-        <div>
-         <Label className="text-sm font-medium text-gray-700 mb-1.5 block">
-          Tags
-         </Label>
-         <div className="flex gap-2">
-          <Input
-           value={
-            Array.isArray(formData.tags)
-             ? formData.tags.join(", ")
-             : formData.tags || ""
-           }
-           onChange={(e) =>
-            handleInputChange(
-             "tags",
-             e.target.value
-              .split(",")
-              .map((tag) => tag.trim())
-              .filter(Boolean)
-            )
-           }
-           placeholder="javascript, react, web-development"
-           className="flex-1"
-          />
-          <Button
-           type="button"
-           variant="outline"
-           size="sm"
-           onClick={() => {
-            const autoTags = generateTags(
-             formData.content || "",
-             formData.title || ""
-            );
-            handleInputChange("tags", autoTags);
-           }}
-          >
-           <Sparkles className="w-4 h-4 mr-1.5" />
-           Generate
-          </Button>
-         </div>
-        </div>
-       </div>
+   {/* Main Content Grid */}
+   {/* Main Content Grid */}
+   <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4">
+    {/* Left Column - Main Content */}
+    <div className="space-y-4">
+     {/* Basic Information */}
+     <div className="bg-white border rounded-lg">
+      <div className="px-4 py-3 border-b bg-gray-50">
+       <h3 className="text-sm font-semibold text-gray-900">
+        Basic Information
+       </h3>
       </div>
-
-      {/* Content Editor */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-       <div className="px-4 py-3 border-b bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">Content Editor</h3>
-       </div>
-       <div className="p-0">
-        <MonacoEditor
-         content={formData.content || ""}
-         onChange={(content: string) => handleInputChange("content", content)}
-         onImageUpload={uploadImageToSupabase}
+      <div className="p-4 space-y-4">
+       <div>
+        <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+         Title *
+        </Label>
+        <Input
+         id="title"
+         value={formData.title || ""}
+         onChange={(e) => handleInputChange("title", e.target.value)}
+         placeholder="Enter an engaging title..."
+         className={`mt-1.5 ${errors.title ? "border-red-500" : ""}`}
         />
        </div>
-      </div>
-     </div>
 
-     {/* Right Column - Sidebar */}
-     <div className="space-y-4">
-      {/* Publishing Settings */}
-      <div className="bg-white border rounded-lg">
-       <div className="px-4 py-3 border-b bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">Publishing</h3>
+       <div>
+        <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
+         URL Slug *
+        </Label>
+        <Input
+         id="slug"
+         value={formData.slug || ""}
+         onChange={(e) => handleInputChange("slug", e.target.value)}
+         placeholder="post-url-slug"
+         className="mt-1.5"
+        />
        </div>
-       <div className="p-4 space-y-4">
-        <div className="flex items-center justify-between py-2">
-         <div className="flex items-center gap-3">
-          <div
-           className={`p-1.5 rounded-full ${
-            formData.published ? "bg-green-100" : "bg-gray-100"
-           }`}
-          >
-           {formData.published ? (
-            <CheckCircle className="w-4 h-4 text-green-600" />
-           ) : (
-            <Clock className="w-4 h-4 text-gray-600" />
-           )}
-          </div>
-          <div>
-           <div className="text-sm font-medium text-gray-900">Published</div>
-           {formData.published && formData.published_at && (
-            <div className="text-xs text-gray-500 mt-0.5">
-             {new Date(formData.published_at).toLocaleDateString()}
-            </div>
-           )}
-          </div>
-         </div>
-         <Switch
-          checked={formData.published || false}
-          onCheckedChange={(checked) => handleInputChange("published", checked)}
-         />
-        </div>
 
-        <div>
-         <Label
-          htmlFor="published_at"
-          className="text-sm font-medium text-gray-700"
-         >
-          Published Date
-         </Label>
+       <div>
+        <Label htmlFor="excerpt" className="text-sm font-medium text-gray-700">
+         Excerpt
+        </Label>
+        <Textarea
+         id="excerpt"
+         value={formData.excerpt || ""}
+         onChange={(e) => handleInputChange("excerpt", e.target.value)}
+         placeholder="Brief description for SEO and social sharing..."
+         rows={3}
+         className="mt-1.5 resize-none"
+        />
+        <div className="flex justify-between text-xs text-gray-500 mt-1.5">
+         <span>{warnings.excerpt || "Recommended: 120-200 characters"}</span>
+         <span>{(formData.excerpt || "").length}/200</span>
+        </div>
+       </div>
+
+       <div>
+        <Label className="text-sm font-medium text-gray-700 mb-1.5 block">
+         Tags
+        </Label>
+        <div className="flex gap-2">
          <Input
-          id="published_at"
-          type="datetime-local"
           value={
-           formData.published_at
-            ? new Date(formData.published_at).toISOString().slice(0, 16)
-            : ""
+           Array.isArray(formData.tags)
+            ? formData.tags.join(", ")
+            : formData.tags || ""
           }
           onChange={(e) =>
            handleInputChange(
-            "published_at",
-            e.target.value ? new Date(e.target.value).toISOString() : null
-           )
-          }
-          className="mt-1.5"
-         />
-        </div>
-
-        <div>
-         <Label
-          htmlFor="created_at"
-          className="text-sm font-medium text-gray-700"
-         >
-          Created Date
-         </Label>
-         <Input
-          id="created_at"
-          type="datetime-local"
-          value={
-           formData.created_at
-            ? new Date(formData.created_at).toISOString().slice(0, 16)
-            : ""
-          }
-          onChange={(e) =>
-           handleInputChange(
-            "created_at",
+            "tags",
             e.target.value
-             ? new Date(e.target.value).toISOString()
-             : new Date().toISOString()
+             .split(",")
+             .map((tag) => tag.trim())
+             .filter(Boolean)
            )
           }
-          className="mt-1.5"
+          placeholder="javascript, react, web-development"
+          className="flex-1"
          />
+         <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+           const autoTags = generateTags(
+            formData.content || "",
+            formData.title || ""
+           );
+           handleInputChange("tags", autoTags);
+          }}
+         >
+          <Sparkles className="w-4 h-4 mr-1.5" />
+          Generate
+         </Button>
         </div>
        </div>
       </div>
+     </div>
 
-      {/* Cover Image */}
-      <div className="bg-white border rounded-lg">
-       <div className="px-4 py-3 border-b bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">Cover Image</h3>
-       </div>
-       <div className="p-4">
-        <ImageDropZone
-         currentImage={coverImagePreview}
-         onImageSelect={handleCoverImageSelect}
-         onRemove={removeCoverImage}
-         showMetadata={false}
-         label=""
-        />
-       </div>
+     {/* Content Editor */}
+     <div className="bg-white border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b bg-gray-50">
+       <h3 className="text-sm font-semibold text-gray-900">Content Editor</h3>
       </div>
-
-      {/* GitHub Information */}
-      <div className="bg-white border rounded-lg">
-       <div className="px-4 py-3 border-b bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">Project Links</h3>
-       </div>
-       <div className="p-4 space-y-3">
-        <div>
-         <Label
-          htmlFor="github_repo_url"
-          className="text-sm font-medium text-gray-700"
-         >
-          Repository
-         </Label>
-         <Input
-          id="github_repo_url"
-          value={formData.github_repo_url || ""}
-          onChange={(e) => handleInputChange("github_repo_url", e.target.value)}
-          placeholder="https://github.com/user/repo"
-          className="mt-1.5"
-         />
-        </div>
-
-        <div>
-         <Label
-          htmlFor="homepage_url"
-          className="text-sm font-medium text-gray-700"
-         >
-          Homepage
-         </Label>
-         <Input
-          id="homepage_url"
-          value={formData.homepage_url || ""}
-          onChange={(e) => handleInputChange("homepage_url", e.target.value)}
-          placeholder="https://project-site.com"
-          className="mt-1.5"
-         />
-        </div>
-       </div>
+      <div className="p-0">
+       <RichTextEditor
+        content={formData.content || ""}
+        onChange={(content) => handleInputChange("content", content)}
+       />
       </div>
      </div>
     </div>
 
-    {/* Action Buttons - Compact */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 p-2.5 bg-white rounded-lg border gap-3">
-     <div className="flex items-center gap-3 text-sm flex-wrap">
-      <div className="flex items-center gap-1.5">
-       {isValid ? (
-        <>
-         <CheckCircle className="w-4 h-4 text-green-600" />
-         <span className="text-green-700 font-medium">Ready</span>
-        </>
-       ) : (
-        <>
-         <AlertCircle className="w-4 h-4 text-red-600" />
-         <span className="text-red-700 font-medium">Has errors</span>
-        </>
-       )}
+    {/* Right Column - Sidebar */}
+    <div className="space-y-4">
+     {/* Publishing Settings */}
+     <div className="bg-white border rounded-lg">
+      <div className="px-4 py-3 border-b bg-gray-50">
+       <h3 className="text-sm font-semibold text-gray-900">Publishing</h3>
       </div>
-      {lastSaved && (
-       <span className="text-green-600 text-sm">
-        Saved {lastSaved.toLocaleTimeString()}
-       </span>
-      )}
+      <div className="p-4 space-y-4">
+       <div className="flex items-center justify-between py-2">
+        <div className="flex items-center gap-3">
+         <div
+          className={`p-1.5 rounded-full ${
+           formData.published ? "bg-green-100" : "bg-gray-100"
+          }`}
+         >
+          {formData.published ? (
+           <CheckCircle className="w-4 h-4 text-green-600" />
+          ) : (
+           <Clock className="w-4 h-4 text-gray-600" />
+          )}
+         </div>
+         <div>
+          <div className="text-sm font-medium text-gray-900">Published</div>
+          {formData.published && formData.published_at && (
+           <div className="text-xs text-gray-500 mt-0.5">
+            {new Date(formData.published_at).toLocaleDateString()}
+           </div>
+          )}
+         </div>
+        </div>
+        <Switch
+         checked={formData.published || false}
+         onCheckedChange={(checked) => handleInputChange("published", checked)}
+        />
+       </div>
+
+       <div>
+        <Label
+         htmlFor="published_at"
+         className="text-sm font-medium text-gray-700"
+        >
+         Published Date
+        </Label>
+        <Input
+         id="published_at"
+         type="datetime-local"
+         value={
+          formData.published_at
+           ? new Date(formData.published_at).toISOString().slice(0, 16)
+           : ""
+         }
+         onChange={(e) =>
+          handleInputChange(
+           "published_at",
+           e.target.value ? new Date(e.target.value).toISOString() : null
+          )
+         }
+         className="mt-1.5"
+        />
+       </div>
+
+       <div>
+        <Label
+         htmlFor="created_at"
+         className="text-sm font-medium text-gray-700"
+        >
+         Created Date
+        </Label>
+        <Input
+         id="created_at"
+         type="datetime-local"
+         value={
+          formData.created_at
+           ? new Date(formData.created_at).toISOString().slice(0, 16)
+           : ""
+         }
+         onChange={(e) =>
+          handleInputChange(
+           "created_at",
+           e.target.value
+            ? new Date(e.target.value).toISOString()
+            : new Date().toISOString()
+          )
+         }
+         className="mt-1.5"
+        />
+       </div>
+      </div>
      </div>
 
-     <div className="flex gap-2">
-      <Button
-       variant="outline"
-       size="sm"
-       onClick={() => (window.location.href = `/${slug}`)}
-      >
-       Cancel
-      </Button>
-      <Button
-       onClick={handleSave}
-       disabled={saving || !isValid}
-       size="sm"
-       className={`min-w-[100px] ${
-        formData.published
-         ? "bg-green-600 hover:bg-green-700"
-         : "bg-blue-600 hover:bg-blue-700"
-       }`}
-      >
-       {saving ? (
-        <>
-         <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-         Saving...
-        </>
-       ) : (
-        <>
-         <Save className="w-3 h-3 mr-1.5" />
-         {formData.published ? "Update" : "Save"}
-        </>
-       )}
-      </Button>
+     {/* Cover Image */}
+     <div className="bg-white border rounded-lg">
+      <div className="px-4 py-3 border-b bg-gray-50">
+       <h3 className="text-sm font-semibold text-gray-900">Cover Image</h3>
+      </div>
+      <div className="p-4">
+       <ImageDropZone
+        currentImage={coverImagePreview}
+        onImageSelect={handleCoverImageSelect}
+        onRemove={removeCoverImage}
+        showMetadata={false}
+        label=""
+       />
+      </div>
      </div>
     </div>
    </div>
-  </MediaProvider>
+
+   {/* Action Buttons - Compact */}
+   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 p-2.5 bg-white rounded-lg border gap-3">
+    <div className="flex items-center gap-3 text-sm flex-wrap">
+     <div className="flex items-center gap-1.5">
+      {isValid ? (
+       <>
+        <CheckCircle className="w-4 h-4 text-green-600" />
+        <span className="text-green-700 font-medium">Ready</span>
+       </>
+      ) : (
+       <>
+        <AlertCircle className="w-4 h-4 text-red-600" />
+        <span className="text-red-700 font-medium">Has errors</span>
+       </>
+      )}
+     </div>
+     {lastSaved && (
+      <span className="text-green-600 text-sm">
+       Saved {lastSaved.toLocaleTimeString()}
+      </span>
+     )}
+    </div>
+
+    <div className="flex gap-2">
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={() => (window.location.href = `/${slug}`)}
+     >
+      Cancel
+     </Button>
+     <Button
+      onClick={handleSave}
+      disabled={saving || !isValid}
+      size="sm"
+      className={`min-w-[100px] ${
+       formData.published
+        ? "bg-green-600 hover:bg-green-700"
+        : "bg-blue-600 hover:bg-blue-700"
+      }`}
+     >
+      {saving ? (
+       <>
+        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+        Saving...
+       </>
+      ) : (
+       <>
+        <Save className="w-3 h-3 mr-1.5" />
+        {formData.published ? "Update" : "Save"}
+       </>
+      )}
+     </Button>
+    </div>
+   </div>
+  </div>
  );
 }
