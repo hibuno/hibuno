@@ -49,7 +49,6 @@
     "dist",
     "build",
     "coverage",
-    "**/video/**",
     "**/*.cpp/**",
     "**/CMakeFiles/**"
   ]
