@@ -4,8 +4,8 @@ import {
 } from "@remotion/media-utils";
 import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
-import { useWindowedAudioDataIfPossible } from "../helpers/use-windowed-audio-data-if-possible";
 import { BASE_SIZE } from "../helpers/constants";
+import { useWindowedAudioDataIfPossible } from "../helpers/use-windowed-audio-data-if-possible";
 
 // AudioVizContainer component
 export const AudioVizContainer: React.FC<{ children?: React.ReactNode }> = ({

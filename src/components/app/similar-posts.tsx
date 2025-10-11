@@ -63,10 +63,10 @@ PostsGrid.displayName = "PostsGrid";
 // Optimized query function with better error handling
 async function getSimilarPosts(
   currentSlug: string,
-  tags?: string[] | null
+  tags?: string[] | null,
 ): Promise<Post[] | null> {
   const supabase = getServerSupabase();
-  
+
   try {
     // First try: Get posts with similar tags if tags are provided
     if (tags?.length) {

@@ -2,243 +2,248 @@
 
 /* Base table styles */
 .editor table {
-	border-collapse: collapse;
-	table-layout: auto;
-	width: 100%;
-	margin: 1rem 0;
-	background-color: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+  margin: 1rem 0;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 /* Table headers */
 .editor table th {
-	background-color: #f9fafb;
-	border: 1px solid #e5e7eb;
-	padding: 12px 16px;
-	text-align: left;
-	font-weight: 600;
-	color: #374151;
-	font-size: 14px;
-	position: relative;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  position: relative;
 }
 
 /* Table cells */
 .editor table td {
-	border: 1px solid #e5e7eb;
-	padding: 12px 16px;
-	color: #374151;
-	font-size: 14px;
-	vertical-align: top;
-	position: relative;
+  border: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  color: #374151;
+  font-size: 14px;
+  vertical-align: top;
+  position: relative;
 }
 
 /* Hover effects */
 .editor table tr:hover td {
-	background-color: #f9fafb;
+  background-color: #f9fafb;
 }
 
 /* Selected cell highlighting */
 .editor table td.selected-cell,
 .editor table th.selected-cell {
-	background-color: #eff6ff;
-	border: 2px solid #3b82f6;
-	box-shadow: inset 0 0 0 1px #3b82f6;
+  background-color: #eff6ff;
+  border: 2px solid #3b82f6;
+  box-shadow: inset 0 0 0 1px #3b82f6;
 }
 
 /* Merged cells */
 .editor table td[colspan],
 .editor table th[colspan] {
-	background-color: #fefce8;
-	border-color: #eab308;
+  background-color: #fefce8;
+  border-color: #eab308;
 }
 
 .editor table td[rowspan],
 .editor table th[rowspan] {
-	background-color: #fefce8;
-	border-color: #eab308;
+  background-color: #fefce8;
+  border-color: #eab308;
 }
 
 /* Table resize handles */
 .editor table .table-resize-handle {
-	position: absolute;
-	right: -2px;
-	top: 0;
-	bottom: 0;
-	width: 4px;
-	cursor: col-resize;
-	background-color: #3b82f6;
-	opacity: 0;
-	transition: opacity 0.2s;
+  position: absolute;
+  right: -3px;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  cursor: col-resize;
+  background-color: #3b82f6;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 10;
+  border-radius: 2px;
 }
 
-.editor table:hover .table-resize-handle {
-	opacity: 1;
+.editor table th:hover .table-resize-handle,
+.editor table td:hover .table-resize-handle {
+  opacity: 0.7;
 }
 
 .editor table .table-resize-handle:hover {
-	background-color: #1d4ed8;
+  background-color: #1d4ed8;
+  opacity: 1;
+  width: 8px;
+  right: -4px;
 }
 
 /* Row resize handles */
 .editor table tr .row-resize-handle {
-	position: absolute;
-	bottom: -2px;
-	left: 0;
-	right: 0;
-	height: 4px;
-	cursor: row-resize;
-	background-color: #3b82f6;
-	opacity: 0;
-	transition: opacity 0.2s;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  cursor: row-resize;
+  background-color: #3b82f6;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .editor table tr:hover .row-resize-handle {
-	opacity: 1;
+  opacity: 1;
 }
 
 .editor table tr .row-resize-handle:hover {
-	background-color: #1d4ed8;
+  background-color: #1d4ed8;
 }
 
 /* Responsive table wrapper */
 .editor .table-wrapper {
-	overflow-x: auto;
-	margin: 1rem 0;
-	border-radius: 8px;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile responsive tables */
 @media (max-width: 768px) {
-	.editor table {
-		font-size: 12px;
-	}
+  .editor table {
+    font-size: 12px;
+  }
 
-	.editor table th,
-	.editor table td {
-		padding: 8px 12px;
-	}
+  .editor table th,
+  .editor table td {
+    padding: 8px 12px;
+  }
 
-	/* Stack table cells on very small screens */
-	.editor table.mobile-stacked {
-		display: block;
-	}
+  /* Stack table cells on very small screens */
+  .editor table.mobile-stacked {
+    display: block;
+  }
 
-	.editor table.mobile-stacked thead,
-	.editor table.mobile-stacked tbody,
-	.editor table.mobile-stacked th,
-	.editor table.mobile-stacked td,
-	.editor table.mobile-stacked tr {
-		display: block;
-	}
+  .editor table.mobile-stacked thead,
+  .editor table.mobile-stacked tbody,
+  .editor table.mobile-stacked th,
+  .editor table.mobile-stacked td,
+  .editor table.mobile-stacked tr {
+    display: block;
+  }
 
-	.editor table.mobile-stacked thead tr {
-		position: absolute;
-		top: -9999px;
-		left: -9999px;
-	}
+  .editor table.mobile-stacked thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
 
-	.editor table.mobile-stacked tr {
-		border: 1px solid #e5e7eb;
-		border-bottom: none;
-		margin-bottom: 0.5rem;
-	}
+  .editor table.mobile-stacked tr {
+    border: 1px solid #e5e7eb;
+    border-bottom: none;
+    margin-bottom: 0.5rem;
+  }
 
-	.editor table.mobile-stacked td {
-		border: none;
-		border-bottom: 1px solid #e5e7eb;
-		position: relative;
-		padding-left: 50%;
-	}
+  .editor table.mobile-stacked td {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+    padding-left: 50%;
+  }
 
-	.editor table.mobile-stacked td:before {
-		content: attr(data-label) ": ";
-		position: absolute;
-		left: 12px;
-		width: 45%;
-		padding-right: 10px;
-		white-space: nowrap;
-		font-weight: bold;
-		color: #6b7280;
-	}
+  .editor table.mobile-stacked td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 12px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #6b7280;
+  }
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-	.editor table {
-		background-color: #1f2937;
-		border-color: #374151;
-	}
+  .editor table {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
 
-	.editor table th {
-		background-color: #111827;
-		border-color: #374151;
-		color: #f9fafb;
-	}
+  .editor table th {
+    background-color: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+  }
 
-	.editor table td {
-		border-color: #374151;
-		color: #d1d5db;
-	}
+  .editor table td {
+    border-color: #374151;
+    color: #d1d5db;
+  }
 
-	.editor table tr:hover td {
-		background-color: #111827;
-	}
+  .editor table tr:hover td {
+    background-color: #111827;
+  }
 
-	.editor table td.selected-cell,
-	.editor table th.selected-cell {
-		background-color: #1e3a8a;
-		border-color: #3b82f6;
-	}
+  .editor table td.selected-cell,
+  .editor table th.selected-cell {
+    background-color: #1e3a8a;
+    border-color: #3b82f6;
+  }
 }
 
 /* Print styles */
 @media print {
-	.editor table {
-		box-shadow: none;
-		border: 1px solid #000;
-	}
+  .editor table {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
 
-	.editor table th,
-	.editor table td {
-		border-color: #000;
-	}
+  .editor table th,
+  .editor table td {
+    border-color: #000;
+  }
 
-	.editor table .table-resize-handle,
-	.editor table .row-resize-handle {
-		display: none;
-	}
+  .editor table .table-resize-handle,
+  .editor table .row-resize-handle {
+    display: none;
+  }
 }
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-	.editor table {
-		border-width: 2px;
-	}
+  .editor table {
+    border-width: 2px;
+  }
 
-	.editor table th,
-	.editor table td {
-		border-width: 2px;
-	}
+  .editor table th,
+  .editor table td {
+    border-width: 2px;
+  }
 
-	.editor table td.selected-cell,
-	.editor table th.selected-cell {
-		border-width: 3px;
-	}
+  .editor table td.selected-cell,
+  .editor table th.selected-cell {
+    border-width: 3px;
+  }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  .editor table .table-resize-handle,
+  .editor table .row-resize-handle {
+    transition: none;
+  }
 
-	.editor table .table-resize-handle,
-	.editor table .row-resize-handle {
-		transition: none;
-	}
-
-	.editor table tr:hover td {
-		transition: none;
-	}
+  .editor table tr:hover td {
+    transition: none;
+  }
 }

@@ -83,7 +83,7 @@ const PostsGrid = memo(({ posts }: { posts: Post[] }) => {
       posts.map((post, index) => (
         <PostGridItem key={post.id} post={post} index={index} />
       )),
-    [posts]
+    [posts],
   );
 
   return (
@@ -110,31 +110,33 @@ const PostsGrid = memo(({ posts }: { posts: Post[] }) => {
 PostsGrid.displayName = "PostsGrid";
 
 // Main component with memoization
-export const AnimatedHomepage = memo(({ recentPosts }: AnimatedHomepageProps) => {
-  // Early return if no posts to prevent unnecessary rendering
-  if (!recentPosts?.length) {
-    return (
-      <main className="mx-auto max-w-3xl px-4 py-16">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2">Belum ada postingan</h2>
-          <p className="text-muted-foreground">
-            Postingan akan muncul di sini setelah dipublikasikan.
-          </p>
-        </div>
-      </main>
-    );
-  }
+export const AnimatedHomepage = memo(
+  ({ recentPosts }: AnimatedHomepageProps) => {
+    // Early return if no posts to prevent unnecessary rendering
+    if (!recentPosts?.length) {
+      return (
+        <main className="mx-auto max-w-3xl px-4 py-16">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-2">Belum ada postingan</h2>
+            <p className="text-muted-foreground">
+              Postingan akan muncul di sini setelah dipublikasikan.
+            </p>
+          </div>
+        </main>
+      );
+    }
 
-  return (
-    <motion.main
-      variants={ANIMATION_VARIANTS.container}
-      initial="hidden"
-      animate="visible"
-    >
-      <HeroSection />
-      <PostsGrid posts={recentPosts} />
-    </motion.main>
-  );
-});
+    return (
+      <motion.main
+        variants={ANIMATION_VARIANTS.container}
+        initial="hidden"
+        animate="visible"
+      >
+        <HeroSection />
+        <PostsGrid posts={recentPosts} />
+      </motion.main>
+    );
+  },
+);
 
 AnimatedHomepage.displayName = "AnimatedHomepage";

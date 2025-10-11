@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Bug, Home, RefreshCw } from "lucide-react";
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ErrorBoundaryProps {
@@ -39,41 +39,38 @@ const ErrorDetails = memo(({ error }: { error: Error }) => (
 ErrorDetails.displayName = "ErrorDetails";
 
 // Memoized action buttons component
-const ActionButtons = memo(({ 
-  canRetry, 
-  retryCount, 
-  maxRetries, 
-  onRetry 
-}: { 
-  canRetry: boolean; 
-  retryCount: number; 
-  maxRetries: number; 
-  onRetry: () => void; 
-}) => {
-  const handleHomeClick = useCallback(() => {
-    window.location.href = "/";
-  }, []);
+const ActionButtons = memo(
+  ({
+    canRetry,
+    retryCount,
+    maxRetries,
+    onRetry,
+  }: {
+    canRetry: boolean;
+    retryCount: number;
+    maxRetries: number;
+    onRetry: () => void;
+  }) => {
+    const handleHomeClick = useCallback(() => {
+      window.location.href = "/";
+    }, []);
 
-  return (
-    <div className="flex gap-3">
-      {canRetry && (
-        <Button onClick={onRetry} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Coba lagi{" "}
-          {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+    return (
+      <div className="flex gap-3">
+        {canRetry && (
+          <Button onClick={onRetry} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Coba lagi {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+          </Button>
+        )}
+        <Button variant="outline" onClick={handleHomeClick} className="gap-2">
+          <Home className="h-4 w-4" />
+          Kembali ke beranda
         </Button>
-      )}
-      <Button
-        variant="outline"
-        onClick={handleHomeClick}
-        className="gap-2"
-      >
-        <Home className="h-4 w-4" />
-        Kembali ke beranda
-      </Button>
-    </div>
-  );
-});
+      </div>
+    );
+  },
+);
 
 ActionButtons.displayName = "ActionButtons";
 
@@ -118,7 +115,8 @@ class ErrorBoundaryClass extends React.Component<
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
-      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+      userAgent:
+        typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
       url: typeof window !== "undefined" ? window.location.href : "unknown",
       errorId: this.state.errorId,
     };
@@ -192,9 +190,11 @@ class ErrorBoundaryClass extends React.Component<
 }
 
 // Memoized wrapper component
-export const ErrorBoundary = memo(({ children, ...props }: ErrorBoundaryProps) => (
-  <ErrorBoundaryClass {...props}>{children}</ErrorBoundaryClass>
-));
+export const ErrorBoundary = memo(
+  ({ children, ...props }: ErrorBoundaryProps) => (
+    <ErrorBoundaryClass {...props}>{children}</ErrorBoundaryClass>
+  ),
+);
 
 ErrorBoundary.displayName = "ErrorBoundary";
 

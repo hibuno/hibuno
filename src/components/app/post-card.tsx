@@ -47,62 +47,54 @@ const UnpublishedBadge = memo(() => (
 UnpublishedBadge.displayName = "UnpublishedBadge";
 
 // Memoized post image component
-const PostImage = memo(({ 
-  post, 
-  isUnpublished 
-}: { 
-  post: Post; 
-  isUnpublished: boolean; 
-}) => (
-  <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-4">
-    <motion.div
-      whileHover={ANIMATION_VARIANTS.image.whileHover}
-      transition={ANIMATION_VARIANTS.image.transition}
-      className="w-full h-full"
-    >
-      <Image
-        src={post.cover_image_url || "/placeholder.png"}
-        alt={post.title}
-        className="w-full h-full object-cover"
-        width={500}
-        height={300}
-        loading="lazy"
-      />
-    </motion.div>
-    {isUnpublished && <UnpublishedBadge />}
-  </div>
-));
+const PostImage = memo(
+  ({ post, isUnpublished }: { post: Post; isUnpublished: boolean }) => (
+    <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-4">
+      <motion.div
+        whileHover={ANIMATION_VARIANTS.image.whileHover}
+        transition={ANIMATION_VARIANTS.image.transition}
+        className="w-full h-full"
+      >
+        <Image
+          src={post.cover_image_url || "/placeholder.png"}
+          alt={post.title}
+          className="w-full h-full object-cover"
+          width={500}
+          height={300}
+          loading="lazy"
+        />
+      </motion.div>
+      {isUnpublished && <UnpublishedBadge />}
+    </div>
+  ),
+);
 
 PostImage.displayName = "PostImage";
 
 // Memoized post meta component
-const PostMeta = memo(({ 
-  date, 
-  isUnpublished 
-}: { 
-  date: Date; 
-  isUnpublished: boolean; 
-}) => (
-  <motion.div
-    className="flex items-center gap-3 text-sm text-gray-600"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 0.2 }}
-  >
-    <span className="font-medium text-gray-900">
-      {date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })}
-    </span>
-    {isUnpublished && (
-      <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
-        Belum diterbitkan
+const PostMeta = memo(
+  ({ date, isUnpublished }: { date: Date; isUnpublished: boolean }) => (
+    <motion.div
+      className="flex items-center gap-3 text-sm text-gray-600"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.2 }}
+    >
+      <span className="font-medium text-gray-900">
+        {date.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}
       </span>
-    )}
-  </motion.div>
-));
+      {isUnpublished && (
+        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+          Belum diterbitkan
+        </span>
+      )}
+    </motion.div>
+  ),
+);
 
 PostMeta.displayName = "PostMeta";
 
@@ -161,7 +153,7 @@ export const PostCard = memo(({ post }: { post: Post }) => {
     const date = new Date(post.published_at);
     const isDev = process.env.NODE_ENV === "development";
     const isUnpublished = isDev && post.published === false;
-    
+
     return { date, isUnpublished };
   }, [post.published_at, post.published]);
 

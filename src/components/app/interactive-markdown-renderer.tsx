@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { MediaDialog, useMediaDialog } from "@/components/app/media-dialog";
 import { cn } from "@/lib/utils";
+import katex from "katex";
 
 interface InteractiveMarkdownRendererProps {
  html: string;
@@ -20,6 +21,98 @@ export function InteractiveMarkdownRenderer({
   if (!contentRef.current) return;
 
   const container = contentRef.current;
+
+  // Render LaTeX formulas with KaTeX
+  const renderLatex = () => {
+   // Handle both new KaTeX-rendered elements and legacy raw LaTeX
+   const mathElements = container.querySelectorAll(
+    ".math-latex-rendered, .math-latex-inline, .math-latex-block"
+   );
+   mathElements.forEach((element) => {
+    const latex = element.getAttribute("data-latex");
+    const inline =
+     element.getAttribute("data-inline") === "true" ||
+     element.classList.contains("math-latex-inline");
+
+    if (latex && !element.hasAttribute("data-katex-rendered")) {
+     try {
+      const renderedHTML = katex.renderToString(latex, {
+       displayMode: !inline,
+       throwOnError: false,
+       errorColor: "#cc0000",
+       strict: "warn" as const,
+      });
+
+      element.innerHTML = renderedHTML;
+      element.setAttribute("data-katex-rendered", "true");
+      element.classList.add("katex-rendered");
+     } catch (err) {
+      console.warn("KaTeX rendering error in post:", err);
+      element.innerHTML = `<span class="text-red-500">${
+       inline ? `$${latex}$` : `$$${latex}$$`
+      }</span>`;
+     }
+    }
+   });
+
+   // Also handle raw LaTeX syntax that might be in the content
+   const rawLatexRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\])/g;
+   const textNodes = getTextNodes(container);
+   textNodes.forEach((textNode) => {
+    const parentElement = textNode.parentElement;
+    if (parentElement && !parentElement.closest(".katex-rendered")) {
+     const text = textNode.textContent || "";
+     const hasLatex = rawLatexRegex.test(text);
+
+     if (hasLatex && !parentElement.hasAttribute("data-katex-processed")) {
+      try {
+       // Replace raw LaTeX with rendered KaTeX
+       const renderedHTML = text.replace(rawLatexRegex, (match) => {
+        const isDisplay = match.startsWith("\\[") && match.endsWith("\\]");
+        const latexContent = match.replace(/^\$\$|\$\$|\\\[|\\\]$/g, "");
+
+        return katex.renderToString(latexContent, {
+         displayMode: isDisplay,
+         throwOnError: false,
+         errorColor: "#cc0000",
+         strict: "warn" as const,
+        });
+       });
+
+       const wrapper = document.createElement("span");
+       wrapper.innerHTML = renderedHTML;
+       wrapper.setAttribute("data-katex-processed", "true");
+       wrapper.classList.add("katex-rendered");
+
+       parentElement.replaceChild(wrapper, textNode);
+      } catch (err) {
+       console.warn("Raw LaTeX processing error:", err);
+       parentElement.setAttribute("data-katex-processed", "true");
+      }
+     }
+    }
+   });
+  };
+
+  // Helper function to get all text nodes
+  function getTextNodes(element: Element): Text[] {
+   const textNodes: Text[] = [];
+   const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    null
+   );
+
+   let node;
+   while ((node = walker.nextNode())) {
+    textNodes.push(node as Text);
+   }
+
+   return textNodes;
+  }
+
+  // Render LaTeX after a short delay to ensure content is loaded
+  const renderTimeout = setTimeout(renderLatex, 100);
 
   // Function to extract caption from image/video context
   const getMediaCaption = (element: HTMLElement): string | undefined => {
@@ -203,6 +296,8 @@ export function InteractiveMarkdownRenderer({
 
   // Cleanup function
   return () => {
+   clearTimeout(renderTimeout);
+
    // Clean up image listeners
    images.forEach((img) => {
     if ((img as any)._cleanup) {

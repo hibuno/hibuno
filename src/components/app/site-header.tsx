@@ -34,7 +34,7 @@ const SOCIAL_LINKS: readonly SocialLink[] = [
 // Memoized navigation link component for better performance
 const NavigationLink = memo(({ link }: { link: SocialLink }) => {
   const isExternal = link.href.startsWith("http");
-  
+
   return (
     <Link
       key={link.name}
@@ -57,10 +57,7 @@ NavigationLink.displayName = "NavigationLink";
 export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
   return (
     <header
-      className={cn(
-        "relative bg-white border-b border-border z-50",
-        className
-      )}
+      className={cn("relative bg-white border-b border-border z-50", className)}
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
         <Link

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
@@ -133,7 +134,10 @@
 		@apply bg-background text-foreground font-sans antialiased;
 		line-height: 1.75;
 		letter-spacing: -0.011em;
-		font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
+		font-feature-settings:
+			"liga" 1,
+			"calt" 1,
+			"kern" 1;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		text-rendering: optimizeLegibility;
@@ -151,7 +155,8 @@
 
 	/* Main prose container with improved typography */
 	.prose-custom {
-		font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		font-family:
+			"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 		font-size: 1.0625rem;
 		line-height: 1.8;
 		color: oklch(0.25 0 0);
@@ -383,7 +388,9 @@
 		overflow: hidden;
 		background: oklch(0.12 0 0);
 		border: 1px solid oklch(0.22 0 0);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
 	.prose-custom .shiki-container pre {
@@ -391,7 +398,8 @@
 		padding: 1.5rem;
 		background: oklch(0.12 0 0);
 		color: oklch(0.9 0 0);
-		font-family: "Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+		font-family:
+			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 		font-size: 0.9375rem;
 		line-height: 1.65;
 		overflow-x: auto;
@@ -406,7 +414,9 @@
 		overflow: hidden;
 		background: oklch(0.12 0 0);
 		border: 1px solid oklch(0.22 0 0);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
 	.shiki-container pre {
@@ -414,7 +424,8 @@
 		padding: 1.5rem;
 		background: oklch(0.12 0 0);
 		color: oklch(0.9 0 0);
-		font-family: "Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+		font-family:
+			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 		font-size: 0.9375rem;
 		line-height: 1.65;
 		overflow-x: auto;
@@ -451,7 +462,8 @@
 		padding: 1.5rem;
 		margin: 0;
 		border-radius: 0.75rem;
-		font-family: "Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+		font-family:
+			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 	}
 
 	.shiki-container .line {
@@ -459,7 +471,8 @@
 	}
 
 	.shiki-container code {
-		font-family: "Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+		font-family:
+			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 		font-size: 0.9375rem;
 	}
 
@@ -729,7 +742,9 @@
 }
 
 .animate-in {
-	animation: fade-in 0.2s ease-out, slide-in-from-top 0.2s ease-out;
+	animation:
+		fade-in 0.2s ease-out,
+		slide-in-from-top 0.2s ease-out;
 }
 
 /* Custom Dropcursor Styling */
@@ -741,7 +756,7 @@
 }
 
 .ProseMirror .custom-dropcursor::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: -2px;
 	left: -2px;

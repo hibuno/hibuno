@@ -3,182 +3,178 @@ import { getSupabaseServerClient } from "@/db/server";
 
 // Extended types for query results
 export type PostListItem = Pick<
-	SelectPost,
-	| "id"
-	| "slug"
-	| "title"
-	| "excerpt"
-	| "cover_image_url"
-	| "tags"
-	| "published"
-	| "published_at"
-	| "created_at"
-	| "updated_at"
+  SelectPost,
+  | "id"
+  | "slug"
+  | "title"
+  | "excerpt"
+  | "cover_image_url"
+  | "tags"
+  | "published"
+  | "published_at"
+  | "created_at"
+  | "updated_at"
 >;
 
 export type PostSummary = Pick<
-	SelectPost,
-	| "id"
-	| "slug"
-	| "title"
-	| "excerpt"
-	| "cover_image_url"
-	| "tags"
-	| "published"
-	| "published_at"
+  SelectPost,
+  | "id"
+  | "slug"
+  | "title"
+  | "excerpt"
+  | "cover_image_url"
+  | "tags"
+  | "published"
+  | "published_at"
 >;
 
 // Query builders for better performance and reusability
 export class PostQueries {
-	private supabase = getSupabaseServerClient();
+  private supabase = getSupabaseServerClient();
 
-	/**
-	 * Get published posts with optimized query
-	 */
-	async getPublishedPosts(
-		options: {
-			limit?: number;
-			offset?: number;
-			tag?: string;
-		} = {},
-	): Promise<PostListItem[]> {
-		const isDev = process.env.NODE_ENV === "development";
-		let query = this.supabase
-			.from("posts")
-			.select(`
+  /**
+   * Get published posts with optimized query
+   */
+  async getPublishedPosts(
+    options: { limit?: number; offset?: number; tag?: string } = {},
+  ): Promise<PostListItem[]> {
+    const isDev = process.env.NODE_ENV === "development";
+    let query = this.supabase
+      .from("posts")
+      .select(`
 			 id, slug, title, excerpt, cover_image_url,
 			 tags, published, published_at, created_at, updated_at
 		`)
-			.order("published_at", { ascending: false });
+      .order("published_at", { ascending: false });
 
-		if (!isDev) {
-			query = query.eq("published", true);
-		}
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
 
-		if (options.tag) {
-			query = query.contains("tags", [options.tag]);
-		}
+    if (options.tag) {
+      query = query.contains("tags", [options.tag]);
+    }
 
-		if (options.limit) {
-			query = query.limit(options.limit);
-		}
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
 
-		if (options.offset) {
-			query = query.range(
-				options.offset,
-				options.offset + (options.limit || 10) - 1,
-			);
-		}
+    if (options.offset) {
+      query = query.range(
+        options.offset,
+        options.offset + (options.limit || 10) - 1,
+      );
+    }
 
-		const { data, error } = await query;
+    const { data, error } = await query;
 
-		if (error) throw error;
+    if (error) throw error;
 
-		return data as unknown as PostListItem[];
-	}
+    return data as unknown as PostListItem[];
+  }
 
-	/**
-	 * Get a single post by slug with full content
-	 */
-	async getPostBySlug(slug: string): Promise<SelectPost | null> {
-		const isDev = process.env.NODE_ENV === "development";
-		let query = this.supabase.from("posts").select("*").eq("slug", slug);
-		if (!isDev) {
-			query = query.eq("published", true);
-		}
-		const { data, error } = await query.single();
+  /**
+   * Get a single post by slug with full content
+   */
+  async getPostBySlug(slug: string): Promise<SelectPost | null> {
+    const isDev = process.env.NODE_ENV === "development";
+    let query = this.supabase.from("posts").select("*").eq("slug", slug);
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
+    const { data, error } = await query.single();
 
-		if (error) {
-			// If no rows returned, it's not an error, just return null
-			if (error.code === "PGRST116") {
-				return null;
-			}
-			throw error;
-		}
+    if (error) {
+      // If no rows returned, it's not an error, just return null
+      if (error.code === "PGRST116") {
+        return null;
+      }
+      throw error;
+    }
 
-		return data as SelectPost;
-	}
+    return data as SelectPost;
+  }
 
-	/**
-	 * Get recent posts
-	 */
-	async getRecentPosts(
-		limit = 10,
-		excludeIds: string[] = [],
-	): Promise<PostSummary[]> {
-		const isDev = process.env.NODE_ENV === "development";
-		let query = this.supabase
-			.from("posts")
-			.select(`
+  /**
+   * Get recent posts
+   */
+  async getRecentPosts(
+    limit = 10,
+    excludeIds: string[] = [],
+  ): Promise<PostSummary[]> {
+    const isDev = process.env.NODE_ENV === "development";
+    let query = this.supabase
+      .from("posts")
+      .select(`
 			 id, slug, title, excerpt, cover_image_url,
 			 tags, published, published_at
 		`)
-			.order("published_at", { ascending: false })
-			.limit(limit);
+      .order("published_at", { ascending: false })
+      .limit(limit);
 
-		if (!isDev) {
-			query = query.eq("published", true);
-		}
+    if (!isDev) {
+      query = query.eq("published", true);
+    }
 
-		if (excludeIds.length > 0) {
-			query = query.not("id", "in", `(${excludeIds.join(",")})`);
-		}
+    if (excludeIds.length > 0) {
+      query = query.not("id", "in", `(${excludeIds.join(",")})`);
+    }
 
-		const { data, error } = await query;
+    const { data, error } = await query;
 
-		if (error) throw error;
+    if (error) throw error;
 
-		return data as unknown as PostSummary[];
-	}
+    return data as unknown as PostSummary[];
+  }
 
-	/**
-	 * Search posts by title, content, or excerpt
-	 */
-	async searchPosts(query: string, limit = 20): Promise<PostSummary[]> {
-		const isDev = process.env.NODE_ENV === "development";
-		let base = this.supabase
-			.from("posts")
-			.select(`
+  /**
+   * Search posts by title, content, or excerpt
+   */
+  async searchPosts(query: string, limit = 20): Promise<PostSummary[]> {
+    const isDev = process.env.NODE_ENV === "development";
+    let base = this.supabase
+      .from("posts")
+      .select(`
 	      id, slug, title, excerpt, cover_image_url,
 	      published, published_at
 	    `)
-			.or(
-				`title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`,
-			)
-			.order("published_at", { ascending: false })
-			.limit(limit);
-		if (!isDev) {
-			base = base.eq("published", true);
-		}
-		const { data, error } = await base;
+      .or(
+        `title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`,
+      )
+      .order("published_at", { ascending: false })
+      .limit(limit);
+    if (!isDev) {
+      base = base.eq("published", true);
+    }
+    const { data, error } = await base;
 
-		if (error) throw error;
+    if (error) throw error;
 
-		return data as unknown as PostSummary[];
-	}
+    return data as unknown as PostSummary[];
+  }
 
-	/**
-	 * Get posts by tag
-	 */
-	async getPostsByTag(tag: string, limit = 20) {
-		return this.getPublishedPosts({ tag, limit });
-	}
+  /**
+   * Get posts by tag
+   */
+  async getPostsByTag(tag: string, limit = 20) {
+    return this.getPublishedPosts({ tag, limit });
+  }
 
-	/**
-	 * Get all unique tags
-	 */
-	async getTags() {
-		const { data, error } = await this.supabase
-			.from("posts")
-			.select("tags")
-			.eq("published", true)
-			.not("tags", "is", null);
+  /**
+   * Get all unique tags
+   */
+  async getTags() {
+    const { data, error } = await this.supabase
+      .from("posts")
+      .select("tags")
+      .eq("published", true)
+      .not("tags", "is", null);
 
-		if (error) throw error;
+    if (error) throw error;
 
-		const tags = [...new Set(data.flatMap((item) => item.tags || []))];
-		return tags;
-	}
+    const tags = [...new Set(data.flatMap((item) => item.tags || []))];
+    return tags;
+  }
 }
 
 // Singleton instances

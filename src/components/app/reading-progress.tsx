@@ -23,7 +23,7 @@ ShineEffect.displayName = "ShineEffect";
 // Throttle function for performance optimization
 const throttle = <T extends (...args: any[]) => any>(
   func: T,
-  limit: number
+  limit: number,
 ): T => {
   let inThrottle: boolean;
   return ((...args: any[]) => {
@@ -51,9 +51,9 @@ export const ReadingProgress = memo(() => {
 
   // Transform for opacity animation with better visibility curve
   const opacity = useTransform(
-    smoothProgress, 
-    [0, 0.05, 0.95, 1], 
-    [0, 1, 1, 0]
+    smoothProgress,
+    [0, 0.05, 0.95, 1],
+    [0, 1, 1, 0],
   );
 
   // Throttled scroll handler for better performance
@@ -61,7 +61,7 @@ export const ReadingProgress = memo(() => {
     throttle(() => {
       // Additional scroll handling if needed
     }, 16), // ~60fps
-    []
+    [],
   );
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export const ReadingProgress = memo(() => {
   }, [handleScroll]);
 
   return (
-    <div 
+    <div
       ref={progressRef}
       className="fixed top-0 left-0 right-0 z-50 h-1 bg-transparent pointer-events-none"
     >
