@@ -106,6 +106,7 @@
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
+    "valtio": "^2.1.8",
     "vaul": "^0.9.9",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.27",
