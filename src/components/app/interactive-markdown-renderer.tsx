@@ -5,6 +5,11 @@ import { MediaDialog, useMediaDialog } from "@/components/app/media-dialog";
 import { cn } from "@/lib/utils";
 import katex from "katex";
 
+// Extend the Element interface to include cleanup function
+interface ElementWithCleanup extends Element {
+ _cleanup?: () => void;
+}
+
 interface InteractiveMarkdownRendererProps {
  html: string;
  className?: string | undefined;
@@ -103,9 +108,11 @@ export function InteractiveMarkdownRenderer({
     null
    );
 
-   let node;
-   while ((node = walker.nextNode())) {
-    textNodes.push(node as Text);
+   let node: Node | null = null;
+   while ((node = walker.nextNode()) !== null) {
+    if (node.nodeType === Node.TEXT_NODE) {
+     textNodes.push(node as Text);
+    }
    }
 
    return textNodes;
@@ -184,7 +191,7 @@ export function InteractiveMarkdownRenderer({
    img.addEventListener("click", handleClick);
 
    // Store cleanup function
-   (img as any)._cleanup = () => {
+   (img as ElementWithCleanup)._cleanup = () => {
     img.removeEventListener("click", handleClick);
    };
   });
@@ -259,7 +266,7 @@ export function InteractiveMarkdownRenderer({
    video.addEventListener("click", handleClick);
 
    // Store cleanup function
-   (video as any)._cleanup = () => {
+   (video as ElementWithCleanup)._cleanup = () => {
     video.removeEventListener("click", handleClick);
    };
   });
@@ -289,7 +296,7 @@ export function InteractiveMarkdownRenderer({
    link.addEventListener("click", handleClick);
 
    // Store cleanup function
-   (link as any)._cleanup = () => {
+   (link as ElementWithCleanup)._cleanup = () => {
     link.removeEventListener("click", handleClick);
    };
   });
@@ -300,22 +307,25 @@ export function InteractiveMarkdownRenderer({
 
    // Clean up image listeners
    images.forEach((img) => {
-    if ((img as any)._cleanup) {
-     (img as any)._cleanup();
+    const cleanup = (img as ElementWithCleanup)._cleanup;
+    if (cleanup) {
+     cleanup();
     }
    });
 
    // Clean up video listeners
    videos.forEach((video) => {
-    if ((video as any)._cleanup) {
-     (video as any)._cleanup();
+    const cleanup = (video as ElementWithCleanup)._cleanup;
+    if (cleanup) {
+     cleanup();
     }
    });
 
    // Clean up TOC link listeners
    tocLinks.forEach((link) => {
-    if ((link as any)._cleanup) {
-     (link as any)._cleanup();
+    const cleanup = (link as ElementWithCleanup)._cleanup;
+    if (cleanup) {
+     cleanup();
     }
    });
   };

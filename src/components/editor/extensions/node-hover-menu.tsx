@@ -1,7 +1,7 @@
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
-import { Plus } from "lucide-react";
+// import { Plus } from "lucide-react";
 
 export interface NodeHoverMenuOptions {
  HTMLAttributes: Record<string, any>;
@@ -28,7 +28,7 @@ export const NodeHoverMenu = Extension.create<NodeHoverMenuOptions>({
   return {
    showCommandMenu:
     (position: { top: number; left: number }) =>
-    ({ editor }) => {
+    ({ editor: _editor }) => {
      // Dispatch custom event to trigger command menu in main editor
      const showCommandEvent = new CustomEvent("showCommandMenu", {
       detail: position,
@@ -50,7 +50,7 @@ export const NodeHoverMenu = Extension.create<NodeHoverMenuOptions>({
      init() {
       return DecorationSet.empty;
      },
-     apply(tr, set) {
+     apply(tr, _set) {
       // Create decorations for node boundaries
       const decorations: Decoration[] = [];
       const doc = tr.doc;

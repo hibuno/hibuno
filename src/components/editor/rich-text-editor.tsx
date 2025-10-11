@@ -166,7 +166,7 @@ export default function RichTextEditor({
     class:
      "prose max-w-none w-full focus:outline-none max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-2 relative group",
    },
-   handleClick: (view, pos, event) => {
+   handleClick: (_view, _pos, event) => {
     const { target } = event;
     if (target && (target as HTMLElement).tagName === "A") {
      event.preventDefault();
@@ -176,7 +176,7 @@ export default function RichTextEditor({
     }
     return false;
    },
-   handleDrop: (view, event, slice, moved) => {
+   handleDrop: (view, event, _slice, moved) => {
     if (
      !moved &&
      event.dataTransfer &&
@@ -552,6 +552,7 @@ export default function RichTextEditor({
      imagePos = pos;
      return false; // Stop searching
     }
+    return true; // Continue searching
    });
 
    if (imagePos !== null) {
@@ -601,6 +602,7 @@ export default function RichTextEditor({
       imagePos = pos;
       return false; // Stop searching
      }
+     return true; // Continue searching
     });
 
     if (imagePos !== null) {

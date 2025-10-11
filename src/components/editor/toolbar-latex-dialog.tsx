@@ -6,14 +6,14 @@ import {
  Minus,
  Divide,
  Equal,
- Star,
+ // Star,
  ChevronRight,
  ChevronLeft,
- ArrowRight,
- ArrowLeft,
- Square,
- ChevronsLeft,
- ChevronsRight,
+ // ArrowRight,
+ // ArrowLeft,
+ // Square,
+ // ChevronsLeft,
+ // ChevronsRight,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";

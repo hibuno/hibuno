@@ -1,5 +1,5 @@
 import { mergeAttributes, Node } from "@tiptap/core";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+// import { ReactNodeViewRenderer } from "@tiptap/react";
 import katex from "katex";
 
 export interface MathLatexOptions {
@@ -123,7 +123,7 @@ export const MathLatex = Node.create<MathLatexOptions>({
 		return ({
 			node,
 			getPos,
-			editor,
+			editor: _editor,
 		}: {
 			node: any;
 			getPos: () => number | undefined;

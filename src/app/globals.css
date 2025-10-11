@@ -331,14 +331,13 @@
 	/* Enhanced blockquote styling */
 	.prose-custom blockquote {
 		border-left: 4px solid oklch(0.4 0 0);
-		padding-left: 1.5rem;
 		margin: 2rem 0;
 		font-style: italic;
 		color: oklch(0.4 0 0);
 		font-size: 1.05em;
 		line-height: 1.75;
 		background: oklch(0.98 0 0);
-		padding: 1.25rem 1.5rem;
+		padding: 1.25rem 1.5rem 1.25rem 2rem;
 		border-radius: 0.25rem;
 	}
 
@@ -407,32 +406,6 @@
 		letter-spacing: 0;
 	}
 
-	/* Shiki syntax highlighting */
-	.shiki-container {
-		margin: 2rem 0;
-		border-radius: 0.75rem;
-		overflow: hidden;
-		background: oklch(0.12 0 0);
-		border: 1px solid oklch(0.22 0 0);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	}
-
-	.shiki-container pre {
-		margin: 0;
-		padding: 1.5rem;
-		background: oklch(0.12 0 0);
-		color: oklch(0.9 0 0);
-		font-family:
-			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
-		font-size: 0.9375rem;
-		line-height: 1.65;
-		overflow-x: auto;
-		white-space: pre;
-		border-radius: 0.75rem;
-		letter-spacing: 0;
-	}
 
 	/* Override Tailwind Typography */
 	.prose pre {
@@ -448,22 +421,6 @@
 		color: inherit;
 		font-size: inherit;
 		font-family: inherit;
-	}
-
-	.prose .shiki-container {
-		background: oklch(0.12 0 0);
-		border: 1px solid oklch(0.22 0 0);
-		border-radius: 0.75rem;
-		margin: 2rem 0;
-	}
-
-	.prose .shiki-container pre {
-		background: oklch(0.12 0 0);
-		padding: 1.5rem;
-		margin: 0;
-		border-radius: 0.75rem;
-		font-family:
-			"Geist Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 	}
 
 	.shiki-container .line {
@@ -536,11 +493,11 @@
 	}
 
 	@media (min-width: 768px) {
-		.shiki-container {
+		.prose-custom .shiki-container {
 			margin: 2.5rem 0;
 		}
 
-		.shiki-container pre {
+		.prose-custom .shiki-container pre {
 			padding: 2rem;
 			font-size: 1rem;
 			line-height: 1.7;
@@ -574,18 +531,18 @@
 			margin-top: 1.75rem;
 		}
 
-		.shiki-container {
+		.prose-custom .shiki-container {
 			margin: 1.5rem 0;
 			border-radius: 0.5rem;
 		}
 
-		.shiki-container pre {
+		.prose-custom .shiki-container pre {
 			padding: 1rem;
 			font-size: 0.875rem;
 			line-height: 1.6;
 		}
 
-		.shiki-container code {
+		.prose-custom .shiki-container code {
 			font-size: 0.875rem;
 		}
 	}
@@ -678,7 +635,8 @@
 }
 
 .ProseMirror pre {
-	@apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+	@apply bg-gray-900 text-gray-100 rounded-lg overflow-x-auto mb-4;
+	padding: 1rem;
 }
 
 .ProseMirror pre code {

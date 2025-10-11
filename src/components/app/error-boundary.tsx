@@ -110,7 +110,7 @@ class ErrorBoundaryClass extends React.Component<
  private reportError = (error: Error, errorInfo: React.ErrorInfo) => {
   // In a real app, you would send this to an error monitoring service
   // like Sentry, LogRocket, or Bugsnag
-  const errorReport = {
+  const _errorReport = {
    message: error.message,
    stack: error.stack,
    componentStack: errorInfo.componentStack,
@@ -120,6 +120,9 @@ class ErrorBoundaryClass extends React.Component<
    url: typeof window !== "undefined" ? window.location.href : "unknown",
    errorId: this.state.errorId,
   };
+
+  // TODO: Send _errorReport to error monitoring service
+  console.log("Error report prepared:", _errorReport);
  };
 
  resetError = () => {
@@ -136,7 +139,7 @@ class ErrorBoundaryClass extends React.Component<
     const FallbackComponent = this.props.fallback;
     return (
      <FallbackComponent
-      error={this.state.error!}
+      error={this.state.error ?? new Error("Unknown error occurred")}
       resetError={this.resetError}
      />
     );
