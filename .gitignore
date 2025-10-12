@@ -41,9 +41,6 @@ yarn-error.log*
 next-env.d.ts
 package-lock.json
 
-# remotion
-dist
-
 # Ignore the output video from Git but not videos you import into src/.
 out
 whisper.cpp
