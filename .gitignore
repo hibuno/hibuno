@@ -44,3 +44,10 @@ package-lock.json
 # Ignore the output video from Git but not videos you import into src/.
 out
 whisper.cpp
+
+# Local content storage
+# Keep the structure but optionally ignore large uploads
+# public/images/uploads/*
+# !public/images/uploads/.gitkeep
+
+bun.lock

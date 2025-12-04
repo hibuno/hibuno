@@ -1,18 +1,7 @@
 "use client";
 
-import { Unlink } from "lucide-react";
+import { ExternalLink, Unlink, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 
 interface LinkDialogProps {
   open: boolean;
@@ -38,153 +27,147 @@ export default function LinkDialog({
   initialData,
 }: LinkDialogProps) {
   const [href, setHref] = useState(initialData?.href || "");
-  const [text, setText] = useState(initialData?.text || "");
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [target, setTarget] = useState<"_blank" | "_self" | "_parent" | "_top">(
-    initialData?.target || "_blank",
+  const [openInNewTab, setOpenInNewTab] = useState(
+    initialData?.target === "_blank" || !initialData?.target
   );
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialData) {
       setHref(initialData.href || "");
-      setText(initialData.text || "");
-      setTitle(initialData.title || "");
-      setTarget(initialData.target || "_blank");
+      setOpenInNewTab(initialData.target === "_blank" || !initialData.target);
     }
   }, [initialData]);
 
+  useEffect(() => {
+    if (open) setError("");
+  }, [open]);
+
   const handleInsert = () => {
     if (!href) {
-      setError("Please provide a URL");
+      setError("Please enter a URL");
       return;
     }
-
-    // Basic URL validation
+    let finalHref = href;
+    if (
+      !/^https?:\/\//i.test(href) &&
+      !href.startsWith("/") &&
+      !href.startsWith("#")
+    ) {
+      finalHref = `https://${href}`;
+    }
     try {
-      new URL(href);
+      if (!href.startsWith("/") && !href.startsWith("#")) new URL(finalHref);
     } catch {
-      setError("Please provide a valid URL");
+      setError("Invalid URL");
       return;
     }
-
-    onInsert({
-      href,
-      ...(text && { text }),
-      ...(title && { title }),
-      target,
-    });
-    onClose();
+    onInsert({ href: finalHref, target: openInNewTab ? "_blank" : "_self" });
+    handleClose();
   };
 
   const handleClose = () => {
     setError("");
     setHref(initialData?.href || "");
-    setText(initialData?.text || "");
-    setTitle(initialData?.title || "");
-    setTarget(initialData?.target || "_blank");
+    setOpenInNewTab(initialData?.target === "_blank" || !initialData?.target);
     onClose();
   };
 
-  const handleUnlink = () => {
-    onInsert({
-      href: "",
-      text: "",
-      title: "",
-      target: "_self",
-    });
-    onClose();
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleInsert();
+    }
+    if (e.key === "Escape") handleClose();
   };
+
+  if (!open) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{initialData ? "Edit Link" : "Insert Link"}</DialogTitle>
-          <DialogDescription>
-            {initialData
-              ? "Edit the link properties below."
-              : "Add a hyperlink to your content."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+      <div className="relative bg-card rounded-lg shadow-2xl w-full max-w-xs mx-4 overflow-hidden animate-in">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h2 className="text-sm font-medium">
+            {initialData?.href ? "Edit Link" : "Add Link"}
+          </h2>
+          <button
+            onClick={handleClose}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+          >
+            <X size={14} />
+          </button>
+        </div>
+        <div className="p-4 space-y-3">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="px-2 py-1.5 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive">
               {error}
             </div>
           )}
-
-          <div className="space-y-2">
-            <Label htmlFor="link-url">URL *</Label>
-            <Input
-              id="link-url"
-              type="url"
+          <div>
+            <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              URL
+            </label>
+            <input
+              type="text"
               value={href}
               onChange={(e) => setHref(e.target.value)}
-              placeholder="https://example.com"
+              onKeyDown={handleKeyDown}
+              placeholder="example.com or /page"
+              autoFocus
+              className="mt-1 w-full px-3 py-2 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="link-text">Link Text (optional)</Label>
-            <Input
-              id="link-text"
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Link display text"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="link-title">Title (optional)</Label>
-            <Input
-              id="link-title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tooltip text"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="link-target">Target</Label>
-            <select
-              id="link-target"
-              value={target}
-              onChange={(e) =>
-                setTarget(
-                  e.target.value as "_blank" | "_self" | "_parent" | "_top",
-                )
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={openInNewTab}
+                onChange={(e) => setOpenInNewTab(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-8 h-4 bg-muted rounded-full peer-checked:bg-foreground transition-colors" />
+              <div className="absolute top-0.5 left-0.5 w-3 h-3 bg-card rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+            </div>
+            <span className="text-xs text-muted-foreground group-hover:text-foreground flex items-center gap-1">
+              <ExternalLink size={12} /> New tab
+            </span>
+          </label>
+        </div>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/30">
+          {initialData?.href ? (
+            <button
+              onClick={() => {
+                onInsert({ href: "", target: "_self" });
+                handleClose();
+              }}
+              className="px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded flex items-center gap-1"
             >
-              <option value="_blank">New tab (_blank)</option>
-              <option value="_self">Same tab (_self)</option>
-              <option value="_parent">Parent frame (_parent)</option>
-              <option value="_top">Top frame (_top)</option>
-            </select>
+              <Unlink size={12} /> Remove
+            </button>
+          ) : (
+            <div />
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={handleClose}
+              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleInsert}
+              disabled={!href}
+              className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50"
+            >
+              {initialData?.href ? "Update" : "Insert"}
+            </button>
           </div>
         </div>
-
-        <DialogFooter className="flex gap-2">
-          {initialData && (
-            <Button variant="outline" onClick={handleUnlink}>
-              <Unlink size={16} className="mr-2" />
-              Remove Link
-            </Button>
-          )}
-          <div className="flex gap-2 ml-auto">
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleInsert} disabled={!href}>
-              {initialData ? "Update Link" : "Insert Link"}
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

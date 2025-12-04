@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ArticleSignature from "@/components/app/article-signature";
-import DynamicTOCPostContent from "@/components/app/dynamic-toc-post-content";
-import { ErrorBoundary } from "@/components/app/error-boundary";
-import { AuthorAvatar, PostCoverImage } from "@/components/app/optimized-image";
-import PostNavigation from "@/components/app/post-navigation";
-import { ReadingProgress } from "@/components/app/reading-progress";
-import SimilarPosts from "@/components/app/similar-posts";
-import { SiteHeader } from "@/components/app/site-header";
-import { StructuredData } from "@/components/app/structured-data";
-import type { SelectPost } from "@/db/schema";
-import { postQueries } from "@/lib/database";
+import ArticleSignature from "@/components/blog/post-signature";
+import DynamicTOCPostContent from "@/components/blog/post-content-with-toc";
+import { ErrorBoundary } from "@/components/blog/error-boundary";
+import {
+  AuthorAvatar,
+  PostCoverImage,
+} from "@/components/blog/optimized-image";
+import PostNavigation from "@/components/blog/post-navigation";
+import { ReadingProgress } from "@/components/blog/reading-progress-bar";
+import SimilarPosts from "@/components/blog/similar-posts";
+import { SiteHeader } from "@/components/blog/site-header";
+import { StructuredData } from "@/components/blog/structured-data";
+import type { SelectPost } from "@/db/types";
+import { postQueries } from "@/lib/post-queries";
 import {
   generateBreadcrumbStructuredData,
   generatePostMetadata,
   generatePostStructuredData,
-} from "@/lib/seo";
-import { calculateStats } from "@/lib/utils";
+} from "@/lib/seo-metadata";
+import { calculateStats } from "@/lib/content-utils";
 
 interface BlogPostPageProps {
   params: { slug: string };
@@ -54,7 +57,7 @@ function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
 
   return (
     <div className="bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-2.5 flex items-center justify-between text-sm">
+      <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between text-sm">
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs opacity-60">ADMIN MODE</span>
           {post.published === false && (
@@ -64,7 +67,7 @@ function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
           )}
         </div>
         <a
-          href={`/admin/edit/${slug}`}
+          href={`/editor/${slug}`}
           className="hover:opacity-70 transition-opacity flex items-center gap-1.5"
         >
           <svg
@@ -112,7 +115,7 @@ function PostHeader({ post }: { post: SelectPost }) {
       <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
         <div className="flex items-center gap-2">
           <AuthorAvatar
-            src="/placeholder.png"
+            src="/placeholder.svg"
             alt="hibuno"
             className="h-6 w-6 rounded-full"
           />
@@ -243,7 +246,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Main Content Container */}
           <main
-            className={`max-w-3xl mx-auto px-6 relative z-10 ${
+            className={`max-w-6xl mx-auto px-6 relative z-10 ${
               isDevMode ? "pt-16" : "pt-8"
             } pb-20`}
           >

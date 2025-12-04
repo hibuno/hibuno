@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { postQueries } from "@/lib/database";
+import { postQueries } from "@/lib/post-queries";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hibuno.com";

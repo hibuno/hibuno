@@ -1,18 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/db/server";
+import {
+  compressForUpload,
+  needsCompression,
+  formatFileSize,
+} from "@/lib/image-compressor";
+import {
+  validateFile,
+  sanitizeFilename,
+  generateUniqueFilename,
+  isImageFile,
+  MAX_FILE_SIZE,
+} from "@/lib/file-validator";
+import { sanitizeSVG } from "@/lib/svg-sanitizer";
+import fs from "fs";
+import path from "path";
 
-// POST - Upload image to Supabase storage
+const IMAGES_DIR = path.join(process.cwd(), "public/images/uploads");
+
+// Ensure upload directory exists
+function ensureUploadDir() {
+  if (!fs.existsSync(IMAGES_DIR)) {
+    fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  }
+}
+
+// POST - Upload image to local storage
 export async function POST(request: NextRequest) {
   // Development environment check
   if (process.env.NODE_ENV !== "development") {
     return NextResponse.json(
       { error: "This endpoint is only available in development" },
-      { status: 403 },
+      { status: 403 }
     );
   }
 
   try {
-    const supabase = getSupabaseServerClient();
+    ensureUploadDir();
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const postId = formData.get("postId") as string;
@@ -21,71 +44,74 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type
-    const allowedTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.",
-        },
-        { status: 400 },
-      );
+    // Comprehensive file validation
+    const validation = validateFile(file, MAX_FILE_SIZE);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File size too large. Maximum size is 5MB." },
-        { status: 400 },
+    // Check if file is an image
+    const isImage = isImageFile(file);
+    const isSVG = file.type === "image/svg+xml";
+
+    // Compress image if needed (only for raster images, not SVG)
+    let fileToUpload = file;
+    if (isImage && !isSVG && needsCompression(file, 1)) {
+      console.log(
+        `Compressing image: ${file.name} (${formatFileSize(file.size)})`
       );
+      try {
+        fileToUpload = await compressForUpload(file, 1); // Target 1MB
+        console.log(`Compressed to: ${formatFileSize(fileToUpload.size)}`);
+      } catch (error) {
+        console.error("Image compression failed, using original:", error);
+        // Continue with original file if compression fails
+      }
     }
 
-    // Generate unique filename
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${postId}-${Date.now()}.${fileExt}`;
+    // Sanitize SVG files to remove potentially malicious content
+    if (isSVG) {
+      console.log(`Sanitizing SVG: ${file.name}`);
+      try {
+        const svgText = await file.text();
+        const sanitizedSVG = sanitizeSVG(svgText);
 
-    // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
+        if (!sanitizedSVG) {
+          return NextResponse.json(
+            { error: "Invalid or malicious SVG content detected" },
+            { status: 400 }
+          );
+        }
 
-    // Upload to Supabase storage
-    const { error: uploadError } = await supabase.storage
-      .from("images")
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      return NextResponse.json(
-        { error: "Failed to upload image" },
-        { status: 500 },
-      );
+        // Create a new File object with sanitized content
+        const blob = new Blob([sanitizedSVG], { type: "image/svg+xml" });
+        fileToUpload = new File([blob], file.name, { type: "image/svg+xml" });
+        console.log("SVG sanitized successfully");
+      } catch (error) {
+        console.error("SVG sanitization failed:", error);
+        return NextResponse.json(
+          { error: "Failed to sanitize SVG file" },
+          { status: 400 }
+        );
+      }
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from("images")
-      .getPublicUrl(fileName);
+    // Sanitize and generate unique filename
+    const sanitizedOriginalName = sanitizeFilename(fileToUpload.name);
+    const fileName = generateUniqueFilename(sanitizedOriginalName, postId);
 
-    if (!urlData.publicUrl) {
-      return NextResponse.json(
-        { error: "Failed to get public URL" },
-        { status: 500 },
-      );
-    }
+    // Convert file to buffer and save locally
+    const arrayBuffer = await fileToUpload.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const filePath = path.join(IMAGES_DIR, fileName);
+    fs.writeFileSync(filePath, buffer);
+
+    // Return public URL (relative to public folder)
+    const publicUrl = `/images/uploads/${fileName}`;
 
     return NextResponse.json({
-      url: urlData.publicUrl,
+      url: publicUrl,
       path: fileName,
       filename: fileName,
     });
@@ -93,7 +119,7 @@ export async function POST(request: NextRequest) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

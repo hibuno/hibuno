@@ -1,11 +1,14 @@
-import { AnimatedHomepage } from "@/components/app/animated-homepage";
-import { ErrorBoundary } from "@/components/app/error-boundary";
-import type { Post } from "@/components/app/post-card";
-import { SiteHeader } from "@/components/app/site-header";
-import { StructuredData } from "@/components/app/structured-data";
-import { postQueries } from "@/lib/database";
-import { retryDatabaseOperation } from "@/lib/retry";
-import { generateWebsiteStructuredData } from "@/lib/seo";
+import { AnimatedHomepage } from "@/components/blog/home-posts-grid";
+import { ErrorBoundary } from "@/components/blog/error-boundary";
+import type { Post } from "@/components/blog/post-card";
+import { SiteHeader } from "@/components/blog/site-header";
+import { StructuredData } from "@/components/blog/structured-data";
+import { postQueries } from "@/lib/post-queries";
+import { retryDatabaseOperation } from "@/lib/retry-helper";
+import { generateWebsiteStructuredData } from "@/lib/seo-metadata";
+
+// Disable caching to always read fresh data from local files
+export const dynamic = "force-dynamic";
 
 async function getHomepageData(): Promise<{
   recentPosts: Post[];
@@ -15,7 +18,7 @@ async function getHomepageData(): Promise<{
   try {
     // Get recent posts with retry mechanism
     const recentPosts = await retryDatabaseOperation(() =>
-      postQueries.getRecentPosts(12),
+      postQueries.getRecentPosts(12)
     );
 
     return {
@@ -23,9 +26,9 @@ async function getHomepageData(): Promise<{
         id: post.id,
         slug: post.slug,
         title: post.title,
-        excerpt: post.excerpt,
-        cover_image_url: post.cover_image_url,
-        published: "published" in post ? (post.published ?? true) : true,
+        excerpt: post.excerpt ?? null,
+        cover_image_url: post.cover_image_url ?? null,
+        published: "published" in post ? post.published ?? true : true,
         published_at: (post.published_at || new Date().toISOString()) as string,
       })),
     };
@@ -49,7 +52,7 @@ function ErrorState({ error }: { error: string }) {
   return (
     <main>
       <SiteHeader />
-      <div className="mx-auto max-w-3xl px-4 py-16">
+      <div className="mx-auto max-w-6xl px-4 py-16">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">
             Tidak dapat memuat konten

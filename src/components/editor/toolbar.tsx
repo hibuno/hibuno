@@ -1,42 +1,30 @@
 import type { Editor } from "@tiptap/react";
 import {
+  AlertCircle,
   AlignCenter,
   AlignLeft,
   AlignRight,
   Bold,
-  BookOpen,
-  Calculator,
-  CheckSquare,
-  Code,
-  Columns as ColumnsIcon,
-  FileText,
+  FoldVertical,
   Heading1,
   Heading2,
   Heading3,
-  Highlighter,
   Image as ImageIcon,
   Italic,
   Link as LinkIcon,
   List,
   ListOrdered,
-  Palette,
+  Minus,
   Quote,
-  Quote as QuoteIcon,
   Redo,
   Strikethrough,
-  TableIcon,
   Underline as UnderlineIcon,
   Undo,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import ToolbarCitationDialog from "./toolbar-citation-dialog";
-import ToolbarFootnoteDialog from "./toolbar-footnote-dialog";
-import ToolbarLaTeXDialog from "./toolbar-latex-dialog";
 
 interface ToolbarProps {
   editor: Editor;
   onImageClick: () => void;
-  onTableClick: () => void;
   onLinkClick: (initialData?: {
     href?: string;
     text?: string;
@@ -49,99 +37,23 @@ export default function Toolbar({
   editor,
   onImageClick,
   onLinkClick,
-  onTableClick,
 }: ToolbarProps) {
-  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
-  const [showLaTeXDialog, setShowLaTeXDialog] = useState(false);
-  const [showCitationDialog, setShowCitationDialog] = useState(false);
-  const [showFootnoteDialog, setShowFootnoteDialog] = useState(false);
-
-  // Close color pickers when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Element;
-      const isClickInsideTextColorPicker = target.closest(".text-color-picker");
-      const isClickInsideBgColorPicker = target.closest(".bg-color-picker");
-      const isClickOnTextColorButton = target.closest('[title="Text Color"]');
-      const isClickOnBgColorButton = target.closest(
-        '[title="Background Color"]',
-      );
-
-      if (
-        showTextColorPicker &&
-        !isClickInsideTextColorPicker &&
-        !isClickOnTextColorButton
-      ) {
-        setShowTextColorPicker(false);
-      }
-      if (
-        showBgColorPicker &&
-        !isClickInsideBgColorPicker &&
-        !isClickOnBgColorButton
-      ) {
-        setShowBgColorPicker(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showTextColorPicker, showBgColorPicker]);
-
-  const textColors = [
-    { name: "Default", value: null },
-    { name: "Black", value: "#000000" },
-    { name: "Red", value: "#ef4444" },
-    { name: "Orange", value: "#f97316" },
-    { name: "Yellow", value: "#eab308" },
-    { name: "Green", value: "#22c55e" },
-    { name: "Blue", value: "#3b82f6" },
-    { name: "Purple", value: "#a855f7" },
-    { name: "Pink", value: "#ec4899" },
-    { name: "Gray", value: "#6b7280" },
-    { name: "Dark Blue", value: "#1e40af" },
-    { name: "Dark Green", value: "#059669" },
-  ];
-
-  const bgColors = [
-    { name: "Default", value: null },
-    { name: "Light Red", value: "#fef2f2" },
-    { name: "Light Orange", value: "#fff7ed" },
-    { name: "Light Yellow", value: "#fefce8" },
-    { name: "Light Green", value: "#f0fdf4" },
-    { name: "Light Blue", value: "#eff6ff" },
-    { name: "Light Purple", value: "#faf5ff" },
-    { name: "Light Pink", value: "#fdf2f8" },
-    { name: "Light Gray", value: "#f9fafb" },
-    { name: "Medium Yellow", value: "#fef3c7" },
-    { name: "Medium Blue", value: "#dbeafe" },
-    { name: "Medium Green", value: "#d1fae5" },
-  ];
   const setLink = () => {
     const previousUrl = editor.getAttributes("link").href;
-    const previousTitle = editor.getAttributes("link").title || "";
-    const previousTarget =
-      (editor.getAttributes("link").target as
-        | "_blank"
-        | "_self"
-        | "_parent"
-        | "_top") || "_blank";
+    const previousTarget = editor.getAttributes("link").target || "_blank";
     const previousText =
       editor.state.doc.textBetween(
         editor.state.selection.from,
-        editor.state.selection.to,
+        editor.state.selection.to
       ) || "";
-
-    // Use the custom link dialog instead of native prompt
     onLinkClick({
       href: previousUrl,
       text: previousText,
-      title: previousTitle,
       target: previousTarget,
     });
   };
 
-  const ToolbarButton = ({
+  const Btn = ({
     onClick,
     isActive = false,
     children,
@@ -155,328 +67,180 @@ export default function Toolbar({
     <button
       onClick={onClick}
       title={title}
-      className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-        isActive ? "bg-gray-200 text-blue-600" : "text-gray-700"
+      className={`p-1.5 rounded transition-colors ${
+        isActive
+          ? "bg-foreground text-background"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
       }`}
     >
       {children}
     </button>
   );
 
-  const handleLaTeXInsert = (latex: string, inline?: boolean) => {
-    editor
-      .chain()
-      .focus()
-      .setMathLatex({ latex, inline: inline || false })
-      .run();
-  };
-
-  const handleCitationInsert = (data: {
-    id: string;
-    text: string;
-    url?: string;
-  }) => {
-    editor.chain().focus().setCitation(data).run();
-  };
-
-  const handleFootnoteInsert = (data: { id: string; text: string }) => {
-    editor.chain().focus().setFootnote(data).run();
-  };
+  const Divider = () => <div className="w-px h-4 bg-border mx-0.5" />;
 
   return (
-    <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex flex-wrap items-center gap-1 px-4 py-2">
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-          <ToolbarButton
-            onClick={() => editor.chain().focus().undo().run()}
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().redo().run()}
-            title="Redo (Ctrl+Y)"
-          >
-            <Redo size={18} />
-          </ToolbarButton>
-        </div>
+    <div
+      className="sticky top-0 z-10 bg-card border-b border-border"
+      role="toolbar"
+    >
+      <div className="flex items-center gap-0.5 px-2 py-1">
+        <Btn onClick={() => editor.chain().focus().undo().run()} title="Undo">
+          <Undo size={14} />
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().redo().run()} title="Redo">
+          <Redo size={14} />
+        </Btn>
 
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 1 })}
-            title="Heading 1"
-          >
-            <Heading1 size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 2 })}
-            title="Heading 2"
-          >
-            <Heading2 size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 3 })}
-            title="Heading 3"
-          >
-            <Heading3 size={18} />
-          </ToolbarButton>
-        </div>
+        <Divider />
 
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            isActive={editor.isActive("bold")}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            isActive={editor.isActive("italic")}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            isActive={editor.isActive("underline")}
-            title="Underline (Ctrl+U)"
-          >
-            <UnderlineIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            isActive={editor.isActive("strike")}
-            title="Strikethrough"
-          >
-            <Strikethrough size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            isActive={editor.isActive("code")}
-            title="Inline Code"
-          >
-            <Code size={18} />
-          </ToolbarButton>
-        </div>
+        <Btn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 1 })}
+          title="Heading 1"
+        >
+          <Heading1 size={14} />
+        </Btn>
+        <Btn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 2 })}
+          title="Heading 2"
+        >
+          <Heading2 size={14} />
+        </Btn>
+        <Btn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 3 })}
+          title="Heading 3"
+        >
+          <Heading3 size={14} />
+        </Btn>
 
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            isActive={editor.isActive({ textAlign: "left" })}
-            title="Align Left"
-          >
-            <AlignLeft size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setTextAlign("center").run()}
-            isActive={editor.isActive({ textAlign: "center" })}
-            title="Align Center"
-          >
-            <AlignCenter size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            isActive={editor.isActive({ textAlign: "right" })}
-            title="Align Right"
-          >
-            <AlignRight size={18} />
-          </ToolbarButton>
-        </div>
+        <Divider />
 
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            isActive={editor.isActive("bulletList")}
-            title="Bullet List"
-          >
-            <List size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            isActive={editor.isActive("orderedList")}
-            title="Numbered List"
-          >
-            <ListOrdered size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleTaskList().run()}
-            isActive={editor.isActive("taskList")}
-            title="Task List"
-          >
-            <CheckSquare size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            isActive={editor.isActive("blockquote")}
-            title="Quote"
-          >
-            <Quote size={18} />
-          </ToolbarButton>
-        </div>
+        <Btn
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive("bold")}
+          title="Bold"
+        >
+          <Bold size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive("italic")}
+          title="Italic"
+        >
+          <Italic size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          isActive={editor.isActive("underline")}
+          title="Underline"
+        >
+          <UnderlineIcon size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          isActive={editor.isActive("strike")}
+          title="Strikethrough"
+        >
+          <Strikethrough size={14} />
+        </Btn>
 
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-300 relative">
-          <div className="relative">
-            <ToolbarButton
-              onClick={() => setShowTextColorPicker(!showTextColorPicker)}
-              title="Text Color"
-            >
-              <Palette size={18} />
-            </ToolbarButton>
-            {showTextColorPicker && (
-              <div className="text-color-picker absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
-                <div className="text-xs font-medium text-gray-600 mb-3">
-                  Text Color
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {textColors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => {
-                        if (color.value) {
-                          editor.chain().focus().setColor(color.value).run();
-                        } else {
-                          editor.chain().focus().unsetColor().run();
-                        }
-                        setShowTextColorPicker(false);
-                      }}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-400 hover:scale-105 transition-all duration-150 flex items-center justify-center group"
-                      style={{ backgroundColor: color.value || "#000000" }}
-                      title={color.name}
-                    >
-                      {color.value === null && (
-                        <span className="text-xs font-medium text-gray-600 group-hover:text-gray-800">
-                          Default
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <ToolbarButton
-              onClick={() => setShowBgColorPicker(!showBgColorPicker)}
-              title="Background Color"
-            >
-              <Highlighter size={18} />
-            </ToolbarButton>
-            {showBgColorPicker && (
-              <div className="bg-color-picker absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 z-[9999] min-w-[200px]">
-                <div className="text-xs font-medium text-gray-600 mb-3">
-                  Background Color
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {bgColors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => {
-                        if (color.value) {
-                          // Set CSS variable for highlight color and apply highlight
-                          document.documentElement.style.setProperty(
-                            "--highlight-color",
-                            color.value,
-                          );
-                          editor
-                            .chain()
-                            .focus()
-                            .setHighlight({ color: color.value })
-                            .run();
-                        } else {
-                          editor.chain().focus().unsetHighlight().run();
-                        }
-                        setShowBgColorPicker(false);
-                      }}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-400 hover:scale-105 transition-all duration-150 flex items-center justify-center group"
-                      style={{ backgroundColor: color.value || "#ffffff" }}
-                      title={color.name}
-                    >
-                      {color.value === null && (
-                        <span className="text-xs font-medium text-gray-600 group-hover:text-gray-800">
-                          Default
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <Divider />
 
-        <div className="flex items-center gap-1">
-          <ToolbarButton
-            onClick={setLink}
-            isActive={editor.isActive("link")}
-            title="Insert Link"
-          >
-            <LinkIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton onClick={onImageClick} title="Insert Image">
-            <ImageIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setTwoColumns().run()}
-            title="Two Columns"
-          >
-            <ColumnsIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton onClick={() => onTableClick()} title="Insert Table">
-            <TableIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => setShowLaTeXDialog(true)}
-            title="Insert Math Formula"
-          >
-            <Calculator size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => setShowCitationDialog(true)}
-            title="Insert Citation"
-          >
-            <QuoteIcon size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => setShowFootnoteDialog(true)}
-            title="Insert Footnote"
-          >
-            <FileText size={18} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setBibliography().run()}
-            title="Insert Bibliography"
-          >
-            <BookOpen size={18} />
-          </ToolbarButton>
-        </div>
+        <Btn
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          isActive={editor.isActive({ textAlign: "left" })}
+          title="Align Left"
+        >
+          <AlignLeft size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          isActive={editor.isActive({ textAlign: "center" })}
+          title="Align Center"
+        >
+          <AlignCenter size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          isActive={editor.isActive({ textAlign: "right" })}
+          title="Align Right"
+        >
+          <AlignRight size={14} />
+        </Btn>
+
+        <Divider />
+
+        <Btn
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          isActive={editor.isActive("bulletList")}
+          title="Bullet List"
+        >
+          <List size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          isActive={editor.isActive("orderedList")}
+          title="Numbered List"
+        >
+          <ListOrdered size={14} />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          isActive={editor.isActive("blockquote")}
+          title="Quote"
+        >
+          <Quote size={14} />
+        </Btn>
+
+        <Divider />
+
+        <Btn onClick={setLink} isActive={editor.isActive("link")} title="Link">
+          <LinkIcon size={14} />
+        </Btn>
+        <Btn onClick={onImageClick} title="Image">
+          <ImageIcon size={14} />
+        </Btn>
+
+        <Divider />
+
+        <Btn
+          onClick={() => {
+            editor.chain().focus().setHorizontalRule().run();
+          }}
+          title="Divider"
+        >
+          <Minus size={14} />
+        </Btn>
+        <Btn
+          onClick={() => {
+            editor.chain().focus().setCallout({ type: "info" }).run();
+          }}
+          title="Image"
+        >
+          <AlertCircle size={14} />
+        </Btn>
+        <Btn
+          onClick={() => {
+            editor
+              .chain()
+              .focus()
+              .setDetails({ summary: "Click to expand", open: false })
+              .run();
+          }}
+          title="Collapsible"
+        >
+          <FoldVertical size={14} />
+        </Btn>
       </div>
-
-      {/* Dialog Components */}
-      <ToolbarLaTeXDialog
-        open={showLaTeXDialog}
-        onClose={() => setShowLaTeXDialog(false)}
-        onInsert={handleLaTeXInsert}
-      />
-      <ToolbarCitationDialog
-        open={showCitationDialog}
-        onClose={() => setShowCitationDialog(false)}
-        onInsert={handleCitationInsert}
-      />
-      <ToolbarFootnoteDialog
-        open={showFootnoteDialog}
-        onClose={() => setShowFootnoteDialog(false)}
-        onInsert={handleFootnoteInsert}
-      />
     </div>
   );
 }

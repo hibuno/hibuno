@@ -1,6 +1,6 @@
 import { ArrowLeft, HomeIcon } from "lucide-react";
 import Link from "next/link";
-import { SiteHeader } from "@/components/app/site-header";
+import { SiteHeader } from "@/components/blog/site-header";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {

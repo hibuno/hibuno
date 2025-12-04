@@ -4,9 +4,8 @@ import { Gloria_Hallelujah, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import type React from "react";
 import "./globals.css";
-import { Databuddy } from "@databuddy/sdk/react";
 import { Suspense } from "react";
-import { generateSiteMetadata } from "@/lib/seo";
+import { generateSiteMetadata } from "@/lib/seo-metadata";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -73,18 +72,11 @@ export default function RootLayout({
         >
           {children}
           {process.env.NODE_ENV === "production" && (
-            <Databuddy
-              clientId="Khkm4yYxBGAcgXEXiYT3b"
-              trackOutgoingLinks={true}
-              trackInteractions={true}
-              trackEngagement={true}
-              trackScrollDepth={true}
-              trackExitIntent={true}
-              trackBounceRate={true}
-              trackWebVitals={true}
-              trackErrors={true}
-              enableBatching={true}
-            />
+            <script
+              defer
+              src="https://cloud.umami.is/script.js"
+              data-website-id="e34a2aaa-fa37-4041-a1cb-416fa98a01f5"
+            ></script>
           )}
         </Suspense>
       </body>
