@@ -49,5 +49,3 @@ whisper.cpp
 # Keep the structure but optionally ignore large uploads
 # public/images/uploads/*
 # !public/images/uploads/.gitkeep
-
-bun.lock
