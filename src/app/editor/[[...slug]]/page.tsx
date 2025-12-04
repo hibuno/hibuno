@@ -30,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { AlertDialog, MessageDialog } from "@/components/ui/alert-dialog";
 import { calculateStats } from "@/lib/content-utils";
 import { Textarea } from "@/components/ui/textarea";
+import { OCRDropZone } from "@/components/editor/ocr-dropzone";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -197,6 +198,9 @@ export default function EditorPage({ params }: EditorPageProps) {
   const [generatingMetadata, setGeneratingMetadata] = useState(false);
   const [generatingProductDesc, setGeneratingProductDesc] = useState(false);
   const metadataPanelRef = useRef<AIMetadataPanelRef>(null);
+  const editorContentRef = useRef<string>(formData.content || "");
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [autoSaving, setAutoSaving] = useState(false);
 
   const debouncedContent = useDebounce(formData.content || "", 1000);
 
@@ -257,9 +261,63 @@ export default function EditorPage({ params }: EditorPageProps) {
       ) {
         newData.slug = generateSlug(value);
       }
+      if (field === "content") {
+        editorContentRef.current = value;
+      }
       return newData;
     });
   }, []);
+
+  const handleOCRTextExtracted = useCallback(
+    (extractedText: string) => {
+      // Append the extracted text to the current editor content
+      const currentContent = editorContentRef.current || "";
+      const newContent = currentContent
+        ? `${currentContent}\n\n${extractedText}`
+        : extractedText;
+      handleInputChange("content", newContent);
+
+      // Trigger auto-save after OCR text is inserted (with a short delay)
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+      autoSaveTimerRef.current = setTimeout(() => {
+        handleSave(true);
+      }, 2000);
+    },
+    [handleInputChange]
+  );
+
+  // Auto-save when content changes (debounced)
+  useEffect(() => {
+    // Only auto-save in edit mode and if we have title and slug
+    if (!isEditMode || !formData.title || !formData.slug) {
+      return;
+    }
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new timer for auto-save after 5 seconds of inactivity
+    autoSaveTimerRef.current = setTimeout(() => {
+      handleSave(true);
+    }, 5000);
+
+    // Cleanup
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [
+    formData.content,
+    formData.title,
+    formData.excerpt,
+    formData.tags,
+    isEditMode,
+  ]);
 
   const uploadImage = async (file: File): Promise<string> => {
     const formDataUpload = new FormData();
@@ -280,18 +338,25 @@ export default function EditorPage({ params }: EditorPageProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isAutoSave = false) => {
     if (!formData.title || !formData.slug) {
-      setMessageDialog({
-        open: true,
-        title: "Validation Error",
-        description: "Title and slug are required to save the post.",
-        variant: "destructive",
-      });
+      if (!isAutoSave) {
+        setMessageDialog({
+          open: true,
+          title: "Validation Error",
+          description: "Title and slug are required to save the post.",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
-    setSaving(true);
+    if (isAutoSave) {
+      setAutoSaving(true);
+    } else {
+      setSaving(true);
+    }
+
     try {
       let cover_image_url = formData.cover_image_url;
       if (coverImageFile) cover_image_url = await uploadImage(coverImageFile);
@@ -317,16 +382,24 @@ export default function EditorPage({ params }: EditorPageProps) {
         setPost(savedPost);
       }
     } catch (error) {
-      setMessageDialog({
-        open: true,
-        title: "Save Failed",
-        description: `Failed to save the post: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-        variant: "destructive",
-      });
+      if (!isAutoSave) {
+        setMessageDialog({
+          open: true,
+          title: "Save Failed",
+          description: `Failed to save the post: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+          variant: "destructive",
+        });
+      } else {
+        console.error("Auto-save failed:", error);
+      }
     } finally {
-      setSaving(false);
+      if (isAutoSave) {
+        setAutoSaving(false);
+      } else {
+        setSaving(false);
+      }
     }
   };
 
@@ -366,7 +439,12 @@ export default function EditorPage({ params }: EditorPageProps) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {lastSaved && (
+            {autoSaving && (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" /> Auto-saving...
+              </span>
+            )}
+            {!autoSaving && lastSaved && (
               <span className="text-[10px] text-foreground flex items-center gap-1">
                 <Check className="w-3 h-3" /> Saved
               </span>
@@ -384,8 +462,8 @@ export default function EditorPage({ params }: EditorPageProps) {
               </Button>
             )}
             <Button
-              onClick={handleSave}
-              disabled={saving}
+              onClick={() => handleSave(false)}
+              disabled={saving || autoSaving}
               size="sm"
               className="text-xs h-7 bg-foreground text-background hover:bg-foreground/90"
             >
@@ -413,6 +491,16 @@ export default function EditorPage({ params }: EditorPageProps) {
               >
                 <Plus className="w-3 h-3 mr-1" /> New Document
               </Button>
+            </div>
+
+            <div className="p-3 border-b border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <Upload className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs font-medium">
+                  Insert Text from Document
+                </span>
+              </div>
+              <OCRDropZone onTextExtracted={handleOCRTextExtracted} />
             </div>
 
             <div className="p-3 border-b border-border">

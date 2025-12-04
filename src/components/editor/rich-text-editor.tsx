@@ -235,6 +235,22 @@ export default function RichTextEditor({
     },
   });
 
+  // Update editor content when content prop changes externally
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      const { from, to } = editor.state.selection;
+      editor.commands.setContent(ensureValidHtml(content), {
+        emitUpdate: false,
+      });
+      // Restore cursor position if possible
+      if (from === to) {
+        editor.commands.setTextSelection(
+          Math.min(from, editor.state.doc.content.size)
+        );
+      }
+    }
+  }, [content, editor]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && editorState.commandMenu.open) {
