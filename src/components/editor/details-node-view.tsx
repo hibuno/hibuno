@@ -9,6 +9,7 @@ export default function DetailsComponent({
   node,
   updateAttributes,
   editor,
+  getPos,
 }: NodeViewProps) {
   const [isOpen, setIsOpen] = useState(node.attrs.open as boolean);
   const [isEditingSummary, setIsEditingSummary] = useState(false);
@@ -49,9 +50,14 @@ export default function DetailsComponent({
   };
 
   const handleDelete = () => {
-    const { from } = editor.state.selection;
-    const pos = editor.view.posAtDOM(editor.view.domAtPos(from).node, 0);
-    editor.commands.deleteRange({ from: pos, to: pos + node.nodeSize });
+    const pos = typeof getPos === "function" ? getPos() : null;
+    if (pos !== null && pos !== undefined) {
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: pos, to: pos + node.nodeSize })
+        .run();
+    }
   };
 
   return (

@@ -17,6 +17,7 @@ import {
   Minus,
   Quote,
   Redo,
+  Sparkles,
   Strikethrough,
   Underline as UnderlineIcon,
   Undo,
@@ -31,12 +32,14 @@ interface ToolbarProps {
     title?: string;
     target?: "_blank" | "_self" | "_parent" | "_top";
   }) => void;
+  onAIClick?: () => void;
 }
 
 export default function Toolbar({
   editor,
   onImageClick,
   onLinkClick,
+  onAIClick,
 }: ToolbarProps) {
   const setLink = () => {
     const previousUrl = editor.getAttributes("link").href;
@@ -85,6 +88,16 @@ export default function Toolbar({
       role="toolbar"
     >
       <div className="flex items-center gap-0.5 px-2 py-1">
+        <button
+          onClick={onAIClick}
+          title="AI Assistant (⌘K)"
+          className="p-1.5 rounded transition-all bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:shadow-md hover:shadow-amber-500/20 flex items-center gap-1"
+        >
+          <Sparkles size={14} />
+        </button>
+
+        <Divider />
+
         <Btn onClick={() => editor.chain().focus().undo().run()} title="Undo">
           <Undo size={14} />
         </Btn>

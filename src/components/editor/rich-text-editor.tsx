@@ -29,6 +29,11 @@ import { uploadImage } from "./editor-utils";
 import InlineSuggestion from "@sereneinserenade/tiptap-inline-suggestion";
 import { generateContent } from "@/lib/ai-service";
 
+// Debounce and cancellation for inline suggestions
+let suggestionAbortController: AbortController | null = null;
+let suggestionDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let lastSuggestionQuery = "";
+
 const ensureValidHtml = (content: string) => {
   if (!content) return "";
   if (content.trim().startsWith("<")) return content;
@@ -58,6 +63,9 @@ export default function RichTextEditor({
   const [selectedTextForAI, setSelectedTextForAI] = useState<
     string | undefined
   >();
+  const [initialAIAction, setInitialAIAction] = useState<
+    "improve" | "expand" | "summarize" | "continue" | "chat" | null
+  >(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -87,51 +95,76 @@ export default function RichTextEditor({
       CustomImage,
       InlineSuggestion.configure({
         fetchAutocompletion: async (query: string) => {
-          try {
-            // Only fetch if there's enough context
-            if (query.length < 30) return "";
-
-            // Check if content ends with a sentence or paragraph
-            const trimmed = query.trim();
-            const lastChar = trimmed.slice(-1);
-            const endsWithPunctuation = [".", "!", "?", ":", ","].includes(
-              lastChar
-            );
-
-            if (!endsWithPunctuation) return "";
-
-            // Get the last 1500 characters for context
-            const contextText =
-              trimmed.length > 1500 ? trimmed.slice(-1500) : trimmed;
-
-            const response = await generateContent({
-              type: "continue",
-              content: contextText,
-            });
-
-            if (response.result) {
-              // Clean up the result - get first sentence or phrase
-              let suggestion = response.result.trim();
-
-              // Remove HTML tags for inline display
-              suggestion = suggestion.replace(/<[^>]*>/g, "");
-
-              // Get first sentence or limit to ~100 chars
-              const firstSentenceEnd = suggestion.search(/[.!?]/);
-              if (firstSentenceEnd > 0 && firstSentenceEnd < 150) {
-                suggestion = suggestion.slice(0, firstSentenceEnd + 1);
-              } else if (suggestion.length > 100) {
-                suggestion = suggestion.slice(0, 100) + "...";
-              }
-
-              return suggestion;
-            }
-
-            return "";
-          } catch (err) {
-            console.error("Failed to fetch AI suggestion:", err);
-            return "";
+          // Cancel any pending request
+          if (suggestionAbortController) {
+            suggestionAbortController.abort();
           }
+          if (suggestionDebounceTimer) {
+            clearTimeout(suggestionDebounceTimer);
+          }
+
+          // Skip if same query or too short
+          if (query === lastSuggestionQuery || query.length < 30) return "";
+
+          // Check if content ends with a sentence or paragraph
+          const trimmed = query.trim();
+          const lastChar = trimmed.slice(-1);
+          const endsWithPunctuation = [".", "!", "?", ":", ","].includes(
+            lastChar
+          );
+
+          if (!endsWithPunctuation) return "";
+
+          // Debounce: wait 800ms before making request
+          return new Promise((resolve) => {
+            suggestionDebounceTimer = setTimeout(async () => {
+              try {
+                lastSuggestionQuery = query;
+                suggestionAbortController = new AbortController();
+
+                // Get the last 1500 characters for context
+                const contextText =
+                  trimmed.length > 1500 ? trimmed.slice(-1500) : trimmed;
+
+                const response = await generateContent({
+                  type: "continue",
+                  content: contextText,
+                });
+
+                // Check if request was aborted
+                if (suggestionAbortController?.signal.aborted) {
+                  resolve("");
+                  return;
+                }
+
+                if (response.result) {
+                  // Clean up the result - get first sentence or phrase
+                  let suggestion = response.result.trim();
+
+                  // Remove HTML tags for inline display
+                  suggestion = suggestion.replace(/<[^>]*>/g, "");
+
+                  // Get first sentence or limit to ~100 chars
+                  const firstSentenceEnd = suggestion.search(/[.!?]/);
+                  if (firstSentenceEnd > 0 && firstSentenceEnd < 150) {
+                    suggestion = suggestion.slice(0, firstSentenceEnd + 1);
+                  } else if (suggestion.length > 100) {
+                    suggestion = suggestion.slice(0, 100) + "...";
+                  }
+
+                  resolve(suggestion);
+                  return;
+                }
+
+                resolve("");
+              } catch (err) {
+                if ((err as Error).name !== "AbortError") {
+                  console.error("Failed to fetch AI suggestion:", err);
+                }
+                resolve("");
+              }
+            }, 800);
+          });
         },
       }),
     ],
@@ -294,19 +327,32 @@ export default function RichTextEditor({
           .setDetails({ summary: "Click to expand", open: false })
           .run();
         break;
-      case "ai-assistant":
+      case "chat":
       case "ai-improve":
       case "ai-expand":
-      case "ai-continue":
-        // Open AI menu for these commands
+      case "ai-continue": {
+        // Open AI menu with specific action
         const { from, to } = editor.state.selection;
         const selectedText = editor.state.doc.textBetween(from, to, " ");
         setSelectedTextForAI(selectedText || undefined);
 
         const coords = editor.view.coordsAtPos(from);
         setAIMenuPosition({ top: coords.top + 24, left: coords.left });
+
+        // Map command to action
+        const actionMap: Record<
+          string,
+          "improve" | "expand" | "continue" | "chat"
+        > = {
+          chat: "chat",
+          "ai-improve": "improve",
+          "ai-expand": "expand",
+          "ai-continue": "continue",
+        };
+        setInitialAIAction(actionMap[command] || null);
         setShowAIMenu(true);
         break;
+      }
     }
     editorDialogActions.closeCommandMenu();
   };
@@ -460,6 +506,15 @@ export default function RichTextEditor({
           if (initialData?.href) setEditingLink(initialData);
           setShowLinkDialog(true);
         }}
+        onAIClick={() => {
+          const { from, to } = editor.state.selection;
+          const selectedText = editor.state.doc.textBetween(from, to, " ");
+          setSelectedTextForAI(selectedText || undefined);
+
+          const coords = editor.view.coordsAtPos(from);
+          setAIMenuPosition({ top: coords.top + 24, left: coords.left });
+          setShowAIMenu(true);
+        }}
       />
       <div className="relative bg-card">
         <FloatingToolbar
@@ -508,8 +563,12 @@ export default function RichTextEditor({
           <AICommandMenu
             editor={editor}
             position={aiMenuPosition}
-            onClose={() => setShowAIMenu(false)}
+            onClose={() => {
+              setShowAIMenu(false);
+              setInitialAIAction(null);
+            }}
             selectedText={selectedTextForAI}
+            initialAction={initialAIAction}
           />
         )}
 

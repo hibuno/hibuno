@@ -54,7 +54,12 @@ const calloutConfig = {
   },
 };
 
-export default function CalloutComponent({ node, updateAttributes, editor }: NodeViewProps) {
+export default function CalloutComponent({
+  node,
+  updateAttributes,
+  editor,
+  getPos,
+}: NodeViewProps) {
   const type = node.attrs.type as keyof typeof calloutConfig;
   const config = calloutConfig[type] || calloutConfig.info;
   const Icon = config.icon;
@@ -64,9 +69,14 @@ export default function CalloutComponent({ node, updateAttributes, editor }: Nod
   };
 
   const handleDelete = () => {
-    const { from } = editor.state.selection;
-    const pos = editor.view.posAtDOM(editor.view.domAtPos(from).node, 0);
-    editor.commands.deleteRange({ from: pos, to: pos + node.nodeSize });
+    const pos = typeof getPos === "function" ? getPos() : null;
+    if (pos !== null && pos !== undefined) {
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: pos, to: pos + node.nodeSize })
+        .run();
+    }
   };
 
   return (
@@ -86,11 +96,7 @@ export default function CalloutComponent({ node, updateAttributes, editor }: Nod
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-            >
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
               {config.label}
             </Button>
           </DropdownMenuTrigger>
@@ -98,7 +104,9 @@ export default function CalloutComponent({ node, updateAttributes, editor }: Nod
             {Object.entries(calloutConfig).map(([key, value]) => (
               <DropdownMenuItem
                 key={key}
-                onClick={() => handleTypeChange(key as keyof typeof calloutConfig)}
+                onClick={() =>
+                  handleTypeChange(key as keyof typeof calloutConfig)
+                }
               >
                 <value.icon className={`w-4 h-4 mr-2 ${value.color}`} />
                 {value.label}

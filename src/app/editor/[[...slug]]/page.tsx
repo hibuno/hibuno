@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Calendar,
   Check,
-  ChevronDown,
   ExternalLink,
   FileText,
   History,
@@ -120,28 +119,18 @@ function ImageDropZone({
 function SidebarSection({
   title,
   children,
-  defaultOpen = true,
 }: {
   title: string;
   children: React.ReactNode;
-  defaultOpen?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
   return (
     <div className="border-b border-border last:border-b-0">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors text-left"
-      >
-        <span className="text-xs font-medium text-foreground">{title}</span>
-        <ChevronDown
-          className={`w-3 h-3 text-muted-foreground transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      {isOpen && <div className="px-3 pb-3 space-y-3">{children}</div>}
+      <div className="px-3 py-2">
+        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+          {title}
+        </span>
+      </div>
+      <div className="px-3 pb-3 space-y-3">{children}</div>
     </div>
   );
 }
@@ -477,7 +466,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         {/* Right Sidebar */}
         <aside className="w-64 border-l border-border bg-card shrink-0 hidden lg:block">
           <div className="sticky top-11 max-h-[calc(100vh-2.75rem)] overflow-y-auto">
-            <SidebarSection title="Post Metadata">
+            <SidebarSection title="Metadata">
               <AIMetadataPanel
                 content={formData.content || ""}
                 title={formData.title || ""}
@@ -494,8 +483,19 @@ export default function EditorPage({ params }: EditorPageProps) {
             </SidebarSection>
 
             <SidebarSection title="Publishing">
+              <ImageDropZone
+                currentImage={coverImagePreview}
+                onImageSelect={handleCoverImageSelect}
+                onRemove={() => {
+                  setCoverImageFile(null);
+                  setCoverImagePreview(null);
+                  handleInputChange("cover_image_url", "");
+                }}
+              />
               <div className="flex items-center justify-between">
-                <span className="text-xs">Published</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Publish
+                </span>
                 <Switch
                   checked={formData.published || false}
                   onCheckedChange={(checked) =>
@@ -527,18 +527,6 @@ export default function EditorPage({ params }: EditorPageProps) {
                   className="mt-1 h-8 text-xs"
                 />
               </div>
-            </SidebarSection>
-
-            <SidebarSection title="Cover Image">
-              <ImageDropZone
-                currentImage={coverImagePreview}
-                onImageSelect={handleCoverImageSelect}
-                onRemove={() => {
-                  setCoverImageFile(null);
-                  setCoverImagePreview(null);
-                  handleInputChange("cover_image_url", "");
-                }}
-              />
             </SidebarSection>
           </div>
         </aside>

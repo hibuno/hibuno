@@ -101,7 +101,7 @@ export default function LinkDialog({
             <X size={14} />
           </button>
         </div>
-        <div className="p-4 space-y-3">
+        <div className="p-4 pt-2 space-y-3">
           {error && (
             <div className="px-2 py-1.5 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive">
               {error}

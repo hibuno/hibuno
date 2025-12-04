@@ -14,7 +14,7 @@ import { useEffect, useState, useRef } from "react";
 interface FloatingToolbarProps {
   editor: Editor;
   onLinkClick?: () => void;
-  onAIClick?: () => void;
+  onAIClick: () => void;
 }
 
 const colors = [
@@ -111,6 +111,16 @@ export default function FloatingToolbar({
         transform: "translateX(-50%)",
       }}
     >
+      <button
+        onClick={onAIClick}
+        title="AI Assistant (⌘K)"
+        className="p-1 rounded transition-all bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:scale-110 hover:shadow-lg hover:shadow-amber-500/25"
+      >
+        <Sparkles size={13} />
+      </button>
+
+      <div className="w-px h-4 bg-white/20 mx-0.5" />
+
       <Btn
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive("bold")}
@@ -201,19 +211,6 @@ export default function FloatingToolbar({
       >
         <LinkIcon size={13} />
       </Btn>
-
-      {onAIClick && (
-        <>
-          <div className="w-px h-4 bg-white/20 mx-0.5" />
-          <button
-            onClick={onAIClick}
-            title="AI Assistant (⌘K)"
-            className="p-1 rounded transition-colors bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
-          >
-            <Sparkles size={13} />
-          </button>
-        </>
-      )}
     </div>
   );
 }

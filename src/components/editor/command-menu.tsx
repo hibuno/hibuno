@@ -30,32 +30,39 @@ interface CommandMenuProps {
 interface Command {
   id: string;
   label: string;
+  description?: string;
   icon: React.ReactNode;
   group: string;
+  shortcut?: string;
 }
 
 const commands: Command[] = [
   {
-    id: "ai-assistant",
-    label: "AI Assistant",
+    id: "chat",
+    label: "Ask AI anything",
+    description: "Custom instructions",
     icon: <Sparkles size={14} />,
     group: "AI",
+    shortcut: "⌘K",
   },
   {
     id: "ai-improve",
     label: "Improve Writing",
+    description: "Fix grammar & clarity",
     icon: <Wand2 size={14} />,
     group: "AI",
   },
   {
     id: "ai-expand",
     label: "Expand Content",
+    description: "Add more details",
     icon: <BookOpen size={14} />,
     group: "AI",
   },
   {
     id: "ai-continue",
     label: "Continue Writing",
+    description: "AI writes next part",
     icon: <PenLine size={14} />,
     group: "AI",
   },
@@ -150,6 +157,8 @@ export default function CommandMenu({
   const [search, setSearch] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const filteredCommands = commands.filter(
     (cmd) =>
@@ -157,9 +166,25 @@ export default function CommandMenu({
       cmd.group.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Scroll selected item into view
+  useEffect(() => {
+    const selectedItem = itemRefs.current[selectedIndex];
+    if (selectedItem && listRef.current) {
+      const listRect = listRef.current.getBoundingClientRect();
+      const itemRect = selectedItem.getBoundingClientRect();
+
+      if (itemRect.bottom > listRect.bottom) {
+        selectedItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      } else if (itemRect.top < listRect.top) {
+        selectedItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+  }, [selectedIndex]);
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
   useEffect(() => {
     setSelectedIndex(0);
   }, [search]);
@@ -210,7 +235,7 @@ export default function CommandMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed bg-card rounded-lg shadow-xl border border-border w-52 z-[9999] overflow-hidden animate-in"
+      className="fixed bg-card rounded-lg shadow-xl border border-border w-64 z-[9999] overflow-hidden animate-in"
       style={{ top: position.top, left: position.left }}
     >
       <div className="p-1.5 border-b border-border">
@@ -223,7 +248,7 @@ export default function CommandMenu({
           className="w-full px-2 py-1.5 text-xs bg-muted rounded focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
-      <div className="max-h-56 overflow-y-auto py-1">
+      <div ref={listRef} className="max-h-56 overflow-y-auto py-1">
         {Object.entries(groupedCommands).map(([group, cmds]) => (
           <div key={group}>
             <div className="px-2 py-1 text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -231,27 +256,65 @@ export default function CommandMenu({
             </div>
             {cmds.map((command) => {
               const currentIndex = flatIndex++;
+              const isAI = command.group === "AI";
               return (
                 <button
                   key={command.id}
+                  ref={(el) => {
+                    itemRefs.current[currentIndex] = el;
+                  }}
                   onClick={() => onSelect(command.id)}
                   onMouseEnter={() => setSelectedIndex(currentIndex)}
-                  className={`w-full px-2 py-1.5 flex items-center gap-2 text-left text-xs transition-colors ${
+                  className={`w-full px-2 py-1.5 flex items-center justify-between text-left text-xs transition-colors ${
                     currentIndex === selectedIndex
-                      ? "bg-foreground text-background"
+                      ? isAI
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                        : "bg-foreground text-background"
                       : "text-foreground hover:bg-muted"
                   }`}
                 >
-                  <span
-                    className={
-                      currentIndex === selectedIndex
-                        ? "text-background"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {command.icon}
-                  </span>
-                  <span className="font-medium">{command.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={
+                        currentIndex === selectedIndex
+                          ? isAI
+                            ? "text-white"
+                            : "text-background"
+                          : isAI
+                          ? "text-amber-500"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {command.icon}
+                    </span>
+                    <div>
+                      <span className="font-medium">{command.label}</span>
+                      {command.description && (
+                        <span
+                          className={`block text-[10px] ${
+                            currentIndex === selectedIndex
+                              ? isAI
+                                ? "text-white/70"
+                                : "text-background/70"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {command.description}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {command.shortcut && (
+                    <kbd
+                      className={`px-1 py-0.5 text-[9px] rounded ${
+                        currentIndex === selectedIndex
+                          ? "bg-white/20 text-white"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {command.shortcut}
+                    </kbd>
+                  )}
                 </button>
               );
             })}
