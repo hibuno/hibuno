@@ -26,9 +26,9 @@ const calloutConfig = {
   },
   warning: {
     icon: AlertTriangle,
-    color: "text-amber-800", // Darker amber for better contrast (WCAG AA compliant)
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-400",
+    color: "text-neutral-800", // Darker neutral for better contrast (WCAG AA compliant)
+    bgColor: "bg-neutral-50",
+    borderColor: "border-neutral-400",
     label: "Warning",
   },
   success: {

@@ -268,7 +268,7 @@ export default function CommandMenu({
                   className={`w-full px-2 py-1.5 flex items-center justify-between text-left text-xs transition-colors ${
                     currentIndex === selectedIndex
                       ? isAI
-                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                        ? "bg-gradient-to-r from-neutral-500 to-neutral-500 text-white"
                         : "bg-foreground text-background"
                       : "text-foreground hover:bg-muted"
                   }`}
@@ -281,7 +281,7 @@ export default function CommandMenu({
                             ? "text-white"
                             : "text-background"
                           : isAI
-                          ? "text-amber-500"
+                          ? "text-neutral-500"
                           : "text-muted-foreground"
                       }
                     >

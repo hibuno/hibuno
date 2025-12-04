@@ -224,7 +224,7 @@ export default function AdminDashboard() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {!post.published && (
-                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500/90 text-white text-[10px] font-medium rounded">
+                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neutral-500/90 text-white text-[10px] font-medium rounded">
                         Draft
                       </span>
                     )}
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                   <div className="relative aspect-[16/9] bg-muted flex items-center justify-center">
                     <FileText className="w-8 h-8 text-muted-foreground" />
                     {!post.published && (
-                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500/90 text-white text-[10px] font-medium rounded">
+                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neutral-500/90 text-white text-[10px] font-medium rounded">
                         Draft
                       </span>
                     )}
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                       className={`px-1.5 py-0.5 rounded-full font-medium ${
                         post.published
                           ? "bg-emerald-100 text-emerald-700"
-                          : "bg-amber-100 text-amber-700"
+                          : "bg-neutral-100 text-neutral-700"
                       }`}
                     >
                       {post.published ? "Published" : "Draft"}

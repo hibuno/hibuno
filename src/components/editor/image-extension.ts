@@ -119,7 +119,7 @@ export const CustomImage = Image.extend({
     if (caption) {
       children.push([
         "p",
-        { class: "text-sm text-gray-600 italic mt-2" },
+        { class: "text-sm text-neutral-600 italic mt-2" },
         caption,
       ]);
     }
@@ -198,7 +198,7 @@ export const CustomImage = Image.extend({
       // Add caption if present
       if (node.attrs.caption) {
         const caption = document.createElement("p");
-        caption.className = "text-sm text-gray-600 italic mt-2";
+        caption.className = "text-sm text-neutral-600 italic mt-2";
         caption.textContent = node.attrs.caption;
         dom.appendChild(img);
         dom.appendChild(caption);
@@ -281,7 +281,7 @@ export const CustomImage = Image.extend({
               existingCaption.textContent = updatedNode.attrs.caption;
             } else {
               const caption = document.createElement("p");
-              caption.className = "text-sm text-gray-600 italic mt-2";
+              caption.className = "text-sm text-neutral-600 italic mt-2";
               caption.textContent = updatedNode.attrs.caption;
               dom.appendChild(caption);
             }

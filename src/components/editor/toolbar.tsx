@@ -91,7 +91,7 @@ export default function Toolbar({
         <button
           onClick={onAIClick}
           title="AI Assistant (⌘K)"
-          className="p-1.5 rounded transition-all bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:shadow-md hover:shadow-amber-500/20 flex items-center gap-1"
+          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-500 to-neutral-500 text-white hover:from-neutral-600 hover:to-neutral-600 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1"
         >
           <Sparkles size={14} />
         </button>

@@ -46,7 +46,7 @@ const PostImage = memo(
         />
       </motion.div>
       {isUnpublished && (
-        <span className="absolute left-2 top-2 rounded bg-amber-500/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
+        <span className="absolute left-2 top-2 rounded bg-neutral-500/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
           Draft
         </span>
       )}

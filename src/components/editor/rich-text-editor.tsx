@@ -76,7 +76,9 @@ export default function RichTextEditor({
       Details,
       Placeholder.configure({
         placeholder: ({ node }) =>
-          node.type.name === "heading" ? "Heading" : "Type '/' for commands...",
+          node.type.name === "heading"
+            ? "Heading"
+            : "Type '/' for commands, use → for autocomplete...",
       }),
       Typography,
       Underline,

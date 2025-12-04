@@ -567,9 +567,9 @@ Rules:
       `}</style>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-gradient-to-r from-neutral-50 to-neutral-50 dark:from-neutral-950/30 dark:to-neutral-950/30">
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-md bg-gradient-to-br from-amber-400 to-orange-500">
+          <div className="p-1 rounded-md bg-gradient-to-br from-neutral-400 to-neutral-500">
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <div>
@@ -607,8 +607,8 @@ Rules:
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
             <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 blur-lg opacity-30 animate-pulse" />
-              <Loader2 className="w-8 h-8 animate-spin text-amber-500 relative" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-neutral-400 to-neutral-500 blur-lg opacity-30 animate-pulse" />
+              <Loader2 className="w-8 h-8 animate-spin text-neutral-500 relative" />
             </div>
             <span className="mt-4 text-sm text-muted-foreground">
               {activeAction === "chat"
@@ -700,7 +700,7 @@ Rules:
                 <button
                   key={tone.id}
                   onClick={() => handleToneSelect(tone.id)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border hover:border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all text-left"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border hover:border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-950/20 transition-all text-left"
                 >
                   <span className="text-lg">{tone.emoji}</span>
                   <div>
@@ -732,7 +732,7 @@ Rules:
                   : "What would you like me to write?"
               }
               rows={4}
-              className="w-full px-3 py-2.5 text-sm border border-input rounded-lg bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full px-3 py-2.5 text-sm border border-input rounded-lg bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-neutral-500/20 focus:border-neutral-500"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -743,7 +743,7 @@ Rules:
             <button
               onClick={handleChat}
               disabled={!chatInput.trim()}
-              className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-2.5 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-sm font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
               Send
@@ -775,7 +775,7 @@ Rules:
             <div className="flex gap-2 pt-1">
               <button
                 onClick={applyResult}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-sm font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
                 Apply
@@ -810,7 +810,7 @@ Rules:
             )}
             {mode === "chat" && <span>Enter Send • Shift+Enter New line</span>}
             {mode === "tone" && <span>1-6 Quick select • Esc Back</span>}
-            <span className="text-amber-500">⌘K</span>
+            <span className="text-neutral-500">⌘K</span>
           </div>
         </div>
       )}

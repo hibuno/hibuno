@@ -20,7 +20,7 @@ interface FloatingToolbarProps {
 const colors = [
   { name: "Default", text: null, bg: null },
   { name: "Red", text: "#b91c1c", bg: "#fef2f2" },
-  { name: "Amber", text: "#b45309", bg: "#fffbeb" },
+  { name: "neutral", text: "#b45309", bg: "#fffbeb" },
   { name: "Green", text: "#15803d", bg: "#f0fdf4" },
   { name: "Blue", text: "#1d4ed8", bg: "#eff6ff" },
 ];
@@ -114,7 +114,7 @@ export default function FloatingToolbar({
       <button
         onClick={onAIClick}
         title="AI Assistant (⌘K)"
-        className="p-1 rounded transition-all bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:scale-110 hover:shadow-lg hover:shadow-amber-500/25"
+        className="p-1 rounded transition-all bg-gradient-to-r from-neutral-500 to-neutral-500 text-white hover:from-neutral-600 hover:to-neutral-600 hover:scale-110 hover:shadow-lg hover:shadow-neutral-500/25"
       >
         <Sparkles size={13} />
       </button>

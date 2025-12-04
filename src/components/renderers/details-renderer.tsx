@@ -22,20 +22,22 @@ export default function DetailsRenderer({
   };
 
   return (
-    <div className="collapsible border border-gray-200 dark:border-gray-700 rounded-lg my-4 overflow-hidden">
+    <div className="collapsible border border-neutral-200 dark:border-neutral-700 rounded-lg my-4 overflow-hidden">
       <button
         type="button"
-        className="collapsible-summary w-full flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors text-left"
+        className="collapsible-summary w-full flex items-center gap-2 p-4 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer transition-colors text-left"
         onClick={handleToggle}
       >
-        <span className="flex-shrink-0 text-gray-600 dark:text-gray-400 transition-transform duration-200">
+        <span className="flex-shrink-0 text-neutral-600 dark:text-neutral-400 transition-transform duration-200">
           {isOpen ? (
             <ChevronDown className="w-5 h-5" />
           ) : (
             <ChevronRight className="w-5 h-5" />
           )}
         </span>
-        <span className="flex-1 font-medium text-gray-900 dark:text-gray-100">{summary}</span>
+        <span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
+          {summary}
+        </span>
       </button>
 
       <div
@@ -45,7 +47,7 @@ export default function DetailsRenderer({
             : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
-        <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 prose prose-sm dark:prose-invert max-w-none">
+        <div className="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 prose prose-sm dark:prose-invert max-w-none">
           {children}
         </div>
       </div>

@@ -61,15 +61,15 @@ export default function DetailsComponent({
   };
 
   return (
-    <NodeViewWrapper className="collapsible border border-gray-200 rounded-lg my-4 overflow-hidden group">
+    <NodeViewWrapper className="collapsible border border-neutral-200 rounded-lg my-4 overflow-hidden group">
       <div className="relative">
         <div
-          className="collapsible-summary flex items-center gap-2 p-4 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
+          className="collapsible-summary flex items-center gap-2 p-4 bg-neutral-50 hover:bg-neutral-100 cursor-pointer transition-colors"
           onClick={handleToggle}
         >
           <button
             type="button"
-            className="flex-shrink-0 text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex-shrink-0 text-neutral-600 hover:text-neutral-900 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               handleToggle();
@@ -95,7 +95,7 @@ export default function DetailsComponent({
             />
           ) : (
             <span
-              className="flex-1 font-medium text-gray-900"
+              className="flex-1 font-medium text-neutral-900"
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 handleSummaryEdit();
@@ -134,7 +134,7 @@ export default function DetailsComponent({
       </div>
 
       {isOpen && (
-        <div className="collapsible-content p-4 bg-white border-t border-gray-200">
+        <div className="collapsible-content p-4 bg-white border-t border-neutral-200">
           <NodeViewContent />
         </div>
       )}

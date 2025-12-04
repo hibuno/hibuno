@@ -189,7 +189,7 @@ export default function AIMetadataPanel({
       <button
         onClick={generateAll}
         disabled={loading}
-        className="w-full px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full px-3 py-2 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-xs font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
       >
         {loading ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -325,9 +325,9 @@ function CompactField({
             title="Generate with AI"
           >
             {loading ? (
-              <Loader2 className="w-3 h-3 animate-spin text-amber-500" />
+              <Loader2 className="w-3 h-3 animate-spin text-neutral-500" />
             ) : (
-              <RefreshCw className="w-3 h-3 text-muted-foreground hover:text-amber-500" />
+              <RefreshCw className="w-3 h-3 text-muted-foreground hover:text-neutral-500" />
             )}
           </button>
         </div>
@@ -339,7 +339,7 @@ function CompactField({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={2}
-          className="w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none"
+          className="w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500/20 resize-none"
         />
       ) : (
         <input
@@ -347,7 +347,7 @@ function CompactField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 ${
+          className={`w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500/20 ${
             mono ? "font-mono text-xs" : ""
           }`}
         />

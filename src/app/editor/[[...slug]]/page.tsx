@@ -158,8 +158,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     title: "",
     slug: "",
     excerpt: "",
-    content:
-      "<p>Use TAB to enable suggestion, use AI to improve your writing...</p>",
+    content: "",
     published: false,
     tags: [],
   });
@@ -341,7 +340,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                   formData.published
                     ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
+                    : "bg-neutral-100 text-neutral-700"
                 }`}
               >
                 {formData.published ? "Published" : "Draft"}

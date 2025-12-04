@@ -122,7 +122,7 @@ function PostHeader({ post }: { post: SelectPost }) {
           <span className="text-black/70 dark:text-white/70">hibuno</span>
         </div>
         <span>•</span>
-        <time className="font-medium text-gray-500 dark:text-gray-400">
+        <time className="font-medium text-neutral-500 dark:text-neutral-400">
           {date.toLocaleDateString("id-ID", {
             day: "numeric",
             month: "long",
