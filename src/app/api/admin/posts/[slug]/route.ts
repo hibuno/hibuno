@@ -35,6 +35,10 @@ export async function GET(
       published: data.published,
       published_at: data.published_at,
       created_at: data.created_at,
+      price: data.price,
+      discount_percentage: data.discount_percentage,
+      homepage: data.homepage,
+      product_description: data.product_description,
     };
 
     return NextResponse.json(formattedData as SelectPost, {
@@ -94,6 +98,10 @@ export async function PUT(
       tags: updateData.tags,
       published: updateData.published,
       published_at: updateData.published_at,
+      price: updateData.price,
+      discount_percentage: updateData.discount_percentage,
+      homepage: updateData.homepage,
+      product_description: updateData.product_description,
     };
 
     // Only update created_at if explicitly provided and different
@@ -126,6 +134,10 @@ export async function PUT(
       published: data.published,
       published_at: data.published_at,
       created_at: data.created_at,
+      price: data.price,
+      discount_percentage: data.discount_percentage,
+      homepage: data.homepage,
+      product_description: data.product_description,
     };
 
     return NextResponse.json(formattedData as SelectPost, {

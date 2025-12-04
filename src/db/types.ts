@@ -1,4 +1,4 @@
-// Post interface for blog functionality
+// Post interface for blog and product functionality
 export interface Post {
   id: string;
   slug: string;
@@ -11,6 +11,11 @@ export interface Post {
   published_at?: Date | null | undefined;
   created_at: Date;
   updated_at: Date;
+  // E-commerce fields
+  price?: number | null | undefined;
+  discount_percentage?: number | null | undefined;
+  homepage?: string | null | undefined;
+  product_description?: string | null | undefined;
 }
 
 // Type for creating a new post (optional fields that have defaults)

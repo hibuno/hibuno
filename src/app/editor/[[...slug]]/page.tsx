@@ -4,24 +4,32 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  DollarSign,
   ExternalLink,
   FileText,
+  Globe,
   History,
   ImagePlus,
+  Info,
   Loader2,
+  Percent,
   Plus,
   Save,
+  Sparkles,
   Upload,
   X,
 } from "lucide-react";
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import RichTextEditor from "@/components/editor/rich-text-editor";
-import AIMetadataPanel from "@/components/editor/ai-metadata-panel";
+import AIMetadataPanel, {
+  type AIMetadataPanelRef,
+} from "@/components/editor/ai-metadata-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, MessageDialog } from "@/components/ui/alert-dialog";
 import { calculateStats } from "@/lib/content-utils";
+import { Textarea } from "@/components/ui/textarea";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -119,16 +127,19 @@ function ImageDropZone({
 function SidebarSection({
   title,
   children,
+  action,
 }: {
   title: string;
   children: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="border-b border-border last:border-b-0">
-      <div className="px-3 py-2">
+      <div className="px-3 py-2 flex items-center justify-between">
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
           {title}
         </span>
+        {action}
       </div>
       <div className="px-3 pb-3 space-y-3">{children}</div>
     </div>
@@ -161,6 +172,10 @@ export default function EditorPage({ params }: EditorPageProps) {
     content: "",
     published: false,
     tags: [],
+    price: null,
+    discount_percentage: null,
+    homepage: "",
+    product_description: "",
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
@@ -179,6 +194,8 @@ export default function EditorPage({ params }: EditorPageProps) {
     title: "",
     description: "",
   });
+  const [generatingMetadata, setGeneratingMetadata] = useState(false);
+  const metadataPanelRef = useRef<AIMetadataPanelRef>(null);
 
   const debouncedContent = useDebounce(formData.content || "", 1000);
 
@@ -465,8 +482,34 @@ export default function EditorPage({ params }: EditorPageProps) {
         {/* Right Sidebar */}
         <aside className="w-64 border-l border-border bg-card shrink-0 hidden lg:block">
           <div className="sticky top-11 max-h-[calc(100vh-2.75rem)] overflow-y-auto">
-            <SidebarSection title="Metadata">
+            <SidebarSection
+              title="Metadata"
+              action={
+                <button
+                  onClick={async () => {
+                    if (metadataPanelRef.current) {
+                      setGeneratingMetadata(true);
+                      try {
+                        await metadataPanelRef.current.generateAll();
+                      } finally {
+                        setGeneratingMetadata(false);
+                      }
+                    }
+                  }}
+                  disabled={generatingMetadata}
+                  className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50"
+                  title="Generate metadata with AI"
+                >
+                  {generatingMetadata ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-500" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 text-muted-foreground hover:text-neutral-500" />
+                  )}
+                </button>
+              }
+            >
               <AIMetadataPanel
+                ref={metadataPanelRef}
                 content={formData.content || ""}
                 title={formData.title || ""}
                 slug={formData.slug || ""}
@@ -478,6 +521,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                   handleInputChange("excerpt", excerpt)
                 }
                 onApplyTags={(tags) => handleInputChange("tags", tags)}
+                hideGenerateButton={true}
+                isGenerating={generatingMetadata}
               />
             </SidebarSection>
 
@@ -522,6 +567,75 @@ export default function EditorPage({ params }: EditorPageProps) {
                         ? new Date(e.target.value).toISOString()
                         : null
                     )
+                  }
+                  className="mt-1 h-8 text-xs"
+                />
+              </div>
+            </SidebarSection>
+
+            <SidebarSection title="Product Info">
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" /> Price
+                </label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={formData.price || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "price",
+                      e.target.value ? parseFloat(e.target.value) : null
+                    )
+                  }
+                  className="mt-1 h-8 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                  <Percent className="w-3 h-3" /> Discount %
+                </label>
+                <Input
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  placeholder="0"
+                  value={formData.discount_percentage || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "discount_percentage",
+                      e.target.value ? parseInt(e.target.value) : null
+                    )
+                  }
+                  className="mt-1 h-8 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                  <Globe className="w-3 h-3" /> Homepage URL
+                </label>
+                <Input
+                  type="url"
+                  placeholder="https://example.com"
+                  value={formData.homepage || ""}
+                  onChange={(e) =>
+                    handleInputChange("homepage", e.target.value)
+                  }
+                  className="mt-1 h-8 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                  <Info className="w-3 h-3" /> Description
+                </label>
+                <Textarea
+                  placeholder="e.g., In stock, Ships in 2-3 days"
+                  value={formData.product_description || ""}
+                  onChange={(e) =>
+                    handleInputChange("product_description", e.target.value)
                   }
                   className="mt-1 h-8 text-xs"
                 />

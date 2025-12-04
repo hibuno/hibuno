@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Copy, Loader2, RefreshCw, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { generateMetadata, generateContent } from "@/lib/ai-service";
 
 interface AIMetadataPanelProps {
@@ -14,258 +14,288 @@ interface AIMetadataPanelProps {
   onApplySlug?: (slug: string) => void;
   onApplyExcerpt?: (excerpt: string) => void;
   onApplyTags?: (tags: string[]) => void;
+  hideGenerateButton?: boolean;
+  onGenerateClick?: () => void;
+  isGenerating?: boolean;
 }
 
-export default function AIMetadataPanel({
-  content,
-  title,
-  slug,
-  excerpt,
-  tags,
-  onApplyTitle,
-  onApplySlug,
-  onApplyExcerpt,
-  onApplyTags,
-}: AIMetadataPanelProps) {
-  const [loading, setLoading] = useState(false);
-  const [loadingField, setLoadingField] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<{
-    title?: string;
-    slug?: string;
-    excerpt?: string;
-    tags?: string[];
-    suggestedTitles?: string[];
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
+export interface AIMetadataPanelRef {
+  generateAll: () => Promise<void>;
+}
 
-  // Local state for manual editing
-  const [localTitle, setLocalTitle] = useState(title);
-  const [localSlug, setLocalSlug] = useState(slug);
-  const [localExcerpt, setLocalExcerpt] = useState(excerpt);
-  const [localTags, setLocalTags] = useState(tags.join(", "));
-
-  // Sync with parent props
-  useEffect(() => setLocalTitle(title), [title]);
-  useEffect(() => setLocalSlug(slug), [slug]);
-  useEffect(() => setLocalExcerpt(excerpt), [excerpt]);
-  useEffect(() => setLocalTags(tags.join(", ")), [tags]);
-
-  const generateAll = async () => {
-    if (!content || content.length < 50) {
-      setError("Add more content first");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await generateMetadata(content, title);
-      setSuggestions(result);
-
-      if (result.title && onApplyTitle) {
-        onApplyTitle(result.title);
-        setLocalTitle(result.title);
-      }
-      if (result.slug && onApplySlug) {
-        onApplySlug(result.slug);
-        setLocalSlug(result.slug);
-      }
-      if (result.excerpt && onApplyExcerpt) {
-        onApplyExcerpt(result.excerpt);
-        setLocalExcerpt(result.excerpt);
-      }
-      if (result.tags && onApplyTags) {
-        onApplyTags(result.tags);
-        setLocalTags(result.tags.join(", "));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateField = async (
-    field: "title" | "excerpt" | "tags" | "slug"
+const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
+  (
+    {
+      content,
+      title,
+      slug,
+      excerpt,
+      tags,
+      onApplyTitle,
+      onApplySlug,
+      onApplyExcerpt,
+      onApplyTags,
+      hideGenerateButton = false,
+      onGenerateClick,
+      isGenerating = false,
+    },
+    ref
   ) => {
-    if (!content || content.length < 50) {
-      setError("Add more content first");
-      return;
-    }
+    const [loading, setLoading] = useState(false);
+    const [loadingField, setLoadingField] = useState<string | null>(null);
+    const [suggestions, setSuggestions] = useState<{
+      title?: string;
+      slug?: string;
+      excerpt?: string;
+      tags?: string[];
+      suggestedTitles?: string[];
+    } | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [copiedField, setCopiedField] = useState<string | null>(null);
 
-    setLoadingField(field);
-    setError(null);
+    // Local state for manual editing
+    const [localTitle, setLocalTitle] = useState(title);
+    const [localSlug, setLocalSlug] = useState(slug);
+    const [localExcerpt, setLocalExcerpt] = useState(excerpt);
+    const [localTags, setLocalTags] = useState(tags.join(", "));
 
-    try {
-      const options: Parameters<typeof generateContent>[0] = {
-        type: field,
-        content: content.substring(0, 3000),
-      };
-      if (title) options.context = `Title: ${title}`;
+    // Sync with parent props
+    useEffect(() => setLocalTitle(title), [title]);
+    useEffect(() => setLocalSlug(slug), [slug]);
+    useEffect(() => setLocalExcerpt(excerpt), [excerpt]);
+    useEffect(() => setLocalTags(tags.join(", ")), [tags]);
 
-      const response = await generateContent(options);
-      let result = response.result;
+    // Expose generateAll function to parent via ref
+    useImperativeHandle(ref, () => ({
+      generateAll,
+    }));
 
-      if (field === "title") {
-        try {
-          const parsed = JSON.parse(result);
-          if (Array.isArray(parsed)) {
-            const newTitle = parsed[0];
-            setSuggestions((prev) => ({
-              ...prev,
-              suggestedTitles: parsed,
-              title: newTitle,
-            }));
-            onApplyTitle?.(newTitle);
-            setLocalTitle(newTitle);
-          }
-        } catch {
-          setSuggestions((prev) => ({ ...prev, title: result }));
-          onApplyTitle?.(result);
-          setLocalTitle(result);
-        }
-      } else if (field === "tags") {
-        try {
-          const parsed = JSON.parse(result);
-          if (Array.isArray(parsed)) {
-            setSuggestions((prev) => ({ ...prev, tags: parsed }));
-            onApplyTags?.(parsed);
-            setLocalTags(parsed.join(", "));
-          }
-        } catch {
-          // Handle non-JSON
-        }
-      } else if (field === "slug") {
-        setSuggestions((prev) => ({ ...prev, slug: result }));
-        onApplySlug?.(result);
-        setLocalSlug(result);
-      } else if (field === "excerpt") {
-        setSuggestions((prev) => ({ ...prev, excerpt: result }));
-        onApplyExcerpt?.(result);
-        setLocalExcerpt(result);
+    const generateAll = async () => {
+      if (!content || content.length < 50) {
+        setError("Add more content first");
+        return;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to generate`);
-    } finally {
-      setLoadingField(null);
-    }
-  };
 
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
+      setLoading(true);
+      setError(null);
 
-  const handleTitleChange = (value: string) => {
-    setLocalTitle(value);
-    onApplyTitle?.(value);
-  };
+      try {
+        const result = await generateMetadata(content, title);
+        setSuggestions(result);
 
-  const handleSlugChange = (value: string) => {
-    setLocalSlug(value);
-    onApplySlug?.(value);
-  };
+        if (result.title && onApplyTitle) {
+          onApplyTitle(result.title);
+          setLocalTitle(result.title);
+        }
+        if (result.slug && onApplySlug) {
+          onApplySlug(result.slug);
+          setLocalSlug(result.slug);
+        }
+        if (result.excerpt && onApplyExcerpt) {
+          onApplyExcerpt(result.excerpt);
+          setLocalExcerpt(result.excerpt);
+        }
+        if (result.tags && onApplyTags) {
+          onApplyTags(result.tags);
+          setLocalTags(result.tags.join(", "));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to generate");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleExcerptChange = (value: string) => {
-    setLocalExcerpt(value);
-    onApplyExcerpt?.(value);
-  };
+    const generateField = async (
+      field: "title" | "excerpt" | "tags" | "slug"
+    ) => {
+      if (!content || content.length < 50) {
+        setError("Add more content first");
+        return;
+      }
 
-  const handleTagsChange = (value: string) => {
-    setLocalTags(value);
-    const tagsArray = value
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-    onApplyTags?.(tagsArray);
-  };
+      setLoadingField(field);
+      setError(null);
 
-  return (
-    <div className="space-y-4">
-      {/* Generate All */}
-      <button
-        onClick={generateAll}
-        disabled={loading}
-        className="w-full px-3 py-2 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-xs font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Sparkles className="w-3.5 h-3.5" />
+      try {
+        const options: Parameters<typeof generateContent>[0] = {
+          type: field,
+          content: content.substring(0, 3000),
+        };
+        if (title) options.context = `Title: ${title}`;
+
+        const response = await generateContent(options);
+        let result = response.result;
+
+        if (field === "title") {
+          try {
+            const parsed = JSON.parse(result);
+            if (Array.isArray(parsed)) {
+              const newTitle = parsed[0];
+              setSuggestions((prev) => ({
+                ...prev,
+                suggestedTitles: parsed,
+                title: newTitle,
+              }));
+              onApplyTitle?.(newTitle);
+              setLocalTitle(newTitle);
+            }
+          } catch {
+            setSuggestions((prev) => ({ ...prev, title: result }));
+            onApplyTitle?.(result);
+            setLocalTitle(result);
+          }
+        } else if (field === "tags") {
+          try {
+            const parsed = JSON.parse(result);
+            if (Array.isArray(parsed)) {
+              setSuggestions((prev) => ({ ...prev, tags: parsed }));
+              onApplyTags?.(parsed);
+              setLocalTags(parsed.join(", "));
+            }
+          } catch {
+            // Handle non-JSON
+          }
+        } else if (field === "slug") {
+          setSuggestions((prev) => ({ ...prev, slug: result }));
+          onApplySlug?.(result);
+          setLocalSlug(result);
+        } else if (field === "excerpt") {
+          setSuggestions((prev) => ({ ...prev, excerpt: result }));
+          onApplyExcerpt?.(result);
+          setLocalExcerpt(result);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : `Failed to generate`);
+      } finally {
+        setLoadingField(null);
+      }
+    };
+
+    const copyToClipboard = (text: string, field: string) => {
+      navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    };
+
+    const handleTitleChange = (value: string) => {
+      setLocalTitle(value);
+      onApplyTitle?.(value);
+    };
+
+    const handleSlugChange = (value: string) => {
+      setLocalSlug(value);
+      onApplySlug?.(value);
+    };
+
+    const handleExcerptChange = (value: string) => {
+      setLocalExcerpt(value);
+      onApplyExcerpt?.(value);
+    };
+
+    const handleTagsChange = (value: string) => {
+      setLocalTags(value);
+      const tagsArray = value
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      onApplyTags?.(tagsArray);
+    };
+
+    // Use external generate handler if provided
+    const handleGenerate = onGenerateClick || generateAll;
+    const isLoading = isGenerating || loading;
+
+    return (
+      <div className="space-y-4">
+        {/* Generate All - only show if not hidden */}
+        {!hideGenerateButton && (
+          <button
+            onClick={handleGenerate}
+            disabled={isLoading}
+            className="w-full px-3 py-2 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-xs font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            {isLoading ? "Generating..." : "Generate"}
+          </button>
         )}
-        {loading ? "Generating..." : "Generate"}
-      </button>
 
-      {error && (
-        <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 px-2 py-1.5 rounded">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 px-2 py-1.5 rounded">
+            {error}
+          </p>
+        )}
 
-      {/* Fields */}
-      <div className="space-y-3">
-        {/* Title */}
-        <CompactField
-          label="Title"
-          value={localTitle}
-          onChange={handleTitleChange}
-          placeholder="Post title"
-          loading={loadingField === "title"}
-          onGenerate={() => generateField("title")}
-          onCopy={() => copyToClipboard(localTitle, "title")}
-          copied={copiedField === "title"}
-          alternatives={suggestions?.suggestedTitles}
-          onSelectAlternative={(v) => {
-            setLocalTitle(v);
-            onApplyTitle?.(v);
-          }}
-        />
+        {/* Fields */}
+        <div className="space-y-3">
+          {/* Title */}
+          <CompactField
+            label="Title"
+            value={localTitle}
+            onChange={handleTitleChange}
+            placeholder="Post title"
+            loading={loadingField === "title"}
+            onGenerate={() => generateField("title")}
+            onCopy={() => copyToClipboard(localTitle, "title")}
+            copied={copiedField === "title"}
+            alternatives={suggestions?.suggestedTitles}
+            onSelectAlternative={(v) => {
+              setLocalTitle(v);
+              onApplyTitle?.(v);
+            }}
+          />
 
-        {/* Slug */}
-        <CompactField
-          label="Slug"
-          value={localSlug}
-          onChange={handleSlugChange}
-          placeholder="url-slug"
-          loading={loadingField === "slug"}
-          onGenerate={() => generateField("slug")}
-          onCopy={() => copyToClipboard(localSlug, "slug")}
-          copied={copiedField === "slug"}
-          mono
-        />
+          {/* Slug */}
+          <CompactField
+            label="Slug"
+            value={localSlug}
+            onChange={handleSlugChange}
+            placeholder="url-slug"
+            loading={loadingField === "slug"}
+            onGenerate={() => generateField("slug")}
+            onCopy={() => copyToClipboard(localSlug, "slug")}
+            copied={copiedField === "slug"}
+            mono
+          />
 
-        {/* Tags */}
-        <CompactField
-          label="Tags"
-          value={localTags}
-          onChange={handleTagsChange}
-          placeholder="tag1, tag2, tag3"
-          loading={loadingField === "tags"}
-          onGenerate={() => generateField("tags")}
-          onCopy={() => copyToClipboard(localTags, "tags")}
-          copied={copiedField === "tags"}
-        />
+          {/* Tags */}
+          <CompactField
+            label="Tags"
+            value={localTags}
+            onChange={handleTagsChange}
+            placeholder="tag1, tag2, tag3"
+            loading={loadingField === "tags"}
+            onGenerate={() => generateField("tags")}
+            onCopy={() => copyToClipboard(localTags, "tags")}
+            copied={copiedField === "tags"}
+          />
 
-        {/* Excerpt */}
-        <CompactField
-          label="Excerpt"
-          value={localExcerpt}
-          onChange={handleExcerptChange}
-          placeholder="Brief description..."
-          loading={loadingField === "excerpt"}
-          onGenerate={() => generateField("excerpt")}
-          onCopy={() => copyToClipboard(localExcerpt, "excerpt")}
-          copied={copiedField === "excerpt"}
-          multiline
-          maxLength={160}
-        />
+          {/* Excerpt */}
+          <CompactField
+            label="Excerpt"
+            value={localExcerpt}
+            onChange={handleExcerptChange}
+            placeholder="Brief description..."
+            loading={loadingField === "excerpt"}
+            onGenerate={() => generateField("excerpt")}
+            onCopy={() => copyToClipboard(localExcerpt, "excerpt")}
+            copied={copiedField === "excerpt"}
+            multiline
+            maxLength={160}
+          />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+AIMetadataPanel.displayName = "AIMetadataPanel";
+
+export default AIMetadataPanel;
 
 interface CompactFieldProps {
   label: string;
@@ -339,7 +369,7 @@ function CompactField({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={2}
-          className="w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500/20 resize-none"
+          className="w-full px-2.5 py-1.5 text-sm bg-transparent border border-input rounded-md shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring resize-none"
         />
       ) : (
         <input
@@ -347,7 +377,7 @@ function CompactField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full px-2.5 py-1.5 text-sm bg-muted/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500/20 ${
+          className={`w-full px-2.5 py-1.5 text-sm bg-transparent border border-input rounded-md shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring ${
             mono ? "font-mono text-xs" : ""
           }`}
         />
