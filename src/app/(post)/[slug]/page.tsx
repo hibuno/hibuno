@@ -92,6 +92,86 @@ function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
   );
 }
 
+function ProductInfo({ post }: { post: SelectPost }) {
+  const hasProductInfo =
+    post.price ||
+    post.discount_percentage ||
+    post.homepage ||
+    post.product_description;
+
+  if (!hasProductInfo) return null;
+
+  // Ensure price is a number
+  const priceNum =
+    typeof post.price === "string" ? parseFloat(post.price) : post.price;
+
+  const finalPrice =
+    priceNum && post.discount_percentage
+      ? priceNum * (1 - post.discount_percentage / 100)
+      : priceNum;
+
+  return (
+    <div className="p-4 bg-black/5 dark:bg-white/5 rounded-lg border border-black/10 dark:border-white/10">
+      <div className="space-y-3">
+        {/* Price Section */}
+        {priceNum && (
+          <div className="flex items-baseline gap-2 flex-wrap">
+            {post.discount_percentage ? (
+              <>
+                <span className="text-2xl font-bold text-black dark:text-white">
+                  Rp {Math.round(finalPrice || 0).toLocaleString("id-ID")}
+                </span>
+                <span className="text-sm text-black/40 dark:text-white/40 line-through">
+                  Rp {Math.round(priceNum).toLocaleString("id-ID")}
+                </span>
+                <span className="px-1.5 py-0.5 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded">
+                  -{post.discount_percentage}%
+                </span>
+              </>
+            ) : (
+              <span className="text-2xl font-bold text-black dark:text-white">
+                Rp {Math.round(priceNum).toLocaleString("id-ID")}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Description */}
+        {post.product_description && (
+          <p className="text-sm text-black/60 dark:text-white/60">
+            {post.product_description}
+          </p>
+        )}
+
+        {/* Homepage Link */}
+        {post.homepage && (
+          <a
+            href={post.homepage}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-black dark:bg-white text-white dark:text-black text-sm font-medium rounded hover:bg-black/80 dark:hover:bg-white/80 transition-colors"
+          >
+            <span>Kunjungi Website</span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PostHeader({ post }: { post: SelectPost }) {
   const publishedISO = post.published_at || Date.now();
   const readingTime = calculateStats(post.content)?.readingTime || 0;
@@ -139,6 +219,9 @@ function PostHeader({ post }: { post: SelectPost }) {
           <TagList tags={normalizeTags(post.tags)} />
         </div>
       )}
+
+      {/* Product Info */}
+      <ProductInfo post={post} />
     </header>
   );
 }
@@ -150,9 +233,9 @@ function PostImage({ post }: { post: SelectPost }) {
       <PostCoverImage
         src={post.cover_image_url}
         alt={post.title}
-        className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 opacity-5"
+        className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 opacity-20"
       />
-      <div className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 bg-gradient-to-b from-transparent via-85% via-white to-white"></div>
+      <div className="absolute top-0 left-0 w-full h-[60vh] object-cover z-1 bg-gradient-to-b from-transparent via-85% via-white to-white"></div>
     </>
   );
 }

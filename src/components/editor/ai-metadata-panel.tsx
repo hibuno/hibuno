@@ -213,7 +213,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
           <button
             onClick={handleGenerate}
             disabled={isLoading}
-            className="w-full px-3 py-2 bg-gradient-to-r from-neutral-500 to-neutral-500 text-white text-xs font-medium rounded-lg hover:from-neutral-600 hover:to-neutral-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full px-3 py-2 bg-foreground text-background text-xs font-medium rounded-lg hover:bg-foreground/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -343,7 +343,7 @@ function CompactField({
             title="Copy"
           >
             {copied ? (
-              <Check className="w-3 h-3 text-emerald-500" />
+              <Check className="w-3 h-3 text-foreground" />
             ) : (
               <Copy className="w-3 h-3 text-muted-foreground" />
             )}
@@ -355,9 +355,9 @@ function CompactField({
             title="Generate with AI"
           >
             {loading ? (
-              <Loader2 className="w-3 h-3 animate-spin text-neutral-500" />
+              <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
             ) : (
-              <RefreshCw className="w-3 h-3 text-muted-foreground hover:text-neutral-500" />
+              <RefreshCw className="w-3 h-3 text-muted-foreground hover:text-foreground" />
             )}
           </button>
         </div>

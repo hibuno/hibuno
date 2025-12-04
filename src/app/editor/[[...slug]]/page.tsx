@@ -195,6 +195,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     description: "",
   });
   const [generatingMetadata, setGeneratingMetadata] = useState(false);
+  const [generatingProductDesc, setGeneratingProductDesc] = useState(false);
   const metadataPanelRef = useRef<AIMetadataPanelRef>(null);
 
   const debouncedContent = useDebounce(formData.content || "", 1000);
@@ -356,8 +357,8 @@ export default function EditorPage({ params }: EditorPageProps) {
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                   formData.published
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-neutral-100 text-neutral-700"
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {formData.published ? "Published" : "Draft"}
@@ -366,7 +367,7 @@ export default function EditorPage({ params }: EditorPageProps) {
           </div>
           <div className="flex items-center gap-2">
             {lastSaved && (
-              <span className="text-[10px] text-emerald-600 flex items-center gap-1">
+              <span className="text-[10px] text-foreground flex items-center gap-1">
                 <Check className="w-3 h-3" /> Saved
               </span>
             )}
@@ -501,9 +502,9 @@ export default function EditorPage({ params }: EditorPageProps) {
                   title="Generate metadata with AI"
                 >
                   {generatingMetadata ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-500" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
                   ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-muted-foreground hover:text-neutral-500" />
+                    <Sparkles className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
                   )}
                 </button>
               }
@@ -536,65 +537,77 @@ export default function EditorPage({ params }: EditorPageProps) {
                   handleInputChange("cover_image_url", "");
                 }}
               />
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                  Publish
-                </span>
-                <Switch
-                  checked={formData.published || false}
-                  onCheckedChange={(checked) =>
-                    handleInputChange("published", checked)
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <Calendar className="w-3 h-3" /> Date
-                </label>
-                <Input
-                  type="datetime-local"
-                  value={
-                    formData.published_at
-                      ? new Date(formData.published_at)
-                          .toISOString()
-                          .slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange(
-                      "published_at",
-                      e.target.value
-                        ? new Date(e.target.value).toISOString()
-                        : null
-                    )
-                  }
-                  className="mt-1 h-8 text-xs"
-                />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+                      Publish Status
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {formData.published
+                        ? "Visible to public"
+                        : "Draft - not visible"}
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.published || false}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("published", checked)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
+                    <Calendar className="w-3 h-3" /> Publish Date & Time
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={
+                      formData.published_at
+                        ? new Date(formData.published_at)
+                            .toISOString()
+                            .slice(0, 16)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleInputChange(
+                        "published_at",
+                        e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : null
+                      )
+                    }
+                    className="h-8 text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave empty to use current time
+                  </p>
+                </div>
               </div>
             </SidebarSection>
 
             <SidebarSection title="Product Info">
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
                   <DollarSign className="w-3 h-3" /> Price
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={formData.price || ""}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "price",
-                      e.target.value ? parseFloat(e.target.value) : null
-                    )
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0"
+                  value={
+                    formData.price ? formData.price.toLocaleString("id-ID") : ""
                   }
-                  className="mt-1 h-8 text-xs"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, "");
+                    const parsed = value ? parseInt(value) : null;
+                    handleInputChange("price", parsed);
+                  }}
+                  className="h-8 text-xs"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
                   <Percent className="w-3 h-3" /> Discount %
                 </label>
                 <Input
@@ -610,11 +623,11 @@ export default function EditorPage({ params }: EditorPageProps) {
                       e.target.value ? parseInt(e.target.value) : null
                     )
                   }
-                  className="mt-1 h-8 text-xs"
+                  className="h-8 text-xs"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
                   <Globe className="w-3 h-3" /> Homepage URL
                 </label>
                 <Input
@@ -624,20 +637,73 @@ export default function EditorPage({ params }: EditorPageProps) {
                   onChange={(e) =>
                     handleInputChange("homepage", e.target.value)
                   }
-                  className="mt-1 h-8 text-xs"
+                  className="h-8 text-xs"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <Info className="w-3 h-3" /> Description
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                    <Info className="w-3 h-3" /> Description
+                  </label>
+                  <button
+                    onClick={async () => {
+                      if (!formData.content || formData.content.length < 50) {
+                        return;
+                      }
+                      setGeneratingProductDesc(true);
+                      try {
+                        // Extract first 500 chars to detect language
+                        const contentSample = formData.content
+                          .replace(/<[^>]*>/g, "")
+                          .substring(0, 500);
+
+                        const response = await fetch("/api/ai/generate", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            type: "excerpt",
+                            content: `${contentSample}\n\n---\n\nFull context: ${formData.content.substring(
+                              0,
+                              2000
+                            )}`,
+                            context: `CRITICAL INSTRUCTION: You MUST write in the EXACT SAME LANGUAGE as the content above. If the content is in Indonesian (Bahasa Indonesia), write in Indonesian. If in English, write in English. DO NOT translate or change the language.
+
+Task: Generate a short product description (max 150 characters) that summarizes the key benefits or features.
+
+Title: ${formData.title || ""}
+
+Remember: Match the language of the content EXACTLY!`,
+                          }),
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          handleInputChange("product_description", data.result);
+                        }
+                      } catch (err) {
+                        console.error("Failed to generate description:", err);
+                      } finally {
+                        setGeneratingProductDesc(false);
+                      }
+                    }}
+                    disabled={generatingProductDesc}
+                    className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50"
+                    title="Generate with AI"
+                  >
+                    {generatingProductDesc ? (
+                      <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-muted-foreground hover:text-foreground" />
+                    )}
+                  </button>
+                </div>
                 <Textarea
                   placeholder="e.g., In stock, Ships in 2-3 days"
                   value={formData.product_description || ""}
                   onChange={(e) =>
                     handleInputChange("product_description", e.target.value)
                   }
-                  className="mt-1 h-8 text-xs"
+                  rows={3}
+                  className="text-xs resize-none"
                 />
               </div>
             </SidebarSection>

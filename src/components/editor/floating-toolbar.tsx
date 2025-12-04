@@ -114,7 +114,7 @@ export default function FloatingToolbar({
       <button
         onClick={onAIClick}
         title="AI Assistant (⌘K)"
-        className="p-1 rounded transition-all bg-gradient-to-r from-neutral-500 to-neutral-500 text-white hover:from-neutral-600 hover:to-neutral-600 hover:scale-110 hover:shadow-lg hover:shadow-neutral-500/25"
+        className="p-1 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:scale-110 hover:shadow-lg hover:shadow-neutral-500/25"
       >
         <Sparkles size={13} />
       </button>

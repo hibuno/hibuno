@@ -83,6 +83,17 @@ export function updatePost(
         : existingPost.published_at,
     created_at: updates.created_at ?? existingPost.created_at,
     updated_at: new Date(),
+    price: updates.price !== undefined ? updates.price : existingPost.price,
+    discount_percentage:
+      updates.discount_percentage !== undefined
+        ? updates.discount_percentage
+        : existingPost.discount_percentage,
+    homepage:
+      updates.homepage !== undefined ? updates.homepage : existingPost.homepage,
+    product_description:
+      updates.product_description !== undefined
+        ? updates.product_description
+        : existingPost.product_description,
   };
   posts[index] = updatedPost;
   savePosts(posts);

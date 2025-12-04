@@ -44,7 +44,9 @@ NavigationLink.displayName = "NavigationLink";
 
 export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
   return (
-    <header className={cn("bg-card border-b border-border", className)}>
+    <header
+      className={cn("bg-card border-b border-border z-50 relative", className)}
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
           href="/"

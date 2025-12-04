@@ -53,6 +53,10 @@ export async function POST(request: NextRequest) {
       published_at: data.published_at ? new Date(data.published_at) : null,
       created_at: new Date(),
       updated_at: new Date(),
+      price: data.price || null,
+      discount_percentage: data.discount_percentage || null,
+      homepage: data.homepage || null,
+      product_description: data.product_description || null,
     });
 
     return NextResponse.json(newPost, { status: 201 });

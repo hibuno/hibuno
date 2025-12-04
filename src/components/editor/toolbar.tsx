@@ -84,14 +84,14 @@ export default function Toolbar({
 
   return (
     <div
-      className="sticky top-0 z-10 bg-card border-b border-border"
+      className="sticky top-11 z-10 bg-card border-b border-border"
       role="toolbar"
     >
       <div className="flex items-center gap-0.5 px-2 py-1">
         <button
           onClick={onAIClick}
           title="AI Assistant (⌘K)"
-          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-500 to-neutral-500 text-white hover:from-neutral-600 hover:to-neutral-600 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1"
+          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1"
         >
           <Sparkles size={14} />
         </button>

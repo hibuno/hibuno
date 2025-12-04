@@ -25,18 +25,26 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = `You are an SEO and content optimization expert. Analyze the given blog post content and generate optimized metadata.
 
+CRITICAL: Detect the language of the content and generate ALL metadata in the SAME language as the content. If the content is in Indonesian, generate metadata in Indonesian. If in English, generate in English, etc.
+
 Generate the following:
-1. title: A compelling, SEO-friendly title (if not provided or to suggest alternatives)
-2. slug: URL-friendly slug based on the title
-3. excerpt: Meta description between 120-160 characters
-4. tags: Array of 5-10 relevant tags in lowercase, hyphenated format
-5. suggestedTitles: Array of 3 alternative title suggestions
+1. title: A compelling, SEO-friendly title in the same language as the content (if not provided or to suggest alternatives)
+2. slug: URL-friendly slug based on the title (use appropriate transliteration for non-Latin scripts)
+3. excerpt: Meta description between 120-160 characters in the same language as the content
+4. tags: Array of 5-10 relevant tags in the same language as the content, lowercase, hyphenated format
+5. suggestedTitles: Array of 3 alternative title suggestions in the same language as the content
 
 Return as valid JSON matching this exact schema.`;
 
     const userPrompt = title
-      ? `Title: ${title}\n\nContent:\n${content.substring(0, 3000)}`
-      : `Content:\n${content.substring(0, 3000)}`;
+      ? `Title: ${title}\n\nContent (first 3000 chars):\n${content.substring(
+          0,
+          3000
+        )}\n\nIMPORTANT: Generate all metadata in the SAME language as this content.`
+      : `Content (first 3000 chars):\n${content.substring(
+          0,
+          3000
+        )}\n\nIMPORTANT: Generate all metadata in the SAME language as this content.`;
 
     const response = await fetch(UPSTAGE_API_URL, {
       method: "POST",

@@ -158,22 +158,26 @@ Rules:
 - Use HTML tags: <p>, <ul>, <li>
 - Start directly with the summary`,
 
-  title: `Generate 5 SEO-friendly titles. Return ONLY a JSON array.
+  title: `Generate 5 SEO-friendly titles in the SAME language as the content. Return ONLY a JSON array.
 Example: ["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"]
-NO explanations, NO markdown, ONLY the JSON array.`,
+NO explanations, NO markdown, ONLY the JSON array.
+CRITICAL: Use the same language as the input content.`,
 
-  excerpt: `Generate a meta description (120-160 characters).
+  excerpt: `Generate a meta description (120-160 characters) in the SAME language as the content.
 Return ONLY the excerpt text, nothing else.
-NO quotes, NO explanations, NO "Here is..."`,
+NO quotes, NO explanations, NO "Here is..."
+CRITICAL: Use the same language as the input content.`,
 
-  tags: `Generate 5-10 relevant tags in lowercase hyphenated format.
+  tags: `Generate 5-10 relevant tags in the SAME language as the content, lowercase hyphenated format.
 Return ONLY a JSON array.
 Example: ["tag-one", "tag-two"]
-NO explanations, ONLY the JSON array.`,
+NO explanations, ONLY the JSON array.
+CRITICAL: Use the same language as the input content.`,
 
   slug: `Generate an SEO-friendly URL slug (3-6 words, lowercase, hyphens).
 Return ONLY the slug, nothing else.
-NO quotes, NO explanations.`,
+NO quotes, NO explanations.
+Use transliteration for non-Latin scripts (e.g., Indonesian "Menjelajahi" → "menjelajahi").`,
 
   continue: `You are a content writer. Continue the text naturally in clean HTML.
 Rules:
