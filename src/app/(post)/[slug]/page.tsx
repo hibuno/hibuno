@@ -172,6 +172,25 @@ function ProductInfo({ post }: { post: SelectPost }) {
   );
 }
 
+// Format date consistently to avoid hydration mismatch
+function formatDate(date: Date): string {
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 function PostHeader({ post }: { post: SelectPost }) {
   const publishedISO = post.published_at || Date.now();
   const readingTime = calculateStats(post.content)?.readingTime || 0;
@@ -203,11 +222,7 @@ function PostHeader({ post }: { post: SelectPost }) {
         </div>
         <span className="hidden sm:inline">•</span>
         <time className="font-medium text-neutral-500 dark:text-neutral-400">
-          {date.toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+          {formatDate(date)}
         </time>
         <span>•</span>
         <span>{readingTime} menit baca</span>

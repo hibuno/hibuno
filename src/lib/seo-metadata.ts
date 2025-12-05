@@ -94,7 +94,7 @@ export function generatePostMetadata(post: SelectPost): Metadata {
     post.excerpt || `Read this article by Hibuno on ${SITE_CONFIG.name}`;
 
   return {
-    title: `${post.title} | ${SITE_CONFIG.name}`,
+    title: post.title,
     description,
     keywords: [...SITE_CONFIG.keywords, ...(post.tags || [])].filter(Boolean),
     authors: [{ name: "Hibuno" }],

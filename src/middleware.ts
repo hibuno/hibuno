@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
 
     // Scripts - allow self, inline scripts (needed for Next.js), and trusted CDNs
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://platform.twitter.com https://gist.github.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://platform.twitter.com https://gist.github.com https://cloud.umami.is",
 
     // Styles - allow self, inline styles (needed for styled components), and trusted CDNs
     "style-src 'self' 'unsafe-inline'",
@@ -32,8 +32,8 @@ export function middleware(request: NextRequest) {
     // Fonts - allow self and data URIs
     "font-src 'self' data:",
 
-    // Connect - allow self only (local storage)
-    "connect-src 'self'",
+    // Connect - allow self and analytics
+    "connect-src 'self' https://cloud.umami.is",
 
     // Frame sources - allow trusted embed providers
     "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://codepen.io https://platform.twitter.com",

@@ -56,13 +56,28 @@ const PostImage = memo(
 
 PostImage.displayName = "PostImage";
 
+// Format date consistently to avoid hydration mismatch
+const formatDate = (date: Date): string => {
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+};
+
 const PostMeta = memo(({ date }: { date: Date }) => (
-  <div className="text-xs text-muted-foreground mb-1">
-    {date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })}
+  <div className="text-xs text-muted-foreground mb-1" suppressHydrationWarning>
+    {formatDate(date)}
   </div>
 ));
 
