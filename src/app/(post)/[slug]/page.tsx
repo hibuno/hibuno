@@ -178,21 +178,21 @@ function PostHeader({ post }: { post: SelectPost }) {
   const date = new Date(publishedISO);
 
   return (
-    <header className="space-y-6 mb-12">
+    <header className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
       {/* Title */}
-      <h1 className="font-serif text-3xl md:text-5xl font-bold leading-[1.15] text-black dark:text-white tracking-tight">
+      <h1 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold leading-[1.15] text-black dark:text-white tracking-tight">
         {post.title}
       </h1>
 
       {/* Excerpt */}
       {post.excerpt && (
-        <p className="text-base md:text-lg text-black/60 dark:text-white/60 leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg text-black/60 dark:text-white/60 leading-relaxed">
           {post.excerpt}
         </p>
       )}
 
       {/* Meta */}
-      <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-black/50 dark:text-white/50">
         <div className="flex items-center gap-2">
           <AuthorAvatar
             src="/placeholder.svg"
@@ -201,7 +201,7 @@ function PostHeader({ post }: { post: SelectPost }) {
           />
           <span className="text-black/70 dark:text-white/70">hibuno</span>
         </div>
-        <span>•</span>
+        <span className="hidden sm:inline">•</span>
         <time className="font-medium text-neutral-500 dark:text-neutral-400">
           {date.toLocaleDateString("id-ID", {
             day: "numeric",
@@ -329,9 +329,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Main Content Container */}
           <main
-            className={`max-w-6xl mx-auto px-6 relative z-10 ${
-              isDevMode ? "pt-16" : "pt-8"
-            } pb-20`}
+            className={`max-w-6xl mx-auto px-4 sm:px-6 relative z-10 ${
+              isDevMode ? "pt-12 sm:pt-16" : "pt-6 sm:pt-8"
+            } pb-12 sm:pb-20`}
           >
             <article className="space-y-12">
               {/* Header */}
@@ -345,7 +345,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </article>
 
             {/* Navigation & Related Content */}
-            <div className="mt-20 space-y-12 divide-y divide-black/5 dark:divide-white/5">
+            <div className="mt-12 sm:mt-20 space-y-8 sm:space-y-12 divide-y divide-black/5 dark:divide-white/5">
               <PostNavigation
                 published_at={(post.published_at || null) as string | null}
               />

@@ -221,6 +221,65 @@
   background: var(--muted-foreground);
 }
 
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+  
+  .prose-custom h1 {
+    font-size: 1.75rem;
+  }
+  
+  .prose-custom h2 {
+    font-size: 1.35rem;
+  }
+  
+  .prose-custom h3 {
+    font-size: 1.15rem;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Exception for inline elements */
+  .inline-link, nav a, .prose a {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
+/* Slide in animation for mobile menus */
+@keyframes slide-in-from-top-2 {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top-2 0.2s ease-out;
+}
+
 /* AI Inline Suggestion */
 [data-inline-suggestion]::after {
   content: attr(data-inline-suggestion);

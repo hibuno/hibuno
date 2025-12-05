@@ -87,11 +87,11 @@ export default function Toolbar({
       className="sticky top-11 z-10 bg-card border-b border-border"
       role="toolbar"
     >
-      <div className="flex items-center gap-0.5 px-2 py-1">
+      <div className="flex items-center gap-0.5 px-2 py-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={onAIClick}
           title="AI Assistant (⌘K)"
-          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1"
+          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1 shrink-0"
         >
           <Sparkles size={14} />
         </button>
@@ -168,29 +168,31 @@ export default function Toolbar({
 
         <Divider />
 
-        <Btn
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          isActive={editor.isActive({ textAlign: "left" })}
-          title="Align Left"
-        >
-          <AlignLeft size={14} />
-        </Btn>
-        <Btn
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          isActive={editor.isActive({ textAlign: "center" })}
-          title="Align Center"
-        >
-          <AlignCenter size={14} />
-        </Btn>
-        <Btn
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          isActive={editor.isActive({ textAlign: "right" })}
-          title="Align Right"
-        >
-          <AlignRight size={14} />
-        </Btn>
-
-        <Divider />
+        {/* Hide alignment on mobile to save space */}
+        <div className="hidden sm:flex items-center gap-0.5">
+          <Btn
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            isActive={editor.isActive({ textAlign: "left" })}
+            title="Align Left"
+          >
+            <AlignLeft size={14} />
+          </Btn>
+          <Btn
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            isActive={editor.isActive({ textAlign: "center" })}
+            title="Align Center"
+          >
+            <AlignCenter size={14} />
+          </Btn>
+          <Btn
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            isActive={editor.isActive({ textAlign: "right" })}
+            title="Align Right"
+          >
+            <AlignRight size={14} />
+          </Btn>
+          <Divider />
+        </div>
 
         <Btn
           onClick={() => editor.chain().focus().toggleBulletList().run()}

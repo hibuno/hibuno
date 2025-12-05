@@ -128,14 +128,17 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between h-14">
             <div>
               <h1 className="text-lg font-semibold font-serif">hibuno</h1>
-              <p className="text-xs text-muted-foreground">Content Dashboard</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">
+                Content Dashboard
+              </p>
             </div>
             <Button
               onClick={() => (window.location.href = "/editor")}
               size="sm"
               className="text-xs h-8 bg-foreground text-background"
             >
-              <Plus className="w-3 h-3 mr-1" /> New Post
+              <Plus className="w-3 h-3 sm:mr-1" />
+              <span className="hidden sm:inline">New Post</span>
             </Button>
           </div>
         </div>
@@ -154,10 +157,10 @@ export default function AdminDashboard() {
               className="pl-8 h-9"
             />
           </div>
-          <div className="flex gap-1 p-0.5 bg-muted rounded-md">
+          <div className="flex gap-1 p-0.5 bg-muted rounded-md overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setFilter("all")}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === "all"
                   ? "bg-card shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -167,7 +170,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setFilter("published")}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === "published"
                   ? "bg-card shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -177,7 +180,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setFilter("draft")}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === "draft"
                   ? "bg-card shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -209,7 +212,7 @@ export default function AdminDashboard() {
             )}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPosts.map((post) => (
               <div
                 key={post.id}

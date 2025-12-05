@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/content-utils";
 
 interface SocialLink {
@@ -26,23 +29,35 @@ const SOCIAL_LINKS: readonly SocialLink[] = [
   },
 ] as const;
 
-const NavigationLink = memo(({ link }: { link: SocialLink }) => {
-  const isExternal = link.href.startsWith("http");
-  return (
-    <Link
-      href={link.href}
-      className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-      {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
-    >
-      <span className="sr-only">{link.label}</span>
-      <span aria-hidden="true">{link.name}</span>
-    </Link>
-  );
-});
+const NavigationLink = memo(
+  ({ link, onClick }: { link: SocialLink; onClick?: () => void }) => {
+    const isExternal = link.href.startsWith("http");
+
+    const handleClick = (_e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (onClick) {
+        onClick();
+      }
+    };
+
+    return (
+      <Link
+        href={link.href}
+        className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+        onClick={handleClick}
+        {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
+      >
+        <span className="sr-only">{link.label}</span>
+        <span aria-hidden="true">{link.name}</span>
+      </Link>
+    );
+  }
+);
 
 NavigationLink.displayName = "NavigationLink";
 
 export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header
       className={cn("bg-card border-b border-border z-50 relative", className)}
@@ -54,12 +69,50 @@ export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
         >
           <span className="font-serif">hibuno</span>
         </Link>
-        <nav className="flex items-center gap-4" aria-label="Main navigation">
+
+        {/* Desktop Navigation */}
+        <nav
+          className="hidden sm:flex items-center gap-4"
+          aria-label="Main navigation"
+        >
           {SOCIAL_LINKS.map((link) => (
             <NavigationLink key={link.name} link={link} />
           ))}
         </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="sm:hidden p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
+        </button>
       </div>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <nav
+          className="sm:hidden border-t border-border bg-card animate-in slide-in-from-top-2 duration-200"
+          aria-label="Mobile navigation"
+        >
+          <div className="px-4 py-3 space-y-3">
+            {SOCIAL_LINKS.map((link) => (
+              <div key={link.name}>
+                <NavigationLink
+                  link={link}
+                  onClick={() => setMobileMenuOpen(false)}
+                />
+              </div>
+            ))}
+          </div>
+        </nav>
+      )}
     </header>
   );
 });

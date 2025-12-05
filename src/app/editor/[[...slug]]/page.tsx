@@ -12,9 +12,11 @@ import {
   ImagePlus,
   Info,
   Loader2,
+  Menu,
   Percent,
   Plus,
   Save,
+  Settings,
   Sparkles,
   Upload,
   X,
@@ -411,6 +413,9 @@ export default function EditorPage({ params }: EditorPageProps) {
     window.location.href = "/editor";
   };
 
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -425,6 +430,14 @@ export default function EditorPage({ params }: EditorPageProps) {
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between h-11 px-3">
           <div className="flex items-center gap-2">
+            {/* Mobile left sidebar toggle */}
+            <button
+              onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+              className="lg:hidden p-1.5 -ml-1.5 hover:bg-muted rounded transition-colors"
+              aria-label="Toggle navigation"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
             <span className="text-sm font-medium">Editor</span>
             {isEditMode && (
               <span
@@ -440,12 +453,12 @@ export default function EditorPage({ params }: EditorPageProps) {
           </div>
           <div className="flex items-center gap-2">
             {autoSaving && (
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <span className="hidden sm:flex text-[10px] text-muted-foreground items-center gap-1">
                 <Loader2 className="w-3 h-3 animate-spin" /> Auto-saving...
               </span>
             )}
             {!autoSaving && lastSaved && (
-              <span className="text-[10px] text-foreground flex items-center gap-1">
+              <span className="hidden sm:flex text-[10px] text-foreground items-center gap-1">
                 <Check className="w-3 h-3" /> Saved
               </span>
             )}
@@ -456,7 +469,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                 onClick={() =>
                   window.open(`/${slug}?t=${Date.now()}`, "_blank")
                 }
-                className="text-xs h-7"
+                className="hidden sm:flex text-xs h-7"
               >
                 <ExternalLink className="w-3 h-3 mr-1" /> Preview
               </Button>
@@ -470,19 +483,67 @@ export default function EditorPage({ params }: EditorPageProps) {
               {saving ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                <Save className="w-3 h-3 mr-1" />
+                <Save className="w-3 h-3 sm:mr-1" />
               )}
-              {saving ? "Saving" : "Save"}
+              <span className="hidden sm:inline">
+                {saving ? "Saving" : "Save"}
+              </span>
             </Button>
+            {/* Mobile right sidebar toggle */}
+            <button
+              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+              className="lg:hidden p-1.5 -mr-1.5 hover:bg-muted rounded transition-colors"
+              aria-label="Toggle settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
 
+      {/* Mobile Left Sidebar Overlay */}
+      {leftSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setLeftSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Right Sidebar Overlay */}
+      {rightSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setRightSidebarOpen(false)}
+        />
+      )}
+
       {/* Main */}
       <div className="flex">
         {/* Left Sidebar */}
-        <aside className="w-56 border-r border-border bg-card shrink-0">
-          <div className="sticky top-11 max-h-[calc(100vh-2.75rem)] overflow-y-auto">
+        <aside
+          className={`
+          fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
+          w-64 lg:w-56 border-r border-border bg-card shrink-0
+          transform transition-transform duration-200 ease-in-out
+          ${
+            leftSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+        >
+          <div className="sticky top-0 lg:top-11 max-h-screen lg:max-h-[calc(100vh-2.75rem)] overflow-y-auto">
+            {/* Mobile close button */}
+            <div className="lg:hidden flex items-center justify-between p-3 border-b border-border">
+              <span className="text-sm font-medium">Navigation</span>
+              <button
+                onClick={() => setLeftSidebarOpen(false)}
+                className="p-1.5 hover:bg-muted rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <div className="p-3 border-b border-border">
               <Button
                 onClick={handleNewDocumentClick}
@@ -517,9 +578,10 @@ export default function EditorPage({ params }: EditorPageProps) {
                   recentPosts.map((recentPost) => (
                     <button
                       key={recentPost.id}
-                      onClick={() =>
-                        (window.location.href = `/editor/${recentPost.slug}`)
-                      }
+                      onClick={() => {
+                        setLeftSidebarOpen(false);
+                        window.location.href = `/editor/${recentPost.slug}`;
+                      }}
                       className={`w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted transition-colors ${
                         recentPost.slug === slug ? "bg-muted" : ""
                       }`}
@@ -569,8 +631,30 @@ export default function EditorPage({ params }: EditorPageProps) {
         </main>
 
         {/* Right Sidebar */}
-        <aside className="w-64 border-l border-border bg-card shrink-0 hidden lg:block">
-          <div className="sticky top-11 max-h-[calc(100vh-2.75rem)] overflow-y-auto">
+        <aside
+          className={`
+          fixed lg:relative inset-y-0 right-0 z-50 lg:z-auto
+          w-72 lg:w-64 border-l border-border bg-card shrink-0
+          transform transition-transform duration-200 ease-in-out
+          ${
+            rightSidebarOpen
+              ? "translate-x-0"
+              : "translate-x-full lg:translate-x-0"
+          }
+        `}
+        >
+          <div className="sticky top-0 lg:top-11 max-h-screen lg:max-h-[calc(100vh-2.75rem)] overflow-y-auto">
+            {/* Mobile close button */}
+            <div className="lg:hidden flex items-center justify-between p-3 border-b border-border">
+              <span className="text-sm font-medium">Settings</span>
+              <button
+                onClick={() => setRightSidebarOpen(false)}
+                className="p-1.5 hover:bg-muted rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <SidebarSection
               title="Metadata"
               action={

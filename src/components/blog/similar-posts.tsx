@@ -27,18 +27,18 @@ const PostItem = memo(({ post }: { post: Post }) => (
           alt=""
           width={128}
           height={80}
-          className="h-20 w-32 rounded-md object-cover ring-1 ring-border"
+          className="h-16 w-24 sm:h-20 sm:w-32 rounded-md object-cover ring-1 ring-border shrink-0"
           loading="lazy"
         />
       ) : (
-        <div className="h-20 w-32 rounded-md bg-muted" />
+        <div className="h-16 w-24 sm:h-20 sm:w-32 rounded-md bg-muted shrink-0" />
       )}
-      <div>
-        <div className="line-clamp-2 font-medium group-hover:underline">
+      <div className="min-w-0 flex-1">
+        <div className="line-clamp-2 text-sm sm:text-base font-medium group-hover:underline">
           {post.title}
         </div>
         {post.excerpt && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+          <p className="mt-1 line-clamp-2 text-xs sm:text-sm text-muted-foreground">
             {post.excerpt}
           </p>
         )}
@@ -51,7 +51,7 @@ PostItem.displayName = "PostItem";
 
 // Memoized posts grid component
 const PostsGrid = memo(({ posts }: { posts: Post[] }) => (
-  <ul className="grid gap-6 sm:grid-cols-2">
+  <ul className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2">
     {posts.map((post) => (
       <PostItem key={post.slug} post={post} />
     ))}

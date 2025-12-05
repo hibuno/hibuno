@@ -13,26 +13,30 @@ export default async function PostNavigation({
     if (!newer && !older) return null;
 
     return (
-      <div className="mt-8 grid gap-4 border-t pt-6 md:grid-cols-2">
+      <div className="mt-6 sm:mt-8 grid gap-3 sm:gap-4 border-t pt-4 sm:pt-6 grid-cols-1 sm:grid-cols-2">
         <div>
           {older && (
             <Link
               href={`/${older.slug}`}
-              className="block rounded-lg bg-muted/40 p-4 hover:bg-muted"
+              className="block rounded-lg bg-muted/40 p-3 sm:p-4 hover:bg-muted transition-colors"
             >
               <div className="text-xs text-muted-foreground">Previous</div>
-              <div className="line-clamp-2 font-medium">{older.title}</div>
+              <div className="line-clamp-2 text-sm sm:text-base font-medium">
+                {older.title}
+              </div>
             </Link>
           )}
         </div>
-        <div className="md:ml-auto md:text-right">
+        <div className="sm:ml-auto sm:text-right">
           {newer && (
             <Link
               href={`/${newer.slug}`}
-              className="block rounded-lg bg-muted/40 p-4 hover:bg-muted"
+              className="block rounded-lg bg-muted/40 p-3 sm:p-4 hover:bg-muted transition-colors"
             >
               <div className="text-xs text-muted-foreground">Next</div>
-              <div className="line-clamp-2 font-medium">{newer.title}</div>
+              <div className="line-clamp-2 text-sm sm:text-base font-medium">
+                {newer.title}
+              </div>
             </Link>
           )}
         </div>

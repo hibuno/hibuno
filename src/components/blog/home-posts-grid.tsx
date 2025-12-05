@@ -31,15 +31,15 @@ const HeroSection = memo(() => (
     className="border-b border-border bg-card"
     variants={ANIMATION.item}
   >
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
       <motion.h1
-        className="font-serif text-balance text-3xl font-semibold leading-tight md:text-4xl"
+        className="font-serif text-balance text-2xl sm:text-3xl font-semibold leading-tight md:text-4xl"
         variants={ANIMATION.item}
       >
         Tempat singgah untuk memperdalam pemahaman Anda
       </motion.h1>
       <motion.p
-        className="mt-2 max-w-prose text-muted-foreground"
+        className="mt-2 max-w-prose text-sm sm:text-base text-muted-foreground"
         variants={ANIMATION.item}
       >
         Dengan kalimat yang mudah dibaca dan gambar yang mudah dipahami,
@@ -74,12 +74,12 @@ const PostsGrid = memo(({ posts }: { posts: Post[] }) => {
 
   return (
     <motion.section aria-label="Recent posts" variants={ANIMATION.item}>
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <motion.h2 className="sr-only" variants={ANIMATION.item}>
           Postingan Terbaru
         </motion.h2>
         <motion.div
-          className="grid gap-8 md:grid-cols-2"
+          className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2"
           variants={ANIMATION.container}
         >
           {postItems}
