@@ -9,9 +9,8 @@ const ArticleSignature = memo(() => {
             Terima kasih telah membaca!
           </p>
           <p className="text-sm text-black/60 dark:text-white/60">
-            Jika Anda merasa artikel ini bermanfaat, pertimbangkan untuk
-            membagikannya kepada orang lain yang mungkin juga mendapat manfaat
-            darinya.
+            Jika kamu merasa artikel ini bermanfaat, mungkin kamu bisa bantu
+            membagikannya.
           </p>
 
           <div className="flex items-center justify-center gap-2 text-xs text-black/50 dark:text-white/50">

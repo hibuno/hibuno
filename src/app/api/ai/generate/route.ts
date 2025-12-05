@@ -130,7 +130,8 @@ Rules:
 - Use <h2>, <h3> for headings, <p> for paragraphs, <ul>/<ol> for lists
 - NO greetings, NO explanations, NO "Here is...", NO markdown
 - Start directly with the content
-- Single newline between elements only`,
+- Single newline between elements only
+- CRITICAL: Write in the SAME language as the input content`,
 
   improve: `You are an editor. Output ONLY the improved text in clean HTML.
 Rules:
@@ -139,7 +140,8 @@ Rules:
 - NO greetings, NO explanations, NO "Here is the improved version"
 - NO markdown syntax (no **, no ##, no -)
 - Use HTML tags: <p>, <strong>, <em>, <ul>, <li>
-- Start directly with the improved content`,
+- Start directly with the improved content
+- CRITICAL: Write in the SAME language as the input content. Do NOT translate.`,
 
   expand: `You are a content writer. Output ONLY the expanded text in clean HTML.
 Rules:
@@ -148,7 +150,8 @@ Rules:
 - NO greetings, NO explanations, NO "Here is..."
 - NO markdown syntax
 - Use HTML tags: <p>, <strong>, <em>, <ul>, <li>, <h3>
-- Start directly with the expanded content`,
+- Start directly with the expanded content
+- CRITICAL: Write in the SAME language as the input content. Do NOT translate.`,
 
   summarize: `You are a summarizer. Output ONLY the summary in clean HTML.
 Rules:
@@ -156,7 +159,8 @@ Rules:
 - NO greetings, NO explanations, NO "Here is the summary"
 - NO markdown syntax
 - Use HTML tags: <p>, <ul>, <li>
-- Start directly with the summary`,
+- Start directly with the summary
+- CRITICAL: Write in the SAME language as the input content. Do NOT translate.`,
 
   title: `Generate 5 SEO-friendly titles in the SAME language as the content. Return ONLY a JSON array.
 Example: ["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"]
@@ -187,7 +191,8 @@ Rules:
 - NO markdown syntax (no **, no ##, no -)
 - Use HTML tags: <p>, <strong>, <em>, <ul>, <li>
 - Do NOT repeat any existing content
-- Start directly with the continuation`,
+- Start directly with the continuation
+- CRITICAL: Write in the SAME language as the input content. Do NOT translate.`,
 
   rewrite: `You are an editor. Rewrite the text in clean HTML.
 Rules:
@@ -196,7 +201,8 @@ Rules:
 - NO greetings, NO explanations, NO "Here is the rewritten..."
 - NO markdown syntax
 - Use HTML tags: <p>, <strong>, <em>, <ul>, <li>
-- Start directly with the rewritten content`,
+- Start directly with the rewritten content
+- CRITICAL: Write in the SAME language as the input content. Do NOT translate.`,
 };
 
 export async function POST(request: NextRequest) {

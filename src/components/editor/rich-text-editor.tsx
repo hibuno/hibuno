@@ -10,7 +10,7 @@ import Underline from "@tiptap/extension-underline";
 import { Gapcursor } from "@tiptap/extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
 import {
   editorDialogState,
@@ -18,16 +18,64 @@ import {
 } from "@/lib/editor-dialog-store";
 import CommandMenu from "./command-menu";
 import { CustomImage } from "./image-extension";
+import { CustomVideo } from "./video-extension";
 import { Callout } from "./callout-extension";
 import { Details } from "./details-extension";
 import ImageDialog from "./image-dialog";
+import VideoDialog from "./video-dialog";
 import LinkDialog from "./link-dialog";
 import Toolbar from "./toolbar";
 import FloatingToolbar from "./floating-toolbar";
 import AICommandMenu from "./ai-command-menu";
-import { uploadImage } from "./editor-utils";
+import { uploadImage, uploadVideo } from "./editor-utils";
 import InlineSuggestion from "@sereneinserenade/tiptap-inline-suggestion";
 import { generateContent } from "@/lib/ai-service";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { HelpCircle } from "lucide-react";
+
+// Keyboard shortcuts configuration
+const KEYBOARD_SHORTCUTS = [
+  { keys: ["⌘", "S"], description: "Save post", category: "General" },
+  { keys: ["⌘", "K"], description: "Open AI assistant", category: "AI" },
+  { keys: ["⌘", "/"], description: "Open command menu", category: "General" },
+  {
+    keys: ["⌘", "?"],
+    description: "Show keyboard shortcuts",
+    category: "General",
+  },
+  { keys: ["⌘", "B"], description: "Bold", category: "Formatting" },
+  { keys: ["⌘", "I"], description: "Italic", category: "Formatting" },
+  { keys: ["⌘", "U"], description: "Underline", category: "Formatting" },
+  { keys: ["⌘", "E"], description: "Code", category: "Formatting" },
+  {
+    keys: ["⌘", "⇧", "S"],
+    description: "Strikethrough",
+    category: "Formatting",
+  },
+  { keys: ["⌘", "⇧", "H"], description: "Highlight", category: "Formatting" },
+  { keys: ["⌘", "⇧", "L"], description: "Insert link", category: "Insert" },
+  { keys: ["⌘", "⇧", "I"], description: "Insert image", category: "Insert" },
+  { keys: ["⌘", "⇧", "7"], description: "Ordered list", category: "Blocks" },
+  { keys: ["⌘", "⇧", "8"], description: "Bullet list", category: "Blocks" },
+  { keys: ["⌘", "⇧", "B"], description: "Blockquote", category: "Blocks" },
+  { keys: ["⌘", "⌥", "1"], description: "Heading 1", category: "Blocks" },
+  { keys: ["⌘", "⌥", "2"], description: "Heading 2", category: "Blocks" },
+  { keys: ["⌘", "⌥", "3"], description: "Heading 3", category: "Blocks" },
+  { keys: ["⌘", "Z"], description: "Undo", category: "History" },
+  { keys: ["⌘", "⇧", "Z"], description: "Redo", category: "History" },
+  { keys: ["→"], description: "Accept AI suggestion", category: "AI" },
+  {
+    keys: ["Esc"],
+    description: "Dismiss suggestion/menu",
+    category: "General",
+  },
+];
 
 // Debounce and cancellation for inline suggestions
 let suggestionAbortController: AbortController | null = null;
@@ -66,6 +114,12 @@ export default function RichTextEditor({
   const [initialAIAction, setInitialAIAction] = useState<
     "improve" | "expand" | "summarize" | "continue" | "chat" | null
   >(null);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+
+  // Save handler - dispatch custom event for parent to handle
+  const handleSave = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("editor:save"));
+  }, []);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -95,6 +149,7 @@ export default function RichTextEditor({
       }),
       Dropcursor.configure({ color: "var(--gold)", width: 2 }),
       CustomImage,
+      CustomVideo,
       InlineSuggestion.configure({
         fetchAutocompletion: async (query: string) => {
           // Cancel any pending request
@@ -188,12 +243,13 @@ export default function RichTextEditor({
       handleDrop: (view, event, _slice, moved) => {
         if (!moved && event.dataTransfer?.files?.[0]) {
           const file = event.dataTransfer.files[0];
+          const pos = view.posAtCoords({
+            left: event.clientX,
+            top: event.clientY,
+          });
+
           if (file.type.startsWith("image/")) {
             event.preventDefault();
-            const pos = view.posAtCoords({
-              left: event.clientX,
-              top: event.clientY,
-            });
             uploadImage(file)
               .then((url) => {
                 if (pos && view.state.schema.nodes.customImage) {
@@ -201,6 +257,27 @@ export default function RichTextEditor({
                     view.state.tr.insert(
                       pos.pos,
                       view.state.schema.nodes.customImage.create({
+                        src: url,
+                        alignment: "center",
+                        width: "100%",
+                      })
+                    )
+                  );
+                }
+              })
+              .catch(console.error);
+            return true;
+          }
+
+          if (file.type.startsWith("video/")) {
+            event.preventDefault();
+            uploadVideo(file)
+              .then((url) => {
+                if (pos && view.state.schema.nodes.customVideo) {
+                  view.dispatch(
+                    view.state.tr.insert(
+                      pos.pos,
+                      view.state.schema.nodes.customVideo.create({
                         src: url,
                         alignment: "center",
                         width: "100%",
@@ -314,6 +391,14 @@ export default function RichTextEditor({
           src: "",
           alt: "",
           caption: "",
+          width: "100%",
+          alignment: "center",
+        });
+        break;
+      case "video":
+        editorDialogActions.openVideoDialog({
+          src: "",
+          title: "",
           width: "100%",
           alignment: "center",
         });
@@ -485,10 +570,49 @@ export default function RichTextEditor({
     }
   };
 
-  // Handle AI menu trigger with Cmd/Ctrl + K
+  const handleVideoInsert = (data: {
+    src: string;
+    title?: string;
+    width?: string;
+    alignment?: "left" | "center" | "right";
+  }) => {
+    if (editor) editor.chain().focus().setVideo(data).run();
+  };
+
+  const handleVideoDelete = () => {
+    if (editor) {
+      const { from } = editor.state.selection;
+      const node = editor.state.doc.nodeAt(from);
+      if (node?.type.name === "customVideo")
+        editor.chain().focus().deleteSelection().run();
+    }
+    editorDialogActions.closeVideoDialog();
+  };
+
+  const handleVideoUpdate = (data: {
+    src: string;
+    title?: string;
+    width?: string;
+    alignment?: "left" | "center" | "right";
+  }) => {
+    if (editor) {
+      const { from } = editor.state.selection;
+      const node = editor.state.doc.nodeAt(from);
+      if (node?.type.name === "customVideo") {
+        editor.chain().focus().setVideo(data).run();
+      } else {
+        editor.chain().focus().setVideo(data).run();
+      }
+    }
+  };
+
+  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      const isMod = e.metaKey || e.ctrlKey;
+
+      // Cmd/Ctrl + K - AI assistant
+      if (isMod && e.key === "k") {
         e.preventDefault();
         if (editor) {
           const { from, to } = editor.state.selection;
@@ -499,11 +623,82 @@ export default function RichTextEditor({
           setAIMenuPosition({ top: coords.top + 24, left: coords.left });
           setShowAIMenu(true);
         }
+        return;
+      }
+
+      // Cmd/Ctrl + S - Save
+      if (isMod && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+        return;
+      }
+
+      // Cmd/Ctrl + / - Open command menu
+      if (isMod && e.key === "/") {
+        e.preventDefault();
+        if (editor) {
+          const { from } = editor.state.selection;
+          const coords = editor.view.coordsAtPos(from);
+          editorDialogActions.openCommandMenu({
+            position: { top: coords.top + 24, left: coords.left },
+          });
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + ? (Shift + /) - Show shortcuts help
+      if (isMod && e.shiftKey && e.key === "?") {
+        e.preventDefault();
+        setShowShortcutsDialog(true);
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + L - Insert link
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        setShowLinkDialog(true);
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + I - Insert image
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "i") {
+        e.preventDefault();
+        editorDialogActions.openImageDialog({
+          src: "",
+          alt: "",
+          caption: "",
+          width: "100%",
+          alignment: "center",
+        });
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + H - Highlight
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "h") {
+        e.preventDefault();
+        editor?.chain().focus().toggleHighlight().run();
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + B - Blockquote
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        editor?.chain().focus().toggleBlockquote().run();
+        return;
+      }
+
+      // Cmd/Ctrl + Alt + 1/2/3 - Headings
+      if (isMod && e.altKey && ["1", "2", "3"].includes(e.key)) {
+        e.preventDefault();
+        const level = parseInt(e.key) as 1 | 2 | 3;
+        editor?.chain().focus().toggleHeading({ level }).run();
+        return;
       }
     };
+
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [editor]);
+  }, [editor, handleSave]);
 
   if (!editor) return null;
 
@@ -520,6 +715,14 @@ export default function RichTextEditor({
             src: "",
             alt: "",
             caption: "",
+            width: "100%",
+            alignment: "center",
+          })
+        }
+        onVideoClick={() =>
+          editorDialogActions.openVideoDialog({
+            src: "",
+            title: "",
             width: "100%",
             alignment: "center",
           })
@@ -619,6 +822,21 @@ export default function RichTextEditor({
             })}
           />
         )}
+        {editorState.videoDialog.open && (
+          <VideoDialog
+            open={editorState.videoDialog.open}
+            onClose={() => editorDialogActions.closeVideoDialog()}
+            onInsert={
+              editorState.videoDialog.data
+                ? handleVideoUpdate
+                : handleVideoInsert
+            }
+            {...(editorState.videoDialog.data && {
+              onDelete: handleVideoDelete,
+              initialData: editorState.videoDialog.data,
+            })}
+          />
+        )}
         {showLinkDialog && (
           <LinkDialog
             open={showLinkDialog}
@@ -631,6 +849,70 @@ export default function RichTextEditor({
           />
         )}
       </div>
+
+      {/* Help button - floating bottom right */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg bg-background/80 backdrop-blur-sm hover:bg-background"
+        onClick={() => setShowShortcutsDialog(true)}
+        aria-label="Show keyboard shortcuts"
+      >
+        <HelpCircle className="h-5 w-5" />
+      </Button>
+
+      {/* Keyboard shortcuts dialog */}
+      <Dialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4 px-4">
+            {["General", "Formatting", "Blocks", "Insert", "AI", "History"].map(
+              (category) => {
+                const shortcuts = KEYBOARD_SHORTCUTS.filter(
+                  (s) => s.category === category
+                );
+                if (shortcuts.length === 0) return null;
+                return (
+                  <div key={category}>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      {category}
+                    </h3>
+                    <div className="space-y-1">
+                      {shortcuts.map((shortcut, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-muted/50"
+                        >
+                          <span className="text-sm">
+                            {shortcut.description}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {shortcut.keys.map((key, keyIdx) => (
+                              <kbd
+                                key={keyIdx}
+                                className="px-2 py-0.5 text-xs font-medium bg-muted rounded border border-border"
+                              >
+                                {key}
+                              </kbd>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 px-4 mb-4">
+            Tip: Type{" "}
+            <kbd className="px-1 py-0.5 text-xs bg-muted rounded border">/</kbd>{" "}
+            in the editor to open the command menu.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

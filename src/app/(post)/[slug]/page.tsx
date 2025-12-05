@@ -57,7 +57,7 @@ function AdminToolbar({ slug, post }: { slug: string; post: SelectPost }) {
 
   return (
     <div className="bg-black text-white">
-      <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between text-sm">
+      <div className="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between text-sm">
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs opacity-60">ADMIN MODE</span>
           {post.published === false && (
@@ -329,7 +329,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Main Content Container */}
           <main
-            className={`max-w-6xl mx-auto px-4 sm:px-6 relative z-10 ${
+            className={`max-w-4xl mx-auto px-4 relative z-10 ${
               isDevMode ? "pt-12 sm:pt-16" : "pt-6 sm:pt-8"
             } pb-12 sm:pb-20`}
           >

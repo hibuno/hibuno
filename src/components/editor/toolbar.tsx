@@ -21,11 +21,13 @@ import {
   Strikethrough,
   Underline as UnderlineIcon,
   Undo,
+  Video,
 } from "lucide-react";
 
 interface ToolbarProps {
   editor: Editor;
   onImageClick: () => void;
+  onVideoClick: () => void;
   onLinkClick: (initialData?: {
     href?: string;
     text?: string;
@@ -38,6 +40,7 @@ interface ToolbarProps {
 export default function Toolbar({
   editor,
   onImageClick,
+  onVideoClick,
   onLinkClick,
   onAIClick,
 }: ToolbarProps) {
@@ -265,6 +268,9 @@ export default function Toolbar({
         </Btn>
         <Btn onClick={onImageClick} title="Image" ariaLabel="Insert image">
           <ImageIcon size={14} aria-hidden="true" />
+        </Btn>
+        <Btn onClick={onVideoClick} title="Video" ariaLabel="Insert video">
+          <Video size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />

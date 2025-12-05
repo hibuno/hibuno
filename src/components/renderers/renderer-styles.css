@@ -178,3 +178,61 @@
     background: rgba(255, 255, 255, 0.05);
   }
 }
+
+
+/* Video Wrapper Styles */
+.video-wrapper {
+  margin: 1.5rem 0;
+  width: 100%;
+}
+
+.video-wrapper video {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mobile: Adjust video wrapper */
+@media (max-width: 640px) {
+  .video-wrapper {
+    margin: 1rem 0;
+  }
+  
+  .video-wrapper video {
+    width: 100% !important;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1920px) {
+  .video-wrapper {
+    margin: 2rem 0;
+  }
+}
+
+/* Dark Mode Video */
+@media (prefers-color-scheme: dark) {
+  .video-wrapper video {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Print styles for video */
+@media print {
+  .video-wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .video-wrapper::after {
+    content: "[Video content - not available in print]";
+    display: block;
+    font-style: italic;
+    color: #666;
+  }
+  
+  .video-wrapper video {
+    display: none;
+  }
+}

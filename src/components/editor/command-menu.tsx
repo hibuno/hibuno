@@ -16,6 +16,7 @@ import {
   PenLine,
   Quote,
   Sparkles,
+  Video,
   Wand2,
   XCircle,
 } from "lucide-react";
@@ -112,6 +113,12 @@ const commands: Command[] = [
     id: "image",
     label: "Image",
     icon: <ImageIcon size={14} />,
+    group: "Media",
+  },
+  {
+    id: "video",
+    label: "Video",
+    icon: <Video size={14} />,
     group: "Media",
   },
   { id: "link", label: "Link", icon: <LinkIcon size={14} />, group: "Media" },

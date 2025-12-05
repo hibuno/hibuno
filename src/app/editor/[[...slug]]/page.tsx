@@ -28,11 +28,17 @@ import AIMetadataPanel, {
 } from "@/components/editor/ai-metadata-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { AlertDialog, MessageDialog } from "@/components/ui/alert-dialog";
 import { calculateStats } from "@/lib/content-utils";
 import { Textarea } from "@/components/ui/textarea";
 import { OCRDropZone } from "@/components/editor/ocr-dropzone";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -811,7 +817,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               />
             </SidebarSection>
 
-            <SidebarSection title="Publishing">
+            <SidebarSection title="Cover">
               <ImageDropZone
                 currentImage={coverImagePreview}
                 onImageSelect={handleCoverImageSelect}
@@ -822,23 +828,24 @@ export default function EditorPage({ params }: EditorPageProps) {
                 }}
               />
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
-                      Status
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {formData.published
-                        ? "Visible to public"
-                        : "Draft - not visible"}
-                    </div>
-                  </div>
-                  <Switch
-                    checked={formData.published || false}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("published", checked)
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium block mb-1">
+                    Status
+                  </label>
+                  <Select
+                    value={formData.published ? "published" : "draft"}
+                    onValueChange={(value) =>
+                      handleInputChange("published", value)
                     }
-                  />
+                  >
+                    <SelectTrigger className="h-8 w-full text-xs">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">

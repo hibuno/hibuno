@@ -10,6 +10,14 @@ export interface ImageData {
   nodeType?: any;
 }
 
+export interface VideoData {
+  src: string;
+  title?: string;
+  width?: string;
+  alignment?: "left" | "center" | "right";
+  pos?: number | undefined;
+}
+
 export interface CommandMenuData {
   position: { top: number; left: number };
   insertPos?: number;
@@ -20,6 +28,10 @@ export interface EditorDialogState {
     open: boolean;
     data: ImageData | null;
   };
+  videoDialog: {
+    open: boolean;
+    data: VideoData | null;
+  };
   commandMenu: {
     open: boolean;
     data: CommandMenuData | null;
@@ -28,6 +40,10 @@ export interface EditorDialogState {
 
 export const editorDialogState = proxy<EditorDialogState>({
   imageDialog: {
+    open: false,
+    data: null,
+  },
+  videoDialog: {
     open: false,
     data: null,
   },
@@ -43,6 +59,12 @@ export const editorDialogActions = {
   },
   closeImageDialog: () => {
     editorDialogState.imageDialog = { open: false, data: null };
+  },
+  openVideoDialog: (data: VideoData) => {
+    editorDialogState.videoDialog = { open: true, data };
+  },
+  closeVideoDialog: () => {
+    editorDialogState.videoDialog = { open: false, data: null };
   },
   openCommandMenu: (data: CommandMenuData) => {
     editorDialogState.commandMenu = { open: true, data };

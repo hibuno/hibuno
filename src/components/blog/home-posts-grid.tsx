@@ -31,7 +31,7 @@ const HeroSection = memo(() => (
     className="border-b border-border bg-card"
     variants={ANIMATION.item}
   >
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
       <motion.h1
         className="font-serif text-balance text-2xl sm:text-3xl font-semibold leading-tight md:text-4xl"
         variants={ANIMATION.item}
@@ -74,7 +74,7 @@ const PostsGrid = memo(({ posts }: { posts: Post[] }) => {
 
   return (
     <motion.section aria-label="Recent posts" variants={ANIMATION.item}>
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
         <motion.h2 className="sr-only" variants={ANIMATION.item}>
           Postingan Terbaru
         </motion.h2>
@@ -95,7 +95,7 @@ export const AnimatedHomepage = memo(
   ({ recentPosts }: AnimatedHomepageProps) => {
     if (!recentPosts?.length) {
       return (
-        <main className="mx-auto max-w-6xl px-4 py-12">
+        <main className="mx-auto max-w-4xl px-4 py-12">
           <div className="text-center">
             <h2 className="text-lg font-medium mb-1">Belum ada postingan</h2>
             <p className="text-muted-foreground text-sm">

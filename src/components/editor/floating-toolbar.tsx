@@ -38,7 +38,38 @@ export default function FloatingToolbar({
   useEffect(() => {
     const updateToolbar = () => {
       const { from, to, empty } = editor.state.selection;
+
+      // Hide toolbar if selection is empty
       if (empty) {
+        setShowToolbar(false);
+        setShowColors(false);
+        return;
+      }
+
+      // Check if selection is a node selection (image, etc.)
+      const selection = editor.state.selection;
+      if (selection.constructor.name === "NodeSelection") {
+        setShowToolbar(false);
+        setShowColors(false);
+        return;
+      }
+
+      // Check if the selected content contains only non-text nodes
+      const selectedNode = editor.state.doc.nodeAt(from);
+      if (
+        selectedNode &&
+        ["customImage", "image", "horizontalRule"].includes(
+          selectedNode.type.name
+        )
+      ) {
+        setShowToolbar(false);
+        setShowColors(false);
+        return;
+      }
+
+      // Check if there's actual text selected
+      const selectedText = editor.state.doc.textBetween(from, to, " ");
+      if (!selectedText.trim()) {
         setShowToolbar(false);
         setShowColors(false);
         return;

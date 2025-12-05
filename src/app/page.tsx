@@ -52,7 +52,7 @@ function ErrorState({ error }: { error: string }) {
   return (
     <main>
       <SiteHeader />
-      <div className="mx-auto max-w-6xl px-4 py-16">
+      <div className="mx-auto max-w-4xl px-4 py-16">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">
             Tidak dapat memuat konten

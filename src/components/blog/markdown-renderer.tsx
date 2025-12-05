@@ -284,7 +284,19 @@ export function InteractiveMarkdownRenderer({
 
         const headingId = (link as HTMLElement).getAttribute("data-heading-id");
         if (headingId) {
-          const target = container.querySelector(`[id$="${headingId}"]`);
+          // Try exact ID match first, then fallback to partial match
+          let target = document.getElementById(headingId);
+          if (!target) {
+            target = container.querySelector(
+              `[id="${headingId}"]`
+            ) as HTMLElement;
+          }
+          if (!target) {
+            target = container.querySelector(
+              `[id$="${headingId}"]`
+            ) as HTMLElement;
+          }
+
           if (target) {
             const elementTop =
               target.getBoundingClientRect().top + window.pageYOffset;

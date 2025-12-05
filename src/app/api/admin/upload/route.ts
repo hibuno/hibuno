@@ -17,6 +17,12 @@ import path from "path";
 
 const IMAGES_DIR = path.join(process.cwd(), "public/images/uploads");
 
+// Validate that a path is within the uploads directory (prevent path traversal)
+function isPathSafe(filePath: string): boolean {
+  const resolvedPath = path.resolve(IMAGES_DIR, filePath);
+  return resolvedPath.startsWith(IMAGES_DIR);
+}
+
 // Ensure upload directory exists
 function ensureUploadDir() {
   if (!fs.existsSync(IMAGES_DIR)) {
@@ -117,6 +123,69 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error uploading file:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Remove image from local storage
+export async function DELETE(request: NextRequest) {
+  // Development environment check
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json(
+      { error: "This endpoint is only available in development" },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const fileUrl = searchParams.get("url");
+
+    if (!fileUrl) {
+      return NextResponse.json(
+        { error: "No file URL provided" },
+        { status: 400 }
+      );
+    }
+
+    // Extract filename from URL (e.g., /images/uploads/filename.jpg -> filename.jpg)
+    const urlPath = fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`;
+    const match = urlPath.match(/\/images\/uploads\/(.+)$/);
+
+    if (!match || !match[1]) {
+      return NextResponse.json(
+        { error: "Invalid file URL format" },
+        { status: 400 }
+      );
+    }
+
+    const fileName = match[1];
+
+    // Security: Prevent path traversal attacks
+    if (!isPathSafe(fileName)) {
+      return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+    }
+
+    const filePath = path.join(IMAGES_DIR, fileName);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
+    // Delete the file
+    fs.unlinkSync(filePath);
+
+    return NextResponse.json({
+      success: true,
+      message: "File deleted successfully",
+      deletedFile: fileName,
+    });
+  } catch (error) {
+    console.error("Error deleting file:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

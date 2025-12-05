@@ -60,9 +60,12 @@ export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
 
   return (
     <header
-      className={cn("bg-card border-b border-border z-50 relative", className)}
+      className={cn(
+        "bg-card/60 backdrop-blur-xl border-b sticky top-0 border-border z-50",
+        className
+      )}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <Link
           href="/"
           className="text-xl font-semibold tracking-tight transition-colors hover:text-muted-foreground"
