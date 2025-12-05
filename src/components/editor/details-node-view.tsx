@@ -61,26 +61,36 @@ export default function DetailsComponent({
   };
 
   return (
-    <NodeViewWrapper className="collapsible border border-neutral-200 rounded-lg my-4 overflow-hidden group">
+    <NodeViewWrapper
+      className="collapsible border border-neutral-200 rounded-lg my-4 overflow-hidden group"
+      role="region"
+      aria-label="Collapsible section"
+    >
       <div className="relative">
         <div
           className="collapsible-summary flex items-center gap-2 p-4 bg-neutral-50 hover:bg-neutral-100 cursor-pointer transition-colors"
           onClick={handleToggle}
-        >
-          <button
-            type="button"
-            className="flex-shrink-0 text-neutral-600 hover:text-neutral-900 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
+          role="button"
+          tabIndex={0}
+          aria-expanded={isOpen}
+          aria-controls="collapsible-content"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
               handleToggle();
-            }}
+            }
+          }}
+        >
+          <span
+            className="flex-shrink-0 text-neutral-600 hover:text-neutral-900 transition-colors"
+            aria-hidden="true"
           >
             {isOpen ? (
               <ChevronDown className="w-5 h-5" />
             ) : (
               <ChevronRight className="w-5 h-5" />
             )}
-          </button>
+          </span>
 
           {isEditingSummary ? (
             <Input
@@ -92,6 +102,7 @@ export default function DetailsComponent({
               onClick={(e) => e.stopPropagation()}
               className="flex-1 h-8"
               autoFocus
+              aria-label="Edit section title"
             />
           ) : (
             <span
@@ -107,7 +118,7 @@ export default function DetailsComponent({
         </div>
 
         {/* Hover menu */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -116,6 +127,7 @@ export default function DetailsComponent({
               e.stopPropagation();
               handleSummaryEdit();
             }}
+            aria-label="Edit section title"
           >
             Edit Title
           </Button>
@@ -127,14 +139,18 @@ export default function DetailsComponent({
               e.stopPropagation();
               handleDelete();
             }}
+            aria-label="Delete collapsible section"
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3 h-3" aria-hidden="true" />
           </Button>
         </div>
       </div>
 
       {isOpen && (
-        <div className="collapsible-content p-4 bg-white border-t border-neutral-200">
+        <div
+          id="collapsible-content"
+          className="collapsible-content p-4 bg-white border-t border-neutral-200"
+        >
           <NodeViewContent />
         </div>
       )}

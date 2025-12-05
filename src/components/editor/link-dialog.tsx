@@ -83,43 +83,63 @@ export default function LinkDialog({
 
   if (!open) return null;
 
+  const dialogTitleId = "link-dialog-title";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+    >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={handleClose}
+        aria-hidden="true"
       />
       <div className="relative bg-card rounded-lg shadow-2xl w-full max-w-xs mx-4 overflow-hidden animate-in">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h2 className="text-sm font-medium">
+          <h2 id={dialogTitleId} className="text-sm font-medium">
             {initialData?.href ? "Edit Link" : "Add Link"}
           </h2>
           <button
             onClick={handleClose}
-            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Close dialog"
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
         <div className="p-4 pt-2 space-y-3">
           {error && (
-            <div className="px-2 py-1.5 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive">
+            <div
+              role="alert"
+              className="px-2 py-1.5 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive"
+            >
               {error}
             </div>
           )}
           <div>
-            <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+            <label
+              htmlFor="link-url-input"
+              className="text-[10px] text-muted-foreground uppercase tracking-wide"
+            >
               URL
             </label>
             <input
+              id="link-url-input"
               type="text"
               value={href}
               onChange={(e) => setHref(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="example.com or /page"
               autoFocus
+              aria-describedby="link-url-hint"
               className="mt-1 w-full px-3 py-2 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
             />
+            <p id="link-url-hint" className="sr-only">
+              Enter a URL, relative path, or anchor link
+            </p>
           </div>
           <label className="flex items-center gap-2 cursor-pointer group">
             <div className="relative">
@@ -128,12 +148,22 @@ export default function LinkDialog({
                 checked={openInNewTab}
                 onChange={(e) => setOpenInNewTab(e.target.checked)}
                 className="sr-only peer"
+                aria-describedby="new-tab-description"
               />
-              <div className="w-8 h-4 bg-muted rounded-full peer-checked:bg-foreground transition-colors" />
-              <div className="absolute top-0.5 left-0.5 w-3 h-3 bg-card rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+              <div
+                className="w-8 h-4 bg-muted rounded-full peer-checked:bg-foreground transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute top-0.5 left-0.5 w-3 h-3 bg-card rounded-full shadow peer-checked:translate-x-4 transition-transform"
+                aria-hidden="true"
+              />
             </div>
-            <span className="text-xs text-muted-foreground group-hover:text-foreground flex items-center gap-1">
-              <ExternalLink size={12} /> New tab
+            <span
+              id="new-tab-description"
+              className="text-xs text-muted-foreground group-hover:text-foreground flex items-center gap-1"
+            >
+              <ExternalLink size={12} aria-hidden="true" /> Open in new tab
             </span>
           </label>
         </div>
@@ -144,9 +174,10 @@ export default function LinkDialog({
                 onInsert({ href: "", target: "_self" });
                 handleClose();
               }}
-              className="px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded flex items-center gap-1"
+              aria-label="Remove link"
+              className="px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Unlink size={12} /> Remove
+              <Unlink size={12} aria-hidden="true" /> Remove
             </button>
           ) : (
             <div />
@@ -154,14 +185,15 @@ export default function LinkDialog({
           <div className="flex gap-2">
             <button
               onClick={handleClose}
-              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Cancel
             </button>
             <button
               onClick={handleInsert}
               disabled={!href}
-              className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50"
+              aria-disabled={!href}
+              className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {initialData?.href ? "Update" : "Insert"}
             </button>

@@ -508,7 +508,11 @@ export default function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full"
+      role="application"
+      aria-label="Rich text editor"
+    >
       <Toolbar
         editor={editor}
         onImageClick={() =>
@@ -550,6 +554,7 @@ export default function RichTextEditor({
         />
         <EditorContent
           editor={editor}
+          aria-label="Post content editor. Type / for commands, use arrow right for autocomplete suggestions."
           onClick={(e) => {
             const target = e.target as HTMLElement;
             const imgElement =

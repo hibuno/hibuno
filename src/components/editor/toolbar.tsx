@@ -61,16 +61,20 @@ export default function Toolbar({
     isActive = false,
     children,
     title,
+    ariaLabel,
   }: {
     onClick: () => void;
     isActive?: boolean;
     children: React.ReactNode;
     title: string;
+    ariaLabel?: string;
   }) => (
     <button
       onClick={onClick}
       title={title}
-      className={`p-1.5 rounded transition-colors ${
+      aria-label={ariaLabel || title}
+      aria-pressed={isActive}
+      className={`p-1.5 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
         isActive
           ? "bg-foreground text-background"
           : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -80,29 +84,45 @@ export default function Toolbar({
     </button>
   );
 
-  const Divider = () => <div className="w-px h-4 bg-border mx-0.5" />;
+  const Divider = () => (
+    <div
+      className="w-px h-4 bg-border mx-0.5"
+      role="separator"
+      aria-orientation="vertical"
+    />
+  );
 
   return (
     <div
       className="sticky top-11 z-10 bg-card border-b border-border"
       role="toolbar"
+      aria-label="Text formatting toolbar"
     >
       <div className="flex items-center gap-0.5 px-2 py-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={onAIClick}
           title="AI Assistant (⌘K)"
-          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1 shrink-0"
+          aria-label="Open AI Assistant, keyboard shortcut Command K"
+          className="p-1.5 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:shadow-md hover:shadow-neutral-500/20 flex items-center gap-1 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         >
-          <Sparkles size={14} />
+          <Sparkles size={14} aria-hidden="true" />
         </button>
 
         <Divider />
 
-        <Btn onClick={() => editor.chain().focus().undo().run()} title="Undo">
-          <Undo size={14} />
+        <Btn
+          onClick={() => editor.chain().focus().undo().run()}
+          title="Undo"
+          ariaLabel="Undo last action"
+        >
+          <Undo size={14} aria-hidden="true" />
         </Btn>
-        <Btn onClick={() => editor.chain().focus().redo().run()} title="Redo">
-          <Redo size={14} />
+        <Btn
+          onClick={() => editor.chain().focus().redo().run()}
+          title="Redo"
+          ariaLabel="Redo last action"
+        >
+          <Redo size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />
@@ -113,8 +133,9 @@ export default function Toolbar({
           }
           isActive={editor.isActive("heading", { level: 1 })}
           title="Heading 1"
+          ariaLabel="Toggle heading level 1"
         >
-          <Heading1 size={14} />
+          <Heading1 size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() =>
@@ -122,8 +143,9 @@ export default function Toolbar({
           }
           isActive={editor.isActive("heading", { level: 2 })}
           title="Heading 2"
+          ariaLabel="Toggle heading level 2"
         >
-          <Heading2 size={14} />
+          <Heading2 size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() =>
@@ -131,8 +153,9 @@ export default function Toolbar({
           }
           isActive={editor.isActive("heading", { level: 3 })}
           title="Heading 3"
+          ariaLabel="Toggle heading level 3"
         >
-          <Heading3 size={14} />
+          <Heading3 size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />
@@ -141,55 +164,66 @@ export default function Toolbar({
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
           title="Bold"
+          ariaLabel="Toggle bold formatting"
         >
-          <Bold size={14} />
+          <Bold size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => editor.chain().focus().toggleItalic().run()}
           isActive={editor.isActive("italic")}
           title="Italic"
+          ariaLabel="Toggle italic formatting"
         >
-          <Italic size={14} />
+          <Italic size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           isActive={editor.isActive("underline")}
           title="Underline"
+          ariaLabel="Toggle underline formatting"
         >
-          <UnderlineIcon size={14} />
+          <UnderlineIcon size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => editor.chain().focus().toggleStrike().run()}
           isActive={editor.isActive("strike")}
           title="Strikethrough"
+          ariaLabel="Toggle strikethrough formatting"
         >
-          <Strikethrough size={14} />
+          <Strikethrough size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />
 
         {/* Hide alignment on mobile to save space */}
-        <div className="hidden sm:flex items-center gap-0.5">
+        <div
+          className="hidden sm:flex items-center gap-0.5"
+          role="group"
+          aria-label="Text alignment"
+        >
           <Btn
             onClick={() => editor.chain().focus().setTextAlign("left").run()}
             isActive={editor.isActive({ textAlign: "left" })}
             title="Align Left"
+            ariaLabel="Align text left"
           >
-            <AlignLeft size={14} />
+            <AlignLeft size={14} aria-hidden="true" />
           </Btn>
           <Btn
             onClick={() => editor.chain().focus().setTextAlign("center").run()}
             isActive={editor.isActive({ textAlign: "center" })}
             title="Align Center"
+            ariaLabel="Align text center"
           >
-            <AlignCenter size={14} />
+            <AlignCenter size={14} aria-hidden="true" />
           </Btn>
           <Btn
             onClick={() => editor.chain().focus().setTextAlign("right").run()}
             isActive={editor.isActive({ textAlign: "right" })}
             title="Align Right"
+            ariaLabel="Align text right"
           >
-            <AlignRight size={14} />
+            <AlignRight size={14} aria-hidden="true" />
           </Btn>
           <Divider />
         </div>
@@ -198,31 +232,39 @@ export default function Toolbar({
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive("bulletList")}
           title="Bullet List"
+          ariaLabel="Toggle bullet list"
         >
-          <List size={14} />
+          <List size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           isActive={editor.isActive("orderedList")}
           title="Numbered List"
+          ariaLabel="Toggle numbered list"
         >
-          <ListOrdered size={14} />
+          <ListOrdered size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           isActive={editor.isActive("blockquote")}
           title="Quote"
+          ariaLabel="Toggle blockquote"
         >
-          <Quote size={14} />
+          <Quote size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />
 
-        <Btn onClick={setLink} isActive={editor.isActive("link")} title="Link">
-          <LinkIcon size={14} />
+        <Btn
+          onClick={setLink}
+          isActive={editor.isActive("link")}
+          title="Link"
+          ariaLabel="Insert or edit link"
+        >
+          <LinkIcon size={14} aria-hidden="true" />
         </Btn>
-        <Btn onClick={onImageClick} title="Image">
-          <ImageIcon size={14} />
+        <Btn onClick={onImageClick} title="Image" ariaLabel="Insert image">
+          <ImageIcon size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />
@@ -232,16 +274,18 @@ export default function Toolbar({
             editor.chain().focus().setHorizontalRule().run();
           }}
           title="Divider"
+          ariaLabel="Insert horizontal divider"
         >
-          <Minus size={14} />
+          <Minus size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => {
             editor.chain().focus().setCallout({ type: "info" }).run();
           }}
-          title="Image"
+          title="Callout"
+          ariaLabel="Insert callout block"
         >
-          <AlertCircle size={14} />
+          <AlertCircle size={14} aria-hidden="true" />
         </Btn>
         <Btn
           onClick={() => {
@@ -252,8 +296,9 @@ export default function Toolbar({
               .run();
           }}
           title="Collapsible"
+          ariaLabel="Insert collapsible section"
         >
-          <FoldVertical size={14} />
+          <FoldVertical size={14} aria-hidden="true" />
         </Btn>
       </div>
     </div>

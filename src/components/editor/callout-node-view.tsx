@@ -82,9 +82,14 @@ export default function CalloutComponent({
   return (
     <NodeViewWrapper
       className={`callout ${config.bgColor} ${config.borderColor} border-l-4 rounded-r-lg p-4 my-4 relative group`}
+      role="note"
+      aria-label={`${config.label} callout`}
     >
       <div className="flex gap-3">
-        <div className={`flex-shrink-0 ${config.color} mt-0.5`}>
+        <div
+          className={`flex-shrink-0 ${config.color} mt-0.5`}
+          aria-hidden="true"
+        >
           <Icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -93,10 +98,15 @@ export default function CalloutComponent({
       </div>
 
       {/* Hover menu */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              aria-label={`Change callout type, currently ${config.label}`}
+            >
               {config.label}
             </Button>
           </DropdownMenuTrigger>
@@ -107,8 +117,12 @@ export default function CalloutComponent({
                 onClick={() =>
                   handleTypeChange(key as keyof typeof calloutConfig)
                 }
+                aria-label={`Change to ${value.label} callout`}
               >
-                <value.icon className={`w-4 h-4 mr-2 ${value.color}`} />
+                <value.icon
+                  className={`w-4 h-4 mr-2 ${value.color}`}
+                  aria-hidden="true"
+                />
                 {value.label}
               </DropdownMenuItem>
             ))}
@@ -120,6 +134,7 @@ export default function CalloutComponent({
           size="sm"
           className="h-7 px-2 text-xs"
           onClick={handleDelete}
+          aria-label="Delete callout"
         >
           Delete
         </Button>

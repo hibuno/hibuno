@@ -541,9 +541,18 @@ Rules:
     return AI_ACTIONS.find((a) => a.id === activeAction)?.label || "Result";
   };
 
+  const dialogTitleId = "ai-assistant-title";
+  const dialogDescId = "ai-assistant-desc";
+
   return (
     <div
       ref={menuRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+      aria-describedby={
+        hasSelection && mode === "actions" ? dialogDescId : undefined
+      }
       className={`fixed bg-card rounded-xl shadow-2xl border border-border overflow-hidden z-[9999] transition-all duration-200 ${
         mode === "result" ? "w-[520px]" : "w-[340px]"
       }`}
@@ -569,13 +578,21 @@ Rules:
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-gradient-to-r from-neutral-50 to-neutral-50 dark:from-neutral-950/30 dark:to-neutral-950/30">
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-md bg-gradient-to-br from-neutral-400 to-neutral-800">
+          <div
+            className="p-1 rounded-md bg-gradient-to-br from-neutral-400 to-neutral-800"
+            aria-hidden="true"
+          >
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <div>
-            <span className="text-sm font-medium">AI Assistant</span>
+            <span id={dialogTitleId} className="text-sm font-medium">
+              AI Assistant
+            </span>
             {hasSelection && mode === "actions" && (
-              <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">
+              <p
+                id={dialogDescId}
+                className="text-[10px] text-muted-foreground truncate max-w-[200px]"
+              >
                 "{selectionPreview}
                 {getTextContent().length > 60 ? "..." : ""}"
               </p>
@@ -584,9 +601,10 @@ Rules:
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors"
+          aria-label="Close AI Assistant"
+          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <X className="w-4 h-4 text-muted-foreground" />
+          <X className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
         </button>
       </div>
 
@@ -605,8 +623,13 @@ Rules:
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="relative">
+          <div
+            className="flex flex-col items-center justify-center py-16 px-4"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <div className="relative" aria-hidden="true">
               <div className="absolute inset-0 rounded-full bg-gradient-to-r from-neutral-400 to-neutral-800 blur-lg opacity-30 animate-pulse" />
               <Loader2 className="w-8 h-8 animate-spin text-neutral-500 relative" />
             </div>
@@ -619,38 +642,49 @@ Rules:
             </span>
             <button
               onClick={cancelRequest}
-              className="mt-3 px-3 py-1 text-xs text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors"
+              aria-label="Cancel AI request"
+              className="mt-3 px-3 py-1 text-xs text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Cancel
             </button>
           </div>
         ) : mode === "actions" ? (
-          <div ref={listRef} className="py-1">
+          <div
+            ref={listRef}
+            role="listbox"
+            aria-label="AI actions"
+            className="py-1"
+          >
             {AI_ACTIONS.map((action, index) => {
               const isDisabled = action.requiresSelection && !hasSelection;
+              const isSelected = index === selectedIndex;
               return (
                 <button
                   key={action.id}
+                  id={`ai-action-${action.id}`}
                   ref={(el) => {
                     itemRefs.current[index] = el;
                   }}
+                  role="option"
+                  aria-selected={isSelected}
+                  aria-disabled={isDisabled}
+                  aria-describedby={`ai-action-desc-${action.id}`}
                   onClick={() => !isDisabled && handleAction(action.id)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   disabled={isDisabled}
-                  className={`w-full px-3 py-2.5 flex items-center justify-between text-left transition-all ${
+                  className={`w-full px-3 py-2.5 flex items-center justify-between text-left transition-all focus:outline-none ${
                     isDisabled
                       ? "opacity-40 cursor-not-allowed"
-                      : index === selectedIndex
+                      : isSelected
                       ? "bg-foreground text-background"
                       : "hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span
+                      aria-hidden="true"
                       className={`p-1.5 rounded-md ${
-                        index === selectedIndex
-                          ? "bg-background/20"
-                          : "bg-muted"
+                        isSelected ? "bg-background/20" : "bg-muted"
                       }`}
                     >
                       {action.icon}
@@ -658,8 +692,9 @@ Rules:
                     <div>
                       <div className="text-sm font-medium">{action.label}</div>
                       <div
+                        id={`ai-action-desc-${action.id}`}
                         className={`text-[11px] ${
-                          index === selectedIndex
+                          isSelected
                             ? "text-background/70"
                             : "text-muted-foreground"
                         }`}
@@ -670,8 +705,9 @@ Rules:
                   </div>
                   {action.shortcut && (
                     <kbd
+                      aria-label={`Keyboard shortcut: ${action.shortcut}`}
                       className={`px-1.5 py-0.5 text-[10px] rounded font-mono ${
-                        index === selectedIndex
+                        isSelected
                           ? "bg-background/20 text-background"
                           : "bg-muted text-muted-foreground"
                       }`}
@@ -687,25 +723,40 @@ Rules:
           <div className="p-3">
             <button
               onClick={() => setMode("actions")}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3"
+              aria-label="Go back to actions"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
             >
-              <ArrowLeft size={12} />
+              <ArrowLeft size={12} aria-hidden="true" />
               Back
             </button>
-            <p className="text-xs text-muted-foreground mb-3">
+            <p
+              id="tone-instructions"
+              className="text-xs text-muted-foreground mb-3"
+            >
               Choose a tone for your text:
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div
+              className="grid grid-cols-2 gap-2"
+              role="listbox"
+              aria-labelledby="tone-instructions"
+            >
               {TONE_OPTIONS.map((tone, index) => (
                 <button
                   key={tone.id}
+                  role="option"
+                  aria-selected={false}
                   onClick={() => handleToneSelect(tone.id)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border hover:border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-950/20 transition-all text-left"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border hover:border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-950/20 transition-all text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <span className="text-lg">{tone.emoji}</span>
+                  <span className="text-lg" aria-hidden="true">
+                    {tone.emoji}
+                  </span>
                   <div>
                     <div className="text-sm font-medium">{tone.label}</div>
-                    <div className="text-[10px] text-muted-foreground">
+                    <div
+                      className="text-[10px] text-muted-foreground"
+                      aria-label={`Press ${index + 1} to select`}
+                    >
                       Press {index + 1}
                     </div>
                   </div>
@@ -717,12 +768,19 @@ Rules:
           <div className="p-3 space-y-3">
             <button
               onClick={() => setMode("actions")}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              aria-label="Go back to actions"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
             >
-              <ArrowLeft size={12} />
+              <ArrowLeft size={12} aria-hidden="true" />
               Back
             </button>
+            <label htmlFor="ai-chat-input" className="sr-only">
+              {hasSelection
+                ? "What would you like to do with the selected text?"
+                : "What would you like me to write?"}
+            </label>
             <textarea
+              id="ai-chat-input"
               ref={chatInputRef}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
@@ -732,6 +790,7 @@ Rules:
                   : "What would you like me to write?"
               }
               rows={4}
+              aria-describedby="chat-hint"
               className="w-full px-3 py-2.5 text-sm border border-input rounded-lg bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-neutral-500/20 focus:border-neutral-500"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -740,12 +799,16 @@ Rules:
                 }
               }}
             />
+            <p id="chat-hint" className="sr-only">
+              Press Enter to send, Shift+Enter for new line
+            </p>
             <button
               onClick={handleChat}
               disabled={!chatInput.trim()}
-              className="w-full px-4 py-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 text-white text-sm font-medium rounded-lg hover:from-neutral-800 hover:to-neutral-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              aria-disabled={!chatInput.trim()}
+              className="w-full px-4 py-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 text-white text-sm font-medium rounded-lg hover:from-neutral-800 hover:to-neutral-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4" aria-hidden="true" />
               Send
             </button>
           </div>
@@ -753,43 +816,58 @@ Rules:
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm font-medium">{getActionLabel()}</span>
+                <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
+                <span className="text-sm font-medium" id="result-label">
+                  {getActionLabel()}
+                </span>
               </div>
               <button
                 onClick={discardResult}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                aria-label="Go back to actions"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
               >
-                <ArrowLeft size={12} />
+                <ArrowLeft size={12} aria-hidden="true" />
                 Back
               </button>
             </div>
 
-            <div className="max-h-[280px] overflow-y-auto p-4 bg-muted/30 rounded-lg border border-border">
+            <div
+              className="max-h-[280px] overflow-y-auto p-4 bg-muted/30 rounded-lg border border-border"
+              role="region"
+              aria-labelledby="result-label"
+              aria-live="polite"
+            >
               <div
                 className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:mt-3 prose-headings:mb-2 prose-p:my-2 prose-ul:my-2 prose-ol:my-2"
                 dangerouslySetInnerHTML={{ __html: result || "" }}
               />
             </div>
 
-            <div className="flex gap-2 pt-1">
+            <div
+              className="flex gap-2 pt-1"
+              role="group"
+              aria-label="Result actions"
+            >
               <button
                 onClick={applyResult}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 text-white text-sm font-medium rounded-lg hover:from-neutral-800 hover:to-neutral-950 transition-all flex items-center justify-center gap-2"
+                aria-label="Apply AI result to editor"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 text-white text-sm font-medium rounded-lg hover:from-neutral-800 hover:to-neutral-950 transition-all flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4" aria-hidden="true" />
                 Apply
               </button>
               <button
                 onClick={handleRegenerate}
-                className="px-4 py-2.5 bg-muted text-foreground text-sm font-medium rounded-lg hover:bg-muted/80 transition-colors flex items-center gap-2"
+                aria-label="Regenerate result, keyboard shortcut Command R"
+                className="px-4 py-2.5 bg-muted text-foreground text-sm font-medium rounded-lg hover:bg-muted/80 transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 title="Regenerate (⌘R)"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-4 h-4" aria-hidden="true" />
               </button>
               <button
                 onClick={discardResult}
-                className="px-4 py-2.5 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+                aria-label="Discard result"
+                className="px-4 py-2.5 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Discard
               </button>
@@ -800,7 +878,10 @@ Rules:
 
       {/* Footer */}
       {!loading && (
-        <div className="px-3 py-2 border-t border-border bg-muted/30">
+        <div
+          className="px-3 py-2 border-t border-border bg-muted/30"
+          aria-hidden="true"
+        >
           <div className="flex items-center justify-between text-[10px] text-muted-foreground">
             {mode === "actions" && (
               <span>↑↓ Navigate • Enter Select • 1-6 Quick select</span>

@@ -235,38 +235,68 @@ export default function CommandMenu({
   return (
     <div
       ref={menuRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command menu"
       className="fixed bg-card rounded-lg shadow-xl border border-border w-64 z-[9999] overflow-hidden animate-in"
       style={{ top: position.top, left: position.left }}
     >
       <div className="p-1.5 border-b border-border">
+        <label htmlFor="command-search" className="sr-only">
+          Search commands
+        </label>
         <input
+          id="command-search"
           ref={inputRef}
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
+          aria-controls="command-list"
+          aria-activedescendant={
+            filteredCommands[selectedIndex]
+              ? `command-${filteredCommands[selectedIndex].id}`
+              : undefined
+          }
           className="w-full px-2 py-1.5 text-xs bg-muted rounded focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
-      <div ref={listRef} className="max-h-56 overflow-y-auto py-1">
+      <div
+        ref={listRef}
+        id="command-list"
+        role="listbox"
+        aria-label="Available commands"
+        className="max-h-56 overflow-y-auto py-1"
+      >
         {Object.entries(groupedCommands).map(([group, cmds]) => (
-          <div key={group}>
-            <div className="px-2 py-1 text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <div key={group} role="group" aria-labelledby={`group-${group}`}>
+            <div
+              id={`group-${group}`}
+              className="px-2 py-1 text-[9px] font-semibold text-muted-foreground uppercase tracking-wider"
+              role="presentation"
+            >
               {group}
             </div>
             {cmds.map((command) => {
               const currentIndex = flatIndex++;
               const isAI = command.group === "AI";
+              const isSelected = currentIndex === selectedIndex;
               return (
                 <button
                   key={command.id}
+                  id={`command-${command.id}`}
                   ref={(el) => {
                     itemRefs.current[currentIndex] = el;
                   }}
+                  role="option"
+                  aria-selected={isSelected}
+                  aria-describedby={
+                    command.description ? `desc-${command.id}` : undefined
+                  }
                   onClick={() => onSelect(command.id)}
                   onMouseEnter={() => setSelectedIndex(currentIndex)}
-                  className={`w-full px-2 py-1.5 flex items-center justify-between text-left text-xs transition-colors ${
-                    currentIndex === selectedIndex
+                  className={`w-full px-2 py-1.5 flex items-center justify-between text-left text-xs transition-colors focus:outline-none ${
+                    isSelected
                       ? isAI
                         ? "bg-gradient-to-r from-neutral-700 to-neutral-800 text-white"
                         : "bg-foreground text-background"
@@ -275,8 +305,9 @@ export default function CommandMenu({
                 >
                   <div className="flex items-center gap-2">
                     <span
+                      aria-hidden="true"
                       className={
-                        currentIndex === selectedIndex
+                        isSelected
                           ? isAI
                             ? "text-white"
                             : "text-background"
@@ -291,8 +322,9 @@ export default function CommandMenu({
                       <span className="font-medium">{command.label}</span>
                       {command.description && (
                         <span
+                          id={`desc-${command.id}`}
                           className={`block text-[10px] ${
-                            currentIndex === selectedIndex
+                            isSelected
                               ? isAI
                                 ? "text-white/70"
                                 : "text-background/70"
@@ -306,8 +338,9 @@ export default function CommandMenu({
                   </div>
                   {command.shortcut && (
                     <kbd
+                      aria-label={`Keyboard shortcut: ${command.shortcut}`}
                       className={`px-1 py-0.5 text-[9px] rounded ${
-                        currentIndex === selectedIndex
+                        isSelected
                           ? "bg-white/20 text-white"
                           : "bg-muted text-muted-foreground"
                       }`}
@@ -321,12 +354,19 @@ export default function CommandMenu({
           </div>
         ))}
         {filteredCommands.length === 0 && (
-          <div className="px-2 py-4 text-center text-xs text-muted-foreground">
+          <div
+            className="px-2 py-4 text-center text-xs text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
             No commands found
           </div>
         )}
       </div>
-      <div className="px-2 py-1.5 border-t border-border bg-muted/50">
+      <div
+        className="px-2 py-1.5 border-t border-border bg-muted/50"
+        aria-hidden="true"
+      >
         <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
           <kbd className="px-1 py-0.5 bg-card border border-border rounded">
             ↑↓

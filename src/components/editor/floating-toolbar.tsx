@@ -80,16 +80,20 @@ export default function FloatingToolbar({
     isActive = false,
     children,
     title,
+    ariaLabel,
   }: {
     onClick: () => void;
     isActive?: boolean;
     children: React.ReactNode;
     title: string;
+    ariaLabel?: string;
   }) => (
     <button
       onClick={onClick}
       title={title}
-      className={`p-1 rounded transition-colors ${
+      aria-label={ariaLabel || title}
+      aria-pressed={isActive}
+      className={`p-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
         isActive
           ? "bg-white/20 text-white"
           : "text-white/70 hover:text-white hover:bg-white/10"
@@ -104,6 +108,8 @@ export default function FloatingToolbar({
   return (
     <div
       ref={toolbarRef}
+      role="toolbar"
+      aria-label="Text formatting options"
       className="fixed bg-[oklch(0.18_0.01_60)] rounded-lg shadow-xl px-1 py-0.5 flex items-center gap-0.5 z-50 animate-in"
       style={{
         top: `${position.top}px`,
@@ -114,61 +120,80 @@ export default function FloatingToolbar({
       <button
         onClick={onAIClick}
         title="AI Assistant (⌘K)"
-        className="p-1 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:scale-110 hover:shadow-lg hover:shadow-neutral-500/25"
+        aria-label="Open AI Assistant, keyboard shortcut Command K"
+        className="p-1 rounded transition-all bg-gradient-to-r from-neutral-700 to-neutral-800 text-white hover:from-neutral-800 hover:to-neutral-950 hover:scale-110 hover:shadow-lg hover:shadow-neutral-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
       >
-        <Sparkles size={13} />
+        <Sparkles size={13} aria-hidden="true" />
       </button>
 
-      <div className="w-px h-4 bg-white/20 mx-0.5" />
+      <div
+        className="w-px h-4 bg-white/20 mx-0.5"
+        role="separator"
+        aria-orientation="vertical"
+      />
 
       <Btn
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive("bold")}
         title="Bold"
+        ariaLabel="Toggle bold formatting"
       >
-        <Bold size={13} />
+        <Bold size={13} aria-hidden="true" />
       </Btn>
       <Btn
         onClick={() => editor.chain().focus().toggleItalic().run()}
         isActive={editor.isActive("italic")}
         title="Italic"
+        ariaLabel="Toggle italic formatting"
       >
-        <Italic size={13} />
+        <Italic size={13} aria-hidden="true" />
       </Btn>
       <Btn
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         isActive={editor.isActive("underline")}
         title="Underline"
+        ariaLabel="Toggle underline formatting"
       >
-        <UnderlineIcon size={13} />
+        <UnderlineIcon size={13} aria-hidden="true" />
       </Btn>
       <Btn
         onClick={() => editor.chain().focus().toggleStrike().run()}
         isActive={editor.isActive("strike")}
         title="Strikethrough"
+        ariaLabel="Toggle strikethrough formatting"
       >
-        <Strikethrough size={13} />
+        <Strikethrough size={13} aria-hidden="true" />
       </Btn>
       <Btn
         onClick={() => editor.chain().focus().toggleCode().run()}
         isActive={editor.isActive("code")}
         title="Code"
+        ariaLabel="Toggle inline code formatting"
       >
-        <Code size={13} />
+        <Code size={13} aria-hidden="true" />
       </Btn>
 
-      <div className="w-px h-4 bg-white/20 mx-0.5" />
+      <div
+        className="w-px h-4 bg-white/20 mx-0.5"
+        role="separator"
+        aria-orientation="vertical"
+      />
 
       <div className="relative">
         <Btn
           onClick={() => setShowColors(!showColors)}
           title="Color"
           isActive={showColors}
+          ariaLabel="Open color picker"
         >
-          <Palette size={13} />
+          <Palette size={13} aria-hidden="true" />
         </Btn>
         {showColors && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 bg-popover rounded-md shadow-lg border border-border p-1.5 z-50 min-w-[100px]">
+          <div
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 bg-popover rounded-md shadow-lg border border-border p-1.5 z-50 min-w-[100px]"
+            role="listbox"
+            aria-label="Text color options"
+          >
             {colors.map((color) => (
               <button
                 key={color.name}
@@ -186,11 +211,14 @@ export default function FloatingToolbar({
                   }
                   setShowColors(false);
                 }}
-                className="w-full px-2 py-1 rounded flex items-center gap-2 hover:bg-muted transition-colors"
+                role="option"
+                aria-label={`Set text color to ${color.name}`}
+                className="w-full px-2 py-1 rounded flex items-center gap-2 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span
                   className="w-3 h-3 rounded-full border border-border"
                   style={{ backgroundColor: color.bg || "#fff" }}
+                  aria-hidden="true"
                 />
                 <span
                   className="text-[11px]"
@@ -208,8 +236,9 @@ export default function FloatingToolbar({
         onClick={() => onLinkClick?.()}
         isActive={editor.isActive("link")}
         title="Link"
+        ariaLabel="Insert or edit link"
       >
-        <LinkIcon size={13} />
+        <LinkIcon size={13} aria-hidden="true" />
       </Btn>
     </div>
   );

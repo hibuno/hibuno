@@ -93,20 +93,44 @@ export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => !isProcessing && fileInputRef.current?.click()}
-        className={`border border-dashed rounded-md p-3 text-center cursor-pointer transition-colors ${
+        onKeyDown={(e) => {
+          if ((e.key === "Enter" || e.key === " ") && !isProcessing) {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        role="button"
+        tabIndex={isProcessing ? -1 : 0}
+        aria-label="Upload document for text extraction. Accepts PDF, PNG, JPG, JPEG, TIFF, and BMP files."
+        aria-disabled={isProcessing}
+        aria-busy={isProcessing}
+        className={`border border-dashed rounded-md p-3 text-center cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           isDragging
             ? "border-[var(--gold)] bg-[var(--gold-light)]/30"
             : "border-border hover:border-muted-foreground"
         } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {isProcessing ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <div
+            className="flex flex-col items-center gap-2"
+            role="status"
+            aria-live="polite"
+          >
+            <Loader2
+              className="w-5 h-5 animate-spin text-muted-foreground"
+              aria-hidden="true"
+            />
             <p className="text-xs text-muted-foreground">Processing...</p>
+            <span className="sr-only">
+              Extracting text from document, please wait
+            </span>
           </div>
         ) : (
           <>
-            <FileText className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+            <FileText
+              className="w-5 h-5 mx-auto mb-1 text-muted-foreground"
+              aria-hidden="true"
+            />
             <p className="text-xs font-medium">Upload Document</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
               Drop or click here
@@ -116,8 +140,14 @@ export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
-          <X className="w-3 h-3 text-destructive mt-0.5 shrink-0" />
+        <div
+          role="alert"
+          className="flex items-start gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md"
+        >
+          <X
+            className="w-3 h-3 text-destructive mt-0.5 shrink-0"
+            aria-hidden="true"
+          />
           <p className="text-[10px] text-destructive flex-1">{error}</p>
         </div>
       )}
@@ -129,6 +159,8 @@ export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
         onChange={handleFileSelect}
         className="hidden"
         disabled={isProcessing}
+        aria-hidden="true"
+        tabIndex={-1}
       />
     </div>
   );

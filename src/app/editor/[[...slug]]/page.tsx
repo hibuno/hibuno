@@ -77,21 +77,23 @@ function ImageDropZone({
         <div className="relative group">
           <img
             src={currentImage}
-            alt="Cover"
+            alt="Cover image preview"
             className="w-full h-24 object-cover rounded-md"
           />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center gap-1">
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity rounded-md flex items-center justify-center gap-1">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-1.5 bg-white/90 rounded text-xs font-medium hover:bg-white"
+              aria-label="Change cover image"
+              className="p-1.5 bg-white/90 rounded text-xs font-medium hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Upload className="w-3 h-3" />
+              <Upload className="w-3 h-3" aria-hidden="true" />
             </button>
             <button
               onClick={onRemove}
-              className="p-1.5 bg-white/90 rounded text-xs font-medium hover:bg-white text-red-600"
+              aria-label="Remove cover image"
+              className="p-1.5 bg-white/90 rounded text-xs font-medium hover:bg-white text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3 h-3" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -104,13 +106,25 @@ function ImageDropZone({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border border-dashed rounded-md p-4 text-center cursor-pointer transition-colors ${
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload cover image. Drop an image or click to select."
+          className={`border border-dashed rounded-md p-4 text-center cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             isDragging
               ? "border-[var(--gold)] bg-[var(--gold-light)]/30"
               : "border-border hover:border-muted-foreground"
           }`}
         >
-          <ImagePlus className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+          <ImagePlus
+            className="w-5 h-5 mx-auto mb-1 text-muted-foreground"
+            aria-hidden="true"
+          />
           <p className="text-xs text-muted-foreground">Drop or click</p>
         </div>
       )}
@@ -122,6 +136,8 @@ function ImageDropZone({
           e.target.files?.[0] && onImageSelect(e.target.files[0])
         }
         className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
       />
     </div>
   );
@@ -136,16 +152,23 @@ function SidebarSection({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) {
+  const sectionId = `section-${title.toLowerCase().replace(/\s+/g, "-")}`;
   return (
-    <div className="border-b border-border last:border-b-0">
+    <section
+      className="border-b border-border last:border-b-0"
+      aria-labelledby={sectionId}
+    >
       <div className="px-3 py-2 flex items-center justify-between">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+        <h2
+          id={sectionId}
+          className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide"
+        >
           {title}
-        </span>
+        </h2>
         {action}
       </div>
       <div className="px-3 pb-3 space-y-3">{children}</div>
-    </div>
+    </section>
   );
 }
 
@@ -418,33 +441,58 @@ export default function EditorPage({ params }: EditorPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      <div
+        className="min-h-screen flex items-center justify-center bg-background"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <Loader2
+          className="w-5 h-5 animate-spin text-muted-foreground"
+          aria-hidden="true"
+        />
+        <span className="sr-only">Loading editor...</span>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen max-w-6xl mx-auto border-x bg-[var(--background)]">
+      {/* Skip link for keyboard navigation */}
+      <a
+        href="#editor-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-foreground focus:text-background focus:rounded-md focus:outline-none"
+      >
+        Skip to editor
+      </a>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+      <header
+        className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border"
+        role="banner"
+      >
         <div className="flex items-center justify-between h-11 px-3">
           <div className="flex items-center gap-2">
             {/* Mobile left sidebar toggle */}
             <button
               onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-              className="lg:hidden p-1.5 -ml-1.5 hover:bg-muted rounded transition-colors"
-              aria-label="Toggle navigation"
+              className="lg:hidden p-1.5 -ml-1.5 hover:bg-muted rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Toggle navigation sidebar"
+              aria-expanded={leftSidebarOpen}
+              aria-controls="left-sidebar"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-4 h-4" aria-hidden="true" />
             </button>
-            <span className="text-sm font-medium">Editor</span>
+            <h1 className="text-sm font-medium">Editor</h1>
             {isEditMode && (
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                   formData.published
                     ? "bg-foreground text-background"
                     : "bg-muted text-muted-foreground"
+                }`}
+                role="status"
+                aria-label={`Post status: ${
+                  formData.published ? "Published" : "Draft"
                 }`}
               >
                 {formData.published ? "Published" : "Draft"}
@@ -453,13 +501,22 @@ export default function EditorPage({ params }: EditorPageProps) {
           </div>
           <div className="flex items-center gap-2">
             {autoSaving && (
-              <span className="hidden sm:flex text-[10px] text-muted-foreground items-center gap-1">
-                <Loader2 className="w-3 h-3 animate-spin" /> Auto-saving...
+              <span
+                className="hidden sm:flex text-[10px] text-muted-foreground items-center gap-1"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />{" "}
+                Auto-saving...
               </span>
             )}
             {!autoSaving && lastSaved && (
-              <span className="hidden sm:flex text-[10px] text-foreground items-center gap-1">
-                <Check className="w-3 h-3" /> Saved
+              <span
+                className="hidden sm:flex text-[10px] text-foreground items-center gap-1"
+                role="status"
+                aria-live="polite"
+              >
+                <Check className="w-3 h-3" aria-hidden="true" /> Saved
               </span>
             )}
             {isEditMode && (
@@ -470,20 +527,24 @@ export default function EditorPage({ params }: EditorPageProps) {
                   window.open(`/${slug}?t=${Date.now()}`, "_blank")
                 }
                 className="hidden sm:flex text-xs h-7"
+                aria-label="Preview post in new tab"
               >
-                <ExternalLink className="w-3 h-3 mr-1" /> Preview
+                <ExternalLink className="w-3 h-3 mr-1" aria-hidden="true" />{" "}
+                Preview
               </Button>
             )}
             <Button
               onClick={() => handleSave(false)}
               disabled={saving || autoSaving}
+              aria-disabled={saving || autoSaving}
               size="sm"
               className="text-xs h-7 bg-foreground text-background hover:bg-foreground/90"
+              aria-label={saving ? "Saving post" : "Save post"}
             >
               {saving ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
               ) : (
-                <Save className="w-3 h-3 sm:mr-1" />
+                <Save className="w-3 h-3 sm:mr-1" aria-hidden="true" />
               )}
               <span className="hidden sm:inline">
                 {saving ? "Saving" : "Save"}
@@ -492,10 +553,12 @@ export default function EditorPage({ params }: EditorPageProps) {
             {/* Mobile right sidebar toggle */}
             <button
               onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-              className="lg:hidden p-1.5 -mr-1.5 hover:bg-muted rounded transition-colors"
-              aria-label="Toggle settings"
+              className="lg:hidden p-1.5 -mr-1.5 hover:bg-muted rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Toggle settings sidebar"
+              aria-expanded={rightSidebarOpen}
+              aria-controls="right-sidebar"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -506,6 +569,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setLeftSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -514,6 +578,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setRightSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -521,6 +586,8 @@ export default function EditorPage({ params }: EditorPageProps) {
       <div className="flex">
         {/* Left Sidebar */}
         <aside
+          id="left-sidebar"
+          aria-label="Navigation sidebar"
           className={`
           fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
           w-64 lg:w-56 border-r border-border bg-card shrink-0
@@ -538,9 +605,10 @@ export default function EditorPage({ params }: EditorPageProps) {
               <span className="text-sm font-medium">Navigation</span>
               <button
                 onClick={() => setLeftSidebarOpen(false)}
-                className="p-1.5 hover:bg-muted rounded transition-colors"
+                aria-label="Close navigation sidebar"
+                className="p-1.5 hover:bg-muted rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -549,15 +617,17 @@ export default function EditorPage({ params }: EditorPageProps) {
                 onClick={handleNewDocumentClick}
                 size="sm"
                 className="w-full text-xs h-7 bg-foreground text-background"
+                aria-label="Create new document"
               >
-                <Plus className="w-3 h-3 mr-1" /> New Document
+                <Plus className="w-3 h-3 mr-1" aria-hidden="true" /> New
+                Document
               </Button>
             </div>
 
             <div className="p-3 border-b border-border">
               <div className="flex items-center gap-2 mb-2">
                 <Upload className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                   Insert Text from Document
                 </span>
               </div>
@@ -566,43 +636,62 @@ export default function EditorPage({ params }: EditorPageProps) {
 
             <div className="p-3 border-b border-border">
               <div className="flex items-center gap-2 mb-2">
-                <History className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium">Recent Posts</span>
+                <History
+                  className="w-3 h-3 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <h2
+                  id="recent-posts-heading"
+                  className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide"
+                >
+                  Recent Posts
+                </h2>
               </div>
-              <div className="space-y-1">
-                {recentPosts.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground py-2">
-                    No recent posts
-                  </p>
-                ) : (
-                  recentPosts.map((recentPost) => (
-                    <button
-                      key={recentPost.id}
-                      onClick={() => {
-                        setLeftSidebarOpen(false);
-                        window.location.href = `/editor/${recentPost.slug}`;
-                      }}
-                      className={`w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted transition-colors ${
-                        recentPost.slug === slug ? "bg-muted" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-1.5">
-                        <FileText className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate">
-                            {recentPost.title}
+              <nav aria-labelledby="recent-posts-heading">
+                <ul className="space-y-1" role="list">
+                  {recentPosts.length === 0 ? (
+                    <li className="text-[10px] text-muted-foreground py-2">
+                      No recent posts
+                    </li>
+                  ) : (
+                    recentPosts.map((recentPost) => (
+                      <li key={recentPost.id}>
+                        <button
+                          onClick={() => {
+                            setLeftSidebarOpen(false);
+                            window.location.href = `/editor/${recentPost.slug}`;
+                          }}
+                          aria-current={
+                            recentPost.slug === slug ? "page" : undefined
+                          }
+                          className={`w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                            recentPost.slug === slug ? "bg-muted" : ""
+                          }`}
+                        >
+                          <div className="flex items-start gap-1.5">
+                            <FileText
+                              className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0"
+                              aria-hidden="true"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium truncate">
+                                {recentPost.title}
+                              </div>
+                              <div className="text-[9px] text-muted-foreground">
+                                <time dateTime={recentPost.updated_at}>
+                                  {new Date(
+                                    recentPost.updated_at
+                                  ).toLocaleDateString()}
+                                </time>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-[9px] text-muted-foreground">
-                            {new Date(
-                              recentPost.updated_at
-                            ).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </nav>
             </div>
 
             <div className="p-3">
@@ -611,15 +700,22 @@ export default function EditorPage({ params }: EditorPageProps) {
                 size="sm"
                 onClick={() => (window.location.href = "/admin")}
                 className="w-full text-xs h-7 justify-start"
+                aria-label="Go back to admin dashboard"
               >
-                <ArrowLeft className="w-3 h-3 mr-1" /> Back to Dashboard
+                <ArrowLeft className="w-3 h-3 mr-1" aria-hidden="true" /> Back
+                to Dashboard
               </Button>
             </div>
           </div>
         </aside>
 
         {/* Editor */}
-        <main className="flex-1 min-w-0">
+        <main
+          id="editor-content"
+          className="flex-1 min-w-0"
+          role="main"
+          aria-label="Post editor"
+        >
           <div className="max-w-6xl mx-auto">
             <div className="bg-card min-h-[calc(100vh-2.75rem)]">
               <RichTextEditor
@@ -632,6 +728,8 @@ export default function EditorPage({ params }: EditorPageProps) {
 
         {/* Right Sidebar */}
         <aside
+          id="right-sidebar"
+          aria-label="Post settings sidebar"
           className={`
           fixed lg:relative inset-y-0 right-0 z-50 lg:z-auto
           w-72 lg:w-64 border-l border-border bg-card shrink-0
@@ -649,9 +747,10 @@ export default function EditorPage({ params }: EditorPageProps) {
               <span className="text-sm font-medium">Settings</span>
               <button
                 onClick={() => setRightSidebarOpen(false)}
-                className="p-1.5 hover:bg-muted rounded transition-colors"
+                aria-label="Close settings sidebar"
+                className="p-1.5 hover:bg-muted rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -670,14 +769,27 @@ export default function EditorPage({ params }: EditorPageProps) {
                     }
                   }}
                   disabled={generatingMetadata}
-                  className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50"
+                  aria-disabled={generatingMetadata}
+                  aria-label="Generate metadata with AI"
+                  className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   title="Generate metadata with AI"
                 >
                   {generatingMetadata ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                    <Loader2
+                      className="w-3.5 h-3.5 animate-spin text-muted-foreground"
+                      aria-hidden="true"
+                    />
                   ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
+                    <Sparkles
+                      className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground"
+                      aria-hidden="true"
+                    />
                   )}
+                  <span className="sr-only">
+                    {generatingMetadata
+                      ? "Generating metadata..."
+                      : "Generate metadata with AI"}
+                  </span>
                 </button>
               }
             >
@@ -713,7 +825,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
-                      Publish Status
+                      Status
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {formData.published
@@ -729,8 +841,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
-                    <Calendar className="w-3 h-3" /> Publish Date & Time
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
+                    <Calendar className="w-3 h-3" /> Date & Time
                   </label>
                   <Input
                     type="datetime-local"
@@ -760,7 +872,7 @@ export default function EditorPage({ params }: EditorPageProps) {
 
             <SidebarSection title="Product Info">
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
                   <DollarSign className="w-3 h-3" /> Price
                 </label>
                 <Input
@@ -779,8 +891,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
-                  <Percent className="w-3 h-3" /> Discount %
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
+                  <Percent className="w-3 h-3" /> Discount
                 </label>
                 <Input
                   type="number"
@@ -799,8 +911,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1">
-                  <Globe className="w-3 h-3" /> Homepage URL
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
+                  <Globe className="w-3 h-3" /> Homepage
                 </label>
                 <Input
                   type="url"
@@ -814,7 +926,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 font-medium">
                     <Info className="w-3 h-3" /> Description
                   </label>
                   <button
