@@ -5,6 +5,27 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Critical CSS - Prevent layout shift */
+@layer base {
+  /* Prevent FOUT (Flash of Unstyled Text) */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Optimize image rendering */
+  img,
+  video {
+    content-visibility: auto;
+  }
+
+  /* Reduce layout shift for images */
+  img {
+    height: auto;
+    max-width: 100%;
+  }
+}
+
 :root {
   --background: oklch(0.995 0.002 60);
   --foreground: oklch(0.18 0.01 60);

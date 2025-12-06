@@ -59,9 +59,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === "production";
+
   return (
     <html lang="en" suppressHydrationWarning>
-      {process.env.NEXT_PUBLIC_NODE_ENV === "production" && <Analytics />}
+      {isProduction && <Analytics />}
       <body
         className={`font-sans ${InterFont.variable} ${GeistMono.variable} ${SourceSerif.variable} ${GloriaHallelujah.variable} antialiased`}
       >

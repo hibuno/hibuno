@@ -162,7 +162,7 @@ export function InteractiveMarkdownRenderer({
       return undefined;
     };
 
-    // Make images clickable
+    // Make images clickable and ensure accessibility
     const images = container.querySelectorAll("img");
     images.forEach((img) => {
       // Skip if already processed
@@ -171,6 +171,20 @@ export function InteractiveMarkdownRenderer({
       img.dataset.interactive = "true";
       img.style.cursor = "pointer";
       img.classList.add("hover:opacity-90", "transition-opacity");
+
+      // Ensure all images have alt text for accessibility
+      if (!img.alt || img.alt.trim() === "") {
+        const caption = getMediaCaption(img);
+        img.alt = caption || img.title || "Image";
+      }
+
+      // Add native lazy loading for images not yet in viewport
+      if (!img.loading) {
+        img.loading = "lazy";
+      }
+
+      // Add decoding async for better performance
+      img.decoding = "async";
 
       const handleClick = (e: Event) => {
         e.preventDefault();
@@ -210,16 +224,19 @@ export function InteractiveMarkdownRenderer({
 
       updatedHtml = updatedHtml.replace(videoLinkRegex, (_match, alt, src) => {
         hasChanges = true;
+        const safeAlt = alt || "Video content";
         return `
           <div class="video-container my-6">
             <video 
               src="${src}" 
-              alt="${alt || ""}"
+              aria-label="${safeAlt}"
               controls 
               class="w-full rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
               data-interactive="true"
               preload="metadata"
+              loading="lazy"
             >
+              <track kind="captions" srclang="en" label="No captions available" />
               Your browser does not support the video tag.
             </video>
             ${

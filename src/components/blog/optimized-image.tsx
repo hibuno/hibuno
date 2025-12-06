@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/content-utils";
 
 interface OptimizedImageProps extends Omit<ImageProps, "src"> {
@@ -12,6 +12,10 @@ interface OptimizedImageProps extends Omit<ImageProps, "src"> {
   priority?: boolean;
   clickable?: boolean;
   caption?: string | undefined;
+  /** Enable lazy loading with intersection observer */
+  lazyLoad?: boolean;
+  /** Preload image before it enters viewport */
+  preloadOffset?: string;
 }
 
 interface OptimizedVideoProps {
@@ -25,6 +29,10 @@ interface OptimizedVideoProps {
   muted?: boolean;
   loop?: boolean;
   poster?: string;
+  /** Enable lazy loading with intersection observer */
+  lazyLoad?: boolean;
+  /** Preload video before it enters viewport */
+  preloadOffset?: string;
 }
 
 // Memoized aspect ratio classes to prevent recreation
@@ -55,11 +63,39 @@ export const OptimizedImage = memo(
     priority = false,
     clickable = false,
     caption,
+    lazyLoad = true,
+    preloadOffset = "200px",
     ...props
   }: OptimizedImageProps) => {
     const [imageSrc, setImageSrc] = useState(src);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
+    const [isInView, setIsInView] = useState(priority || !lazyLoad);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Intersection Observer for lazy loading with preload offset
+    useEffect(() => {
+      if (priority || !lazyLoad || isInView) return;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        },
+        {
+          rootMargin: preloadOffset, // Preload before entering viewport
+          threshold: 0,
+        }
+      );
+
+      if (containerRef.current) {
+        observer.observe(containerRef.current);
+      }
+
+      return () => observer.disconnect();
+    }, [priority, lazyLoad, preloadOffset, isInView]);
 
     const handleError = useCallback(() => {
       if (imageSrc !== fallback && !hasError) {
@@ -73,20 +109,19 @@ export const OptimizedImage = memo(
     }, []);
 
     // Reset state when src changes
-    const handleSrcChange = useCallback(() => {
+    useEffect(() => {
       if (src !== imageSrc && !hasError) {
         setImageSrc(src);
         setIsLoading(true);
       }
     }, [src, imageSrc, hasError]);
 
-    // Effect to handle src changes
-    if (src !== imageSrc && !hasError) {
-      handleSrcChange();
-    }
+    // Ensure alt text is always present for accessibility
+    const safeAlt = alt || caption || "Image";
 
     return (
       <div
+        ref={containerRef}
         className={cn(
           "relative",
           ASPECT_RATIO_CLASSES[aspectRatio],
@@ -94,21 +129,24 @@ export const OptimizedImage = memo(
           className
         )}
       >
-        <Image
-          src={imageSrc}
-          alt={alt}
-          fill
-          className={cn(
-            "object-cover transition-opacity duration-300",
-            isLoading ? "opacity-0" : "opacity-100"
-          )}
-          onError={handleError}
-          onLoad={handleLoad}
-          priority={priority}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          {...props}
-        />
-        {isLoading && <LoadingSkeleton />}
+        {isInView ? (
+          <Image
+            src={imageSrc}
+            alt={safeAlt}
+            fill
+            className={cn(
+              "object-cover transition-opacity duration-300",
+              isLoading ? "opacity-0" : "opacity-100"
+            )}
+            onError={handleError}
+            onLoad={handleLoad}
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            {...props}
+          />
+        ) : null}
+        {(isLoading || !isInView) && <LoadingSkeleton />}
       </div>
     );
   }
@@ -122,21 +160,53 @@ export const OptimizedVideo = memo(
     className,
     aspectRatio = "video",
     clickable = false,
-    caption: _caption,
+    caption,
     controls = true,
     autoPlay = false,
     muted = false,
     loop = false,
     poster,
+    lazyLoad = true,
+    preloadOffset = "200px",
   }: OptimizedVideoProps) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [isInView, setIsInView] = useState(!lazyLoad);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Intersection Observer for lazy loading with preload offset
+    useEffect(() => {
+      if (!lazyLoad || isInView) return;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        },
+        {
+          rootMargin: preloadOffset, // Preload before entering viewport
+          threshold: 0,
+        }
+      );
+
+      if (containerRef.current) {
+        observer.observe(containerRef.current);
+      }
+
+      return () => observer.disconnect();
+    }, [lazyLoad, preloadOffset, isInView]);
 
     const handleLoad = useCallback(() => {
       setIsLoading(false);
     }, []);
 
+    // Ensure accessible label
+    const ariaLabel = caption || "Video content";
+
     return (
       <div
+        ref={containerRef}
         className={cn(
           "relative",
           ASPECT_RATIO_CLASSES[aspectRatio],
@@ -144,24 +214,28 @@ export const OptimizedVideo = memo(
           className
         )}
       >
-        <video
-          src={src}
-          className={cn(
-            "w-full h-full object-cover transition-opacity duration-300",
-            isLoading ? "opacity-0" : "opacity-100",
-            clickable && "hover:opacity-90 transition-opacity"
-          )}
-          controls={controls}
-          autoPlay={autoPlay}
-          muted={muted}
-          loop={loop}
-          poster={poster}
-          onLoadedData={handleLoad}
-          preload="metadata"
-        >
-          Your browser does not support the video tag.
-        </video>
-        {isLoading && <LoadingSkeleton />}
+        {isInView ? (
+          <video
+            src={src}
+            className={cn(
+              "w-full h-full object-cover transition-opacity duration-300",
+              isLoading ? "opacity-0" : "opacity-100",
+              clickable && "hover:opacity-90 transition-opacity"
+            )}
+            controls={controls}
+            autoPlay={autoPlay}
+            muted={muted}
+            loop={loop}
+            poster={poster}
+            onLoadedData={handleLoad}
+            preload="metadata"
+            aria-label={ariaLabel}
+          >
+            <track kind="captions" srcLang="en" label="No captions available" />
+            Your browser does not support the video tag.
+          </video>
+        ) : null}
+        {(isLoading || !isInView) && <LoadingSkeleton />}
       </div>
     );
   }

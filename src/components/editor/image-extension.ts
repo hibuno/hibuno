@@ -175,8 +175,12 @@ export const CustomImage = Image.extend({
 
       const img = document.createElement("img");
       img.src = node.attrs.src;
-      img.alt = node.attrs.alt || "";
+      // Ensure alt text is always present for accessibility
+      img.alt = node.attrs.alt || node.attrs.caption || "Image";
       img.className = "rounded-lg shadow-md";
+      // Add lazy loading for better performance
+      img.loading = "lazy";
+      img.decoding = "async";
 
       // Apply alignment
       const alignment = node.attrs.alignment || "center";

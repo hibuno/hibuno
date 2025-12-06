@@ -30,7 +30,7 @@ const ANIMATION = {
 
 const PostImage = memo(
   ({ post, isUnpublished }: { post: Post; isUnpublished: boolean }) => (
-    <div className="relative aspect-[16/9] overflow-hidden rounded-md mb-3">
+    <div className="relative aspect-video overflow-hidden rounded-md mb-3">
       <motion.div
         whileHover={ANIMATION.image.whileHover}
         transition={ANIMATION.image.transition}
@@ -38,11 +38,12 @@ const PostImage = memo(
       >
         <Image
           src={post.cover_image_url || "/placeholder.svg"}
-          alt={post.title}
+          alt={post.title || "Blog post cover image"}
           className="w-full h-full object-cover"
           width={500}
           height={300}
           loading="lazy"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       </motion.div>
       {isUnpublished && (
