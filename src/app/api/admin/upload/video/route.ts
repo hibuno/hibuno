@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { checkAdminAuth } from "@/lib/admin-auth";
 import { sanitizeFilename, generateUniqueFilename } from "@/lib/file-validator";
 import fs from "fs";
 import path from "path";
@@ -25,12 +26,8 @@ function isPathSafe(filePath: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     ensureUploadDir();
@@ -82,12 +79,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { searchParams } = new URL(request.url);

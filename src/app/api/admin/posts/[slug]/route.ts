@@ -1,19 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { SelectPost } from "@/db/types";
 import { getPostBySlug, updatePost, deletePost } from "@/db/server";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 // GET - Fetch post by slug for editing
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  // Development environment check
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { slug } = await params;
@@ -62,13 +58,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  // Development environment check
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { slug } = await params;
@@ -158,16 +149,11 @@ export async function PUT(
 
 // DELETE - Delete post
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  // Development environment check
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { slug } = await params;

@@ -1,14 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createPost, getAllPosts } from "@/db/server";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 // GET - List all posts
-export async function GET() {
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+export async function GET(request: NextRequest) {
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const posts = getAllPosts();
@@ -24,12 +21,8 @@ export async function GET() {
 
 // POST - Create new post
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const data = await request.json();

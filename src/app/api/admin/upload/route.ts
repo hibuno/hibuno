@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { checkAdminAuth } from "@/lib/admin-auth";
 import {
   compressForUpload,
   needsCompression,
@@ -32,13 +33,8 @@ function ensureUploadDir() {
 
 // POST - Upload image to local storage
 export async function POST(request: NextRequest) {
-  // Development environment check
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     ensureUploadDir();
@@ -132,13 +128,8 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Remove image from local storage
 export async function DELETE(request: NextRequest) {
-  // Development environment check
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "This endpoint is only available in development" },
-      { status: 403 }
-    );
-  }
+  const authError = checkAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { searchParams } = new URL(request.url);
