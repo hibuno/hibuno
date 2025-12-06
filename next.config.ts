@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
     // Local images only - no external domains needed
     unoptimized: false,
   },
+  // Increase body size limit for video uploads (default is 1MB)
+  experimental: {
+    middlewareClientMaxBodySize: "100mb",
+  },
   // async headers() {
   //   return [
   //     {

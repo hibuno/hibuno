@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Skip middleware for upload routes to avoid body parsing issues with large files
+  // Auth is handled in the route handlers themselves
+  if (pathname.startsWith("/api/admin/upload")) {
+    return NextResponse.next();
+  }
+
   // Protect /api/admin routes
   if (pathname.startsWith("/api/admin")) {
     const adminAccess = request.cookies.get("admin_access")?.value;
@@ -35,8 +41,8 @@ export function middleware(request: NextRequest) {
     // Frame sources - allow trusted embed providers
     "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://codepen.io https://platform.twitter.com",
 
-    // Media - allow self and trusted sources
-    "media-src 'self' https://www.youtube.com https://player.vimeo.com",
+    // Media - allow self, blob URLs, and trusted sources
+    "media-src 'self' blob: https://www.youtube.com https://player.vimeo.com",
 
     // Object and embed - disallow for security
     "object-src 'none'",

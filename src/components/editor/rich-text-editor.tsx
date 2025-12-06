@@ -533,8 +533,11 @@ export default function RichTextEditor({
     if (editor) {
       const { from } = editor.state.selection;
       const node = editor.state.doc.nodeAt(from);
-      if (node?.type.name === "customImage")
-        editor.chain().focus().deleteSelection().run();
+      if (node?.type.name === "customImage") {
+        const tr = editor.state.tr.delete(from, from + node.nodeSize);
+        editor.view.dispatch(tr);
+        editor.commands.focus();
+      }
     }
     editorDialogActions.closeImageDialog();
   };
