@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { MediaDialog, useMediaDialog } from "@/components/blog/media-dialog";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 import { ErrorBoundary } from "@/components/blog/error-boundary";
 import { cn } from "@/lib/content-utils";
 import "@/components/renderers/renderer-styles.css";
@@ -29,7 +30,6 @@ export function InteractiveMarkdownRenderer({
   className,
 }: InteractiveMarkdownRendererProps) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const { isOpen, mediaData, openDialog, closeDialog } = useMediaDialog();
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -125,57 +125,17 @@ export function InteractiveMarkdownRenderer({
       renderDetails();
     }, 100);
 
-    // Function to extract caption from image/video context
-    const getMediaCaption = (element: HTMLElement): string | undefined => {
-      // Check for alt text
-      const alt = element.getAttribute("alt");
-      if (alt?.trim()) return alt;
-
-      // Check for title attribute
-      const title = element.getAttribute("title");
-      if (title?.trim()) return title;
-
-      // Check for figcaption in parent figure
-      const figure = element.closest("figure");
-      if (figure) {
-        const figcaption = figure.querySelector("figcaption");
-        if (figcaption?.textContent?.trim()) {
-          return figcaption.textContent.trim();
-        }
-      }
-
-      // Check for caption in next sibling
-      const nextSibling = element.nextElementSibling;
-      if (
-        nextSibling &&
-        (nextSibling.tagName.toLowerCase() === "p" ||
-          nextSibling.classList.contains("caption") ||
-          nextSibling.classList.contains("image-caption"))
-      ) {
-        const text = nextSibling.textContent?.trim();
-        if (text && text.length < 200) {
-          // Reasonable caption length
-          return text;
-        }
-      }
-
-      return undefined;
-    };
-
-    // Make images clickable and ensure accessibility
+    // Wrap images with react-medium-image-zoom
     const images = container.querySelectorAll("img");
     images.forEach((img) => {
       // Skip if already processed
       if (img.dataset.interactive === "true") return;
 
       img.dataset.interactive = "true";
-      img.style.cursor = "pointer";
-      img.classList.add("hover:opacity-90", "transition-opacity");
 
       // Ensure all images have alt text for accessibility
       if (!img.alt || img.alt.trim() === "") {
-        const caption = getMediaCaption(img);
-        img.alt = caption || img.title || "Image";
+        img.alt = img.title || "Image";
       }
 
       // Add native lazy loading for images not yet in viewport
@@ -186,35 +146,38 @@ export function InteractiveMarkdownRenderer({
       // Add decoding async for better performance
       img.decoding = "async";
 
-      const handleClick = (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
+      // Create a wrapper div for React component
+      const wrapper = document.createElement("div");
+      wrapper.className = "inline-block max-w-full";
 
-        const src = img.src || img.getAttribute("data-src");
-        if (!src) return;
+      // Clone the image to preserve all attributes
+      const imgClone = img.cloneNode(true) as HTMLImageElement;
 
-        const dialogData: Parameters<typeof openDialog>[0] = {
-          src,
-          type: "image",
-        };
+      // Replace the original image with the wrapper
+      img.parentNode?.replaceChild(wrapper, img);
 
-        if (img.alt) dialogData.alt = img.alt;
-
-        const caption = getMediaCaption(img);
-        if (caption) dialogData.caption = caption;
-
-        openDialog(dialogData);
-      };
-
-      img.addEventListener("click", handleClick);
+      // Render React component with Zoom
+      const root = createRoot(wrapper);
+      root.render(
+        <Zoom>
+          <img
+            src={imgClone.src}
+            alt={imgClone.alt}
+            title={imgClone.title}
+            className={imgClone.className}
+            loading="lazy"
+            decoding="async"
+          />
+        </Zoom>
+      );
 
       // Store cleanup function
-      (img as ElementWithCleanup)._cleanup = () => {
-        img.removeEventListener("click", handleClick);
+      (wrapper as ElementWithCleanup)._cleanup = () => {
+        root.unmount();
       };
     });
 
-    // Convert video markdown to actual video elements and make them clickable
+    // Convert video markdown to actual video elements
     const processVideoElements = () => {
       // Find video links in markdown format: ![alt](video.mp4)
       const videoLinkRegex =
@@ -231,7 +194,7 @@ export function InteractiveMarkdownRenderer({
               src="${src}" 
               aria-label="${safeAlt}"
               controls 
-              class="w-full rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+              class="w-full rounded-lg shadow-lg"
               data-interactive="true"
               preload="metadata"
               loading="lazy"
@@ -255,42 +218,6 @@ export function InteractiveMarkdownRenderer({
 
     // Process video elements
     processVideoElements();
-
-    // Make video elements clickable
-    const videos = container.querySelectorAll('video[data-interactive="true"]');
-    videos.forEach((video) => {
-      const handleClick = (e: Event) => {
-        // Only open dialog if not clicking on controls
-        const target = e.target as HTMLElement;
-        if (target.tagName.toLowerCase() === "video") {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const src = (video as HTMLVideoElement).src;
-          if (!src) return;
-
-          const dialogData: Parameters<typeof openDialog>[0] = {
-            src,
-            type: "video",
-          };
-
-          const alt = video.getAttribute("alt");
-          if (alt) dialogData.alt = alt;
-
-          const caption = getMediaCaption(video as HTMLElement);
-          if (caption) dialogData.caption = caption;
-
-          openDialog(dialogData);
-        }
-      };
-
-      video.addEventListener("click", handleClick);
-
-      // Store cleanup function
-      (video as ElementWithCleanup)._cleanup = () => {
-        video.removeEventListener("click", handleClick);
-      };
-    });
 
     // Handle TOC link clicks for smooth scrolling
     const tocLinks = container.querySelectorAll(".toc-link");
@@ -338,17 +265,12 @@ export function InteractiveMarkdownRenderer({
     return () => {
       clearTimeout(renderTimeout);
 
-      // Clean up image listeners
-      images.forEach((img) => {
-        const cleanup = (img as ElementWithCleanup)._cleanup;
-        if (cleanup) {
-          cleanup();
-        }
-      });
-
-      // Clean up video listeners
-      videos.forEach((video) => {
-        const cleanup = (video as ElementWithCleanup)._cleanup;
+      // Clean up image wrappers
+      const imageWrappers = container.querySelectorAll(
+        '[data-interactive="true"]'
+      );
+      imageWrappers.forEach((wrapper) => {
+        const cleanup = (wrapper.parentElement as ElementWithCleanup)?._cleanup;
         if (cleanup) {
           cleanup();
         }
@@ -362,34 +284,21 @@ export function InteractiveMarkdownRenderer({
         }
       });
     };
-  }, [openDialog]);
+  }, []);
 
   return (
-    <>
-      <article
-        ref={contentRef}
-        className={cn(
-          "prose prose-zinc dark:prose-invert max-w-none prose-custom",
-          // Enhanced styles for interactive media
-          "[&_img]:transition-all [&_img]:duration-200",
-          "[&_video]:transition-all [&_video]:duration-200",
-          "[&_.video-container]:my-6",
-          className
-        )}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-
-      {mediaData && (
-        <MediaDialog
-          isOpen={isOpen}
-          onClose={closeDialog}
-          src={mediaData.src}
-          type={mediaData.type}
-          {...(mediaData.alt && { alt: mediaData.alt })}
-          {...(mediaData.caption && { caption: mediaData.caption })}
-        />
+    <article
+      ref={contentRef}
+      className={cn(
+        "prose prose-zinc dark:prose-invert max-w-none prose-custom",
+        // Enhanced styles for interactive media
+        "[&_img]:transition-all [&_img]:duration-200",
+        "[&_video]:transition-all [&_video]:duration-200",
+        "[&_.video-container]:my-6",
+        className
       )}
-    </>
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
 

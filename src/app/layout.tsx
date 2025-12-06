@@ -7,6 +7,9 @@ import "./globals.css";
 import { Suspense } from "react";
 import { generateSiteMetadata } from "@/lib/seo-metadata";
 import { Analytics } from "@vercel/analytics/next";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -67,6 +70,7 @@ export default function RootLayout({
       <body
         className={`font-sans ${InterFont.variable} ${GeistMono.variable} ${SourceSerif.variable} ${GloriaHallelujah.variable} antialiased`}
       >
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <Suspense
           fallback={
             <div className="flex items-center justify-center min-h-screen">

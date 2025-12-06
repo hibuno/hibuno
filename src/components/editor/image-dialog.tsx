@@ -11,7 +11,8 @@ import {
   X,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import { uploadImage, deleteImage } from "./editor-utils";
+import { useUploadThing } from "@/lib/uploadthing";
+import { deleteImage } from "./editor-utils";
 
 interface ImageDialogProps {
   open: boolean;
@@ -33,6 +34,15 @@ interface ImageDialogProps {
   };
 }
 
+interface StorageFile {
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  uploadedAt: string;
+}
+
 export default function ImageDialog({
   open,
   onClose,
@@ -40,20 +50,33 @@ export default function ImageDialog({
   onDelete,
   initialData,
 }: ImageDialogProps) {
-  const [mode, setMode] = useState<"url" | "upload">("upload");
+  const [mode, setMode] = useState<"url" | "upload" | "storage">("upload");
   const [url, setUrl] = useState("");
   const [alt, setAlt] = useState("");
   const [width, setWidth] = useState("100%");
   const [alignment, setAlignment] = useState<"left" | "center" | "right">(
     "center"
   );
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [storageFiles, setStorageFiles] = useState<StorageFile[]>([]);
+  const [loadingStorage, setLoadingStorage] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync state with initialData when dialog opens or initialData changes
+  const { startUpload, isUploading } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (res) => {
+      if (res?.[0]) {
+        setUrl(res[0].ufsUrl || res[0].url);
+        setMode("url");
+      }
+    },
+    onUploadError: (err) => {
+      console.error("Upload error:", err);
+      setError(err.message || "Upload failed");
+    },
+  });
+
   useEffect(() => {
     if (open) {
       setUrl(initialData?.src || "");
@@ -62,29 +85,44 @@ export default function ImageDialog({
       setAlignment(initialData?.alignment || "center");
       setMode(initialData?.src ? "url" : "upload");
       setError("");
+      setStorageFiles([]);
     }
   }, [open, initialData]);
+
+  const loadStorageFiles = async () => {
+    setLoadingStorage(true);
+    setError("");
+    try {
+      const response = await fetch("/api/uploadthing/list?type=image&limit=20");
+      if (!response.ok) throw new Error("Failed to load files");
+      const data = await response.json();
+      setStorageFiles(data.files || []);
+    } catch (err) {
+      console.error("Error loading storage:", err);
+      setError("Failed to load storage files");
+    } finally {
+      setLoadingStorage(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mode === "storage" && storageFiles.length === 0 && !loadingStorage) {
+      loadStorageFiles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError("Please select an image");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Max 5MB");
+    if (file.size > 4 * 1024 * 1024) {
+      setError("Max 4MB");
       return;
     }
-    setUploading(true);
     setError("");
-    try {
-      const uploadedUrl = await uploadImage(file);
-      setUrl(uploadedUrl);
-      setMode("url");
-    } catch {
-      setError("Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    await startUpload([file]);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -146,27 +184,35 @@ export default function ImageDialog({
               onClick={() => setMode("upload")}
               role="tab"
               aria-selected={mode === "upload"}
-              aria-controls="upload-panel"
-              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium ${
                 mode === "upload"
                   ? "bg-card shadow-sm"
                   : "text-muted-foreground"
               }`}
             >
-              <Upload size={12} className="inline mr-1" aria-hidden="true" />{" "}
-              Upload
+              <Upload size={12} className="inline mr-1" /> Upload
             </button>
             <button
               onClick={() => setMode("url")}
               role="tab"
               aria-selected={mode === "url"}
-              aria-controls="url-panel"
-              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium ${
                 mode === "url" ? "bg-card shadow-sm" : "text-muted-foreground"
               }`}
             >
-              <LinkIcon size={12} className="inline mr-1" aria-hidden="true" />{" "}
-              URL
+              <LinkIcon size={12} className="inline mr-1" /> URL
+            </button>
+            <button
+              onClick={() => setMode("storage")}
+              role="tab"
+              aria-selected={mode === "storage"}
+              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium ${
+                mode === "storage"
+                  ? "bg-card shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Storage
             </button>
           </div>
           {error && (
@@ -179,9 +225,6 @@ export default function ImageDialog({
           )}
           {mode === "upload" && !url && (
             <div
-              id="upload-panel"
-              role="tabpanel"
-              aria-labelledby="upload-tab"
               onDragOver={(e) => {
                 e.preventDefault();
                 setDragActive(true);
@@ -189,17 +232,9 @@ export default function ImageDialog({
               onDragLeave={() => setDragActive(false)}
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  inputRef.current?.click();
-                }
-              }}
-              tabIndex={0}
-              aria-label="Drop zone for image upload. Click or press Enter to select a file."
-              className={`border border-dashed rounded-md p-6 text-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`border border-dashed rounded-md p-6 text-center cursor-pointer ${
                 dragActive
-                  ? "border-[var(--gold)] bg-[var(--gold-light)]/30"
+                  ? "border-(--gold) bg-(--gold-light)/30"
                   : "border-border hover:border-muted-foreground"
               }`}
             >
@@ -211,42 +246,75 @@ export default function ImageDialog({
                   e.target.files?.[0] && handleFile(e.target.files[0])
                 }
                 className="hidden"
-                aria-hidden="true"
               />
-              {uploading ? (
-                <div aria-live="polite" aria-busy="true">
+              {isUploading ? (
+                <div>
                   <Loader2
                     size={20}
                     className="mx-auto text-muted-foreground animate-spin"
-                    aria-hidden="true"
                   />
-                  <span className="sr-only">Uploading image...</span>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Uploading...
+                  </p>
                 </div>
               ) : (
                 <>
                   <Upload
                     size={20}
                     className="mx-auto text-muted-foreground mb-1"
-                    aria-hidden="true"
                   />
-                  <p className="text-xs text-muted-foreground">Drop or click</p>
+                  <p className="text-xs text-muted-foreground">
+                    Drop or click (max 4MB)
+                  </p>
                 </>
               )}
             </div>
           )}
           {mode === "url" && !url && (
-            <div id="url-panel" role="tabpanel" aria-labelledby="url-tab">
-              <label htmlFor="image-url-input" className="sr-only">
-                Image URL
-              </label>
-              <input
-                id="image-url-input"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
-              />
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-3 py-2 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          )}
+          {mode === "storage" && !url && (
+            <div className="max-h-64 overflow-y-auto">
+              {loadingStorage ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2
+                    size={20}
+                    className="animate-spin text-muted-foreground"
+                  />
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    Loading...
+                  </span>
+                </div>
+              ) : storageFiles.length === 0 ? (
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  No images in storage
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {storageFiles.map((file) => (
+                    <button
+                      key={file.key}
+                      onClick={() => {
+                        setUrl(file.url);
+                        setMode("url");
+                      }}
+                      className="relative aspect-square rounded-md overflow-hidden border border-border hover:border-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <img
+                        src={file.url}
+                        alt={file.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           {url && (
@@ -260,44 +328,44 @@ export default function ImageDialog({
                 <button
                   onClick={() => setUrl("")}
                   aria-label="Remove image"
-                  className="absolute top-1 right-1 p-1 bg-black/60 rounded text-white opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="absolute top-1 right-1 p-1 bg-black/60 rounded text-white opacity-0 group-hover:opacity-100"
                 >
-                  <X size={12} aria-hidden="true" />
+                  <X size={12} />
                 </button>
               </div>
               <div>
-                <label
-                  htmlFor="image-alt-text"
-                  className="text-[10px] text-muted-foreground uppercase tracking-wide"
-                >
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="mt-1 w-full px-2 py-1.5 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-ring font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
                   Alt text
                 </label>
                 <input
-                  id="image-alt-text"
                   type="text"
                   value={alt}
                   onChange={(e) => setAlt(e.target.value)}
                   placeholder="Describe the image"
-                  aria-describedby="alt-text-hint"
                   className="mt-1 w-full px-2 py-1.5 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
                 />
-                <p id="alt-text-hint" className="sr-only">
-                  Provide a description of the image for screen readers
-                </p>
               </div>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label
-                    htmlFor="image-width"
-                    className="text-[10px] text-muted-foreground uppercase tracking-wide"
-                  >
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
                     Width
                   </label>
                   <select
-                    id="image-width"
                     value={width}
                     onChange={(e) => setWidth(e.target.value)}
-                    className="mt-1 w-full px-2 py-1.5 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="mt-1 w-full px-2 py-1.5 border border-input rounded-md text-sm bg-transparent"
                   >
                     <option value="100%">Full</option>
                     <option value="75%">75%</option>
@@ -305,38 +373,24 @@ export default function ImageDialog({
                   </select>
                 </div>
                 <div>
-                  <span
-                    id="alignment-label"
-                    className="text-[10px] text-muted-foreground uppercase tracking-wide block"
-                  >
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wide block">
                     Align
                   </span>
-                  <div
-                    className="mt-1 flex border border-input rounded-md overflow-hidden"
-                    role="group"
-                    aria-labelledby="alignment-label"
-                  >
+                  <div className="mt-1 flex border border-input rounded-md overflow-hidden">
                     {(["left", "center", "right"] as const).map((a) => (
                       <button
                         key={a}
                         onClick={() => setAlignment(a)}
-                        aria-label={`Align ${a}`}
                         aria-pressed={alignment === a}
-                        className={`p-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
+                        className={`p-1.5 ${
                           alignment === a
                             ? "bg-foreground text-background"
                             : "text-muted-foreground hover:bg-muted"
                         }`}
                       >
-                        {a === "left" && (
-                          <AlignLeft size={14} aria-hidden="true" />
-                        )}
-                        {a === "center" && (
-                          <AlignCenter size={14} aria-hidden="true" />
-                        )}
-                        {a === "right" && (
-                          <AlignRight size={14} aria-hidden="true" />
-                        )}
+                        {a === "left" && <AlignLeft size={14} />}
+                        {a === "center" && <AlignCenter size={14} />}
+                        {a === "right" && <AlignRight size={14} />}
                       </button>
                     ))}
                   </div>
@@ -353,14 +407,12 @@ export default function ImageDialog({
                   onDelete();
                   return;
                 }
-                // Only delete from filesystem if it's a local upload
                 if (initialData.src.startsWith("/images/uploads/")) {
                   setDeleting(true);
                   try {
                     await deleteImage(initialData.src);
                   } catch (err) {
                     console.error("Failed to delete file:", err);
-                    // Continue with editor deletion even if file deletion fails
                   } finally {
                     setDeleting(false);
                   }
@@ -368,17 +420,12 @@ export default function ImageDialog({
                 onDelete();
               }}
               disabled={deleting}
-              aria-label="Delete image"
-              className="px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              className="px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded flex items-center gap-1 disabled:opacity-50"
             >
               {deleting ? (
-                <Loader2
-                  size={12}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
+                <Loader2 size={12} className="animate-spin" />
               ) : (
-                <Trash2 size={12} aria-hidden="true" />
+                <Trash2 size={12} />
               )}
               {deleting ? "Deleting..." : "Delete"}
             </button>
@@ -388,15 +435,14 @@ export default function ImageDialog({
           <div className="flex gap-2">
             <button
               onClick={handleClose}
-              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded"
             >
               Cancel
             </button>
             <button
               onClick={handleInsert}
-              disabled={!url || uploading}
-              aria-disabled={!url || uploading}
-              className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              disabled={!url || isUploading}
+              className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50"
             >
               {initialData ? "Update" : "Insert"}
             </button>

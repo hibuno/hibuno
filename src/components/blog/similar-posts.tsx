@@ -73,7 +73,7 @@ export default async function SimilarPosts({
 
     return (
       <section aria-label="Similar posts" className="mt-12">
-        <h3 className="mb-4 text-lg font-semibold">Postingan Serupa</h3>
+        <h3 className="mb-4 text-lg font-semibold">Artikel Lainnya</h3>
         <PostsGrid posts={posts as Post[]} />
       </section>
     );

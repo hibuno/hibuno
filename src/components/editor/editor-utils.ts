@@ -1,31 +1,10 @@
-import { compressForUpload, needsCompression } from "@/lib/image-compressor";
-
-export async function uploadImage(
-  file: File,
-  postId?: string
-): Promise<string> {
-  // Compress image if needed (client-side compression as backup)
-  let fileToUpload = file;
-  if (file.type.startsWith("image/") && needsCompression(file, 1)) {
-    try {
-      fileToUpload = await compressForUpload(file, 1);
-      console.log("Client-side compression applied");
-    } catch (error) {
-      console.error(
-        "Client-side compression failed, server will handle it:",
-        error
-      );
-    }
-  }
-
-  // Create form data
+// Upload functions using UploadThing API
+export async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
-  formData.append("file", fileToUpload);
-  if (postId) {
-    formData.append("postId", postId);
-  }
+  formData.append("file", file);
 
-  // Upload using admin API route
+  // Use the legacy admin upload endpoint for drag-drop (simpler flow)
+  // UploadThing dropzone is used in dialogs for better UX
   const response = await fetch("/api/admin/upload", {
     method: "POST",
     body: formData,
@@ -40,36 +19,16 @@ export async function uploadImage(
   return data.url;
 }
 
-export async function deleteImage(imageUrl: string): Promise<void> {
-  const response = await fetch(
-    `/api/admin/upload?url=${encodeURIComponent(imageUrl)}`,
-    {
-      method: "DELETE",
-    }
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to delete image");
-  }
-}
-
-export async function uploadVideo(
-  file: File,
-  postId?: string
-): Promise<string> {
+export async function uploadVideo(file: File): Promise<string> {
   // Step 1: Initialize upload
   const initResponse = await fetch("/api/admin/upload/video?action=init", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       filename: file.name,
       fileSize: file.size,
       fileType: file.type,
     }),
-    credentials: "same-origin",
   });
 
   if (!initResponse.ok) {
@@ -81,18 +40,15 @@ export async function uploadVideo(
 
   // Step 2: Upload chunks
   const totalChunks = Math.ceil(file.size / chunkSize);
-
   for (let i = 0; i < totalChunks; i++) {
     const start = i * chunkSize;
     const end = Math.min(start + chunkSize, file.size);
     const chunk = file.slice(start, end);
 
-    const chunkUrl = `/api/admin/upload/video?action=chunk&uploadId=${uploadId}&chunkIndex=${i}`;
-    const chunkResponse = await fetch(chunkUrl, {
-      method: "POST",
-      body: chunk,
-      credentials: "same-origin",
-    });
+    const chunkResponse = await fetch(
+      `/api/admin/upload/video?action=chunk&uploadId=${uploadId}&chunkIndex=${i}`,
+      { method: "POST", body: chunk }
+    );
 
     if (!chunkResponse.ok) {
       const errorData = await chunkResponse.json();
@@ -105,15 +61,8 @@ export async function uploadVideo(
     "/api/admin/upload/video?action=finalize",
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        uploadId,
-        filename: file.name,
-        postId,
-      }),
-      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uploadId, filename: file.name }),
     }
   );
 
@@ -126,16 +75,31 @@ export async function uploadVideo(
   return data.url;
 }
 
-export async function deleteVideo(videoUrl: string): Promise<void> {
-  const response = await fetch(
-    `/api/admin/upload/video?url=${encodeURIComponent(videoUrl)}`,
-    {
-      method: "DELETE",
-    }
-  );
+// Delete functions for legacy local uploads
+export async function deleteImage(imageUrl: string): Promise<void> {
+  if (imageUrl.startsWith("/images/uploads/")) {
+    const response = await fetch(
+      `/api/admin/upload?url=${encodeURIComponent(imageUrl)}`,
+      { method: "DELETE" }
+    );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to delete video");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to delete image");
+    }
+  }
+}
+
+export async function deleteVideo(videoUrl: string): Promise<void> {
+  if (videoUrl.startsWith("/videos/uploads/")) {
+    const response = await fetch(
+      `/api/admin/upload/video?url=${encodeURIComponent(videoUrl)}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to delete video");
+    }
   }
 }

@@ -32,17 +32,20 @@ export function middleware(request: NextRequest) {
     // Styles - allow self, inline styles (needed for styled components), and trusted CDNs
     "style-src 'self' 'unsafe-inline'",
 
-    // Images - allow self, data URIs (for inline images), and trusted image sources
-    "img-src 'self' data: blob: https: http:",
+    // Images - allow self, data URIs (for inline images), UploadThing, and trusted image sources
+    "img-src 'self' data: blob: https: http: https://*.ufs.sh https://*.uploadthing.com",
 
     // Fonts - allow self and data URIs
     "font-src 'self' data:",
+
+    // Connect sources - allow API calls to self and UploadThing
+    "connect-src 'self' https://*.uploadthing.com https://*.ingest.uploadthing.com https://uploadthing.com",
 
     // Frame sources - allow trusted embed providers
     "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://codepen.io https://platform.twitter.com",
 
     // Media - allow self, blob URLs, and trusted sources
-    "media-src 'self' blob: https://www.youtube.com https://player.vimeo.com",
+    "media-src 'self' blob: https://www.youtube.com https://player.vimeo.com https://*.ufs.sh https://*.uploadthing.com",
 
     // Object and embed - disallow for security
     "object-src 'none'",

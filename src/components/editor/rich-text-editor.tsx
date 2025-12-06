@@ -504,17 +504,6 @@ export default function RichTextEditor({
 
   const handleImageEdit = (imageElement: HTMLElement) => {
     const src = imageElement.getAttribute("src") || "";
-    editorDialogActions.openImageDialog({
-      src,
-      alt: imageElement.getAttribute("alt") || "",
-      caption: imageElement.getAttribute("data-caption") || "",
-      width: imageElement.getAttribute("width") || "100%",
-      alignment:
-        (imageElement.getAttribute("data-alignment") as
-          | "left"
-          | "center"
-          | "right") || "center",
-    });
     if (editor) {
       let imagePos: number | null = null;
       editor.state.doc.descendants((node, pos) => {
@@ -524,22 +513,36 @@ export default function RichTextEditor({
         }
         return true;
       });
-      if (imagePos !== null)
+
+      editorDialogActions.openImageDialog({
+        src,
+        alt: imageElement.getAttribute("alt") || "",
+        caption: imageElement.getAttribute("data-caption") || "",
+        width: imageElement.getAttribute("width") || "100%",
+        alignment:
+          (imageElement.getAttribute("data-alignment") as
+            | "left"
+            | "center"
+            | "right") || "center",
+        pos: imagePos ?? undefined,
+      });
+
+      if (imagePos !== null) {
         setTimeout(() => editor.commands.setNodeSelection(imagePos!), 0);
+      }
     }
   };
 
   const handleImageDelete = () => {
-    if (editor) {
-      const { from } = editor.state.selection;
-      const node = editor.state.doc.nodeAt(from);
-      if (node?.type.name === "customImage") {
-        const tr = editor.state.tr.delete(from, from + node.nodeSize);
-        editor.view.dispatch(tr);
-        editor.commands.focus();
-      }
-    }
+    const dialogSrc = editorState.imageDialog.data?.src;
+
+    // Close dialog first
     editorDialogActions.closeImageDialog();
+
+    if (!editor || !dialogSrc) return;
+
+    // Use the custom deleteImage command
+    editor.chain().focus().deleteImage(dialogSrc).run();
   };
 
   const handleImageUpdate = (data: {
@@ -583,13 +586,15 @@ export default function RichTextEditor({
   };
 
   const handleVideoDelete = () => {
-    if (editor) {
-      const { from } = editor.state.selection;
-      const node = editor.state.doc.nodeAt(from);
-      if (node?.type.name === "customVideo")
-        editor.chain().focus().deleteSelection().run();
-    }
+    const dialogSrc = editorState.videoDialog.data?.src;
+
+    // Close dialog first
     editorDialogActions.closeVideoDialog();
+
+    if (!editor || !dialogSrc) return;
+
+    // Use the custom deleteVideo command
+    editor.chain().focus().deleteVideo(dialogSrc).run();
   };
 
   const handleVideoUpdate = (data: {

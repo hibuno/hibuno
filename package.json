@@ -38,6 +38,7 @@
     "@tiptap/pm": "^3.12.1",
     "@tiptap/react": "^3.12.1",
     "@tiptap/starter-kit": "^3.12.1",
+    "@uploadthing/react": "^7.3.3",
     "@vercel/analytics": "^1.6.1",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
@@ -51,6 +52,7 @@
     "next": "15.5.7",
     "react": "19.1.2",
     "react-dom": "19.1.2",
+    "react-medium-image-zoom": "^5.4.0",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "server-only": "^0.0.1",
@@ -58,6 +60,7 @@
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
+    "uploadthing": "^7.7.4",
     "valtio": "^2.2.0",
     "zod": "3.25.67"
   },

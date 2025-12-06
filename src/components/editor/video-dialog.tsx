@@ -11,7 +11,8 @@ import {
   X,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import { uploadVideo, deleteVideo } from "./editor-utils";
+import { useUploadThing } from "@/lib/uploadthing";
+import { deleteVideo } from "./editor-utils";
 
 interface VideoDialogProps {
   open: boolean;
@@ -31,6 +32,15 @@ interface VideoDialogProps {
   };
 }
 
+interface StorageFile {
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  uploadedAt: string;
+}
+
 export default function VideoDialog({
   open,
   onClose,
@@ -38,20 +48,33 @@ export default function VideoDialog({
   onDelete,
   initialData,
 }: VideoDialogProps) {
-  const [mode, setMode] = useState<"url" | "upload">("upload");
+  const [mode, setMode] = useState<"url" | "upload" | "storage">("upload");
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [width, setWidth] = useState("100%");
   const [alignment, setAlignment] = useState<"left" | "center" | "right">(
     "center"
   );
-  const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
+  const [storageFiles, setStorageFiles] = useState<StorageFile[]>([]);
+  const [loadingStorage, setLoadingStorage] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync state with initialData when dialog opens or initialData changes
+  const { startUpload, isUploading } = useUploadThing("videoUploader", {
+    onClientUploadComplete: (res) => {
+      if (res?.[0]) {
+        setUrl(res[0].ufsUrl || res[0].url);
+        setMode("url");
+      }
+    },
+    onUploadError: (err) => {
+      console.error("Upload error:", err);
+      setError(err.message || "Upload failed");
+    },
+  });
+
   useEffect(() => {
     if (open) {
       setUrl(initialData?.src || "");
@@ -60,29 +83,44 @@ export default function VideoDialog({
       setAlignment(initialData?.alignment || "center");
       setMode(initialData?.src ? "url" : "upload");
       setError("");
+      setStorageFiles([]);
     }
   }, [open, initialData]);
+
+  const loadStorageFiles = async () => {
+    setLoadingStorage(true);
+    setError("");
+    try {
+      const response = await fetch("/api/uploadthing/list?type=video&limit=20");
+      if (!response.ok) throw new Error("Failed to load files");
+      const data = await response.json();
+      setStorageFiles(data.files || []);
+    } catch (err) {
+      console.error("Error loading storage:", err);
+      setError("Failed to load storage files");
+    } finally {
+      setLoadingStorage(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mode === "storage" && storageFiles.length === 0 && !loadingStorage) {
+      loadStorageFiles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("video/")) {
       setError("Please select a video file");
       return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      setError("Max 100MB");
+    if (file.size > 64 * 1024 * 1024) {
+      setError("Max 64MB");
       return;
     }
-    setUploading(true);
     setError("");
-    try {
-      const uploadedUrl = await uploadVideo(file);
-      setUrl(uploadedUrl);
-      setMode("url");
-    } catch {
-      setError("Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    await startUpload([file]);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -156,6 +194,18 @@ export default function VideoDialog({
             >
               <LinkIcon size={12} className="inline mr-1" /> URL
             </button>
+            <button
+              onClick={() => setMode("storage")}
+              role="tab"
+              aria-selected={mode === "storage"}
+              className={`flex-1 py-1.5 px-2 rounded text-xs font-medium ${
+                mode === "storage"
+                  ? "bg-card shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Storage
+            </button>
           </div>
 
           {error && (
@@ -191,11 +241,16 @@ export default function VideoDialog({
                 }
                 className="hidden"
               />
-              {uploading ? (
-                <Loader2
-                  size={20}
-                  className="mx-auto text-muted-foreground animate-spin"
-                />
+              {isUploading ? (
+                <div>
+                  <Loader2
+                    size={20}
+                    className="mx-auto text-muted-foreground animate-spin"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Uploading...
+                  </p>
+                </div>
               ) : (
                 <>
                   <Upload
@@ -203,7 +258,7 @@ export default function VideoDialog({
                     className="mx-auto text-muted-foreground mb-1"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Drop or click (max 100MB)
+                    Drop or click (max 64MB)
                   </p>
                 </>
               )}
@@ -218,6 +273,50 @@ export default function VideoDialog({
               placeholder="https://example.com/video.mp4"
               className="w-full px-3 py-2 border border-input rounded-md text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
             />
+          )}
+
+          {mode === "storage" && !url && (
+            <div className="max-h-64 overflow-y-auto">
+              {loadingStorage ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2
+                    size={20}
+                    className="animate-spin text-muted-foreground"
+                  />
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    Loading...
+                  </span>
+                </div>
+              ) : storageFiles.length === 0 ? (
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  No videos in storage
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {storageFiles.map((file) => (
+                    <button
+                      key={file.key}
+                      onClick={() => {
+                        setUrl(file.url);
+                        setMode("url");
+                      }}
+                      className="relative aspect-video rounded-md overflow-hidden border border-border hover:border-foreground focus:outline-none focus:ring-2 focus:ring-ring bg-black"
+                    >
+                      <video
+                        src={file.url}
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+                          <div className="w-0 h-0 border-l-8 border-l-black border-y-4 border-y-transparent ml-1" />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {url && (
@@ -236,6 +335,19 @@ export default function VideoDialog({
                 >
                   <X size={12} />
                 </button>
+              </div>
+
+              <div>
+                <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Video URL
+                </label>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com/video.mp4"
+                  className="mt-1 w-full px-2 py-1.5 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-ring font-mono text-xs"
+                />
               </div>
 
               <div>
@@ -336,7 +448,7 @@ export default function VideoDialog({
             </button>
             <button
               onClick={handleInsert}
-              disabled={!url || uploading}
+              disabled={!url || isUploading}
               className="px-3 py-1.5 text-xs font-medium text-background bg-foreground hover:bg-foreground/90 rounded disabled:opacity-50"
             >
               {initialData ? "Update" : "Insert"}

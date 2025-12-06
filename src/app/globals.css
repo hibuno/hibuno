@@ -405,3 +405,32 @@
 .prose li::marker {
   color: var(--gold);
 }
+
+/* React Medium Image Zoom Custom Styles */
+[data-rmiz-modal-overlay] {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+.dark [data-rmiz-modal-overlay] {
+  background-color: rgba(0, 0, 0, 0.92) !important;
+}
+
+[data-rmiz-modal-content] {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Ensure images in prose are zoomable */
+.prose-custom img {
+  cursor: zoom-in;
+  transition: opacity 0.2s ease;
+}
+
+.prose-custom img:hover {
+  opacity: 0.9;
+}
+
+/* Style for zoomed images */
+[data-rmiz-modal-img] {
+  cursor: zoom-out;
+}

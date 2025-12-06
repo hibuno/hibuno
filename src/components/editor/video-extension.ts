@@ -14,6 +14,7 @@ declare module "@tiptap/core" {
         width?: string;
         alignment?: "left" | "center" | "right";
       }) => ReturnType;
+      deleteVideo: (src: string) => ReturnType;
     };
   }
 }
@@ -122,6 +123,30 @@ export const CustomVideo = Node.create<VideoOptions>({
             });
           }
         },
+      deleteVideo:
+        (src: string) =>
+        ({ commands, state }: { commands: any; state: any }) => {
+          let nodePos: number | null = null;
+
+          state.doc.descendants((node: any, pos: number) => {
+            if (
+              nodePos === null &&
+              node.type.name === "customVideo" &&
+              node.attrs.src === src
+            ) {
+              nodePos = pos;
+              return false;
+            }
+            return true;
+          });
+
+          if (nodePos === null) return false;
+
+          // Select the node and delete it using built-in commands
+          return (
+            commands.setNodeSelection(nodePos) && commands.deleteSelection()
+          );
+        },
     };
   },
 
@@ -180,6 +205,7 @@ export const CustomVideo = Node.create<VideoOptions>({
           title: node.attrs.title,
           width: node.attrs.width,
           alignment: node.attrs.alignment,
+          pos: getPos !== undefined ? getPos() : undefined,
         });
       };
 

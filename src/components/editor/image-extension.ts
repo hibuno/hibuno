@@ -1,12 +1,5 @@
-import { mergeAttributes } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
+import { mergeAttributes, Node } from "@tiptap/core";
 import { editorDialogActions } from "@/lib/editor-dialog-store";
-
-export interface ImageOptions {
-  inline: boolean;
-  allowBase64: boolean;
-  HTMLAttributes: Record<string, any>;
-}
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -19,58 +12,69 @@ declare module "@tiptap/core" {
         caption?: string;
         alignment?: "left" | "center" | "right";
       }) => ReturnType;
+      deleteImage: (src: string) => ReturnType;
     };
   }
 }
 
-export const CustomImage = Image.extend({
+export const CustomImage = Node.create({
   name: "customImage",
+
+  group: "block",
+
+  atom: true,
+
+  draggable: true,
 
   addAttributes() {
     return {
       src: {
         default: null,
+        parseHTML: (element) => element.getAttribute("src"),
+        renderHTML: (attributes) => {
+          if (!attributes.src) return {};
+          return { src: attributes.src };
+        },
       },
       alt: {
         default: null,
+        parseHTML: (element) => element.getAttribute("alt"),
+        renderHTML: (attributes) => {
+          if (!attributes.alt) return {};
+          return { alt: attributes.alt };
+        },
       },
       title: {
         default: null,
+        parseHTML: (element) => element.getAttribute("title"),
+        renderHTML: (attributes) => {
+          if (!attributes.title) return {};
+          return { title: attributes.title };
+        },
       },
       width: {
         default: "100%",
-        parseHTML: (element: Element) => {
-          const htmlElement = element as HTMLElement;
-          return (
-            htmlElement.getAttribute("width") ||
-            htmlElement.style.width ||
-            "100%"
-          );
+        parseHTML: (element) => {
+          return element.getAttribute("data-width") || "100%";
         },
-        renderHTML: (attributes: any) => {
-          return {
-            width: attributes.width,
-          };
+        renderHTML: (attributes) => {
+          return { "data-width": attributes.width };
         },
       },
       caption: {
         default: null,
-        parseHTML: (element: Element) => element.getAttribute("data-caption"),
-        renderHTML: (attributes: any) => {
+        parseHTML: (element) => element.getAttribute("data-caption"),
+        renderHTML: (attributes) => {
           if (!attributes.caption) return {};
-          return {
-            "data-caption": attributes.caption,
-          };
+          return { "data-caption": attributes.caption };
         },
       },
       alignment: {
         default: "center",
-        parseHTML: (element: Element) =>
+        parseHTML: (element) =>
           element.getAttribute("data-alignment") || "center",
-        renderHTML: (attributes: any) => {
-          return {
-            "data-alignment": attributes.alignment,
-          };
+        renderHTML: (attributes) => {
+          return { "data-alignment": attributes.alignment };
         },
       },
     };
@@ -84,105 +88,66 @@ export const CustomImage = Image.extend({
     ];
   },
 
-  renderHTML({ HTMLAttributes }: { HTMLAttributes: any }) {
-    const alignment = HTMLAttributes["data-alignment"] || "center";
-    const caption = HTMLAttributes["data-caption"];
-    const width = HTMLAttributes["width"];
-
-    const alignmentClass =
-      alignment === "left"
-        ? "float-left mr-4"
-        : alignment === "right"
-        ? "float-right ml-4"
-        : "mx-auto block";
-
-    // Apply width as style attribute if specified
-    const imgAttributes: any = {
-      class: `rounded-lg shadow-md ${alignmentClass}`,
-    };
-
-    if (width && width !== "100%") {
-      imgAttributes.style = `width: ${width}; height: auto;`;
-    }
-
-    const children: any[] = [
-      [
-        "img",
-        mergeAttributes(
-          this.options.HTMLAttributes,
-          HTMLAttributes,
-          imgAttributes
-        ),
-      ],
-    ];
-
-    if (caption) {
-      children.push([
-        "p",
-        { class: "text-sm text-neutral-600 italic mt-2" },
-        caption,
-      ]);
-    }
-
-    return [
-      "div",
-      {
-        class: `image-wrapper my-4 ${
-          alignment === "center" ? "text-center" : ""
-        }`,
-      },
-      ...children,
-    ];
+  renderHTML({ HTMLAttributes }) {
+    return ["img", mergeAttributes(HTMLAttributes)];
   },
 
   addCommands() {
     return {
       setImage:
-        (options: any) =>
-        ({ commands, editor }: { commands: any; editor: any }) => {
-          // Check if we're updating an existing image
+        (options) =>
+        ({ commands, editor }) => {
           const { from } = editor.state.selection;
           const node = editor.state.doc.nodeAt(from);
 
           if (node && node.type.name === "customImage") {
-            // Update existing image
             return commands.updateAttributes(this.name, options);
-          } else {
-            // Insert new image
-            return commands.insertContent({
-              type: this.name,
-              attrs: options,
-            });
           }
+
+          return commands.insertContent({
+            type: this.name,
+            attrs: options,
+          });
+        },
+      deleteImage:
+        (src) =>
+        ({ chain, state }) => {
+          let nodePos: number | null = null;
+
+          state.doc.descendants((node, pos) => {
+            if (
+              nodePos === null &&
+              node.type.name === "customImage" &&
+              node.attrs.src === src
+            ) {
+              nodePos = pos;
+              return false;
+            }
+            return true;
+          });
+
+          if (nodePos === null) return false;
+
+          return chain().setNodeSelection(nodePos).deleteSelection().run();
         },
     };
   },
 
   addNodeView() {
-    return ({
-      node,
-      getPos,
-      editor,
-    }: {
-      node: any;
-      getPos: () => number | undefined;
-      editor: any;
-    }) => {
+    return ({ node, getPos, editor }) => {
       const dom = document.createElement("div");
       dom.className = `image-wrapper my-4 ${
         node.attrs.alignment === "center" ? "text-center" : ""
       }`;
+      dom.contentEditable = "false";
 
       const img = document.createElement("img");
       img.src = node.attrs.src;
-      // Ensure alt text is always present for accessibility
       img.alt = node.attrs.alt || node.attrs.caption || "Image";
       img.className = "rounded-lg shadow-md";
-      // Add lazy loading for better performance
       img.loading = "lazy";
       img.decoding = "async";
 
-      // Apply alignment
       const alignment = node.attrs.alignment || "center";
       if (alignment === "left") {
         img.className += " float-left mr-4";
@@ -192,14 +157,12 @@ export const CustomImage = Image.extend({
         img.className += " mx-auto block";
       }
 
-      // Apply width
       const width = node.attrs.width;
       if (width && width !== "100%") {
         img.style.width = width;
         img.style.height = "auto";
       }
 
-      // Add caption if present
       if (node.attrs.caption) {
         const caption = document.createElement("p");
         caption.className = "text-sm text-neutral-600 italic mt-2";
@@ -210,34 +173,30 @@ export const CustomImage = Image.extend({
         dom.appendChild(img);
       }
 
-      // Add click handler for editing
       const handleEdit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (getPos !== undefined) {
-          const pos = getPos();
+        const pos = typeof getPos === "function" ? getPos() : undefined;
+        if (pos !== undefined) {
           editor.commands.setNodeSelection(pos);
         }
 
-        // Use Valtio state to trigger image edit dialog
         editorDialogActions.openImageDialog({
           src: node.attrs.src,
           alt: node.attrs.alt,
           caption: node.attrs.caption,
           width: node.attrs.width,
           alignment: node.attrs.alignment,
-          pos: getPos(),
-          nodeType: node.type,
+          pos: pos !== undefined ? pos : undefined,
         });
       };
 
       img.addEventListener("click", handleEdit);
-
-      // Add keyboard accessibility
       img.setAttribute("tabindex", "0");
       img.setAttribute("role", "button");
       img.setAttribute("aria-label", node.attrs.alt || "Edit image");
+      img.style.cursor = "pointer";
 
       img.addEventListener("keydown", (e: KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -246,22 +205,17 @@ export const CustomImage = Image.extend({
         }
       });
 
-      // Make image cursor pointer to indicate it's clickable
-      img.style.cursor = "pointer";
-
       return {
         dom,
-        update: (updatedNode: any) => {
-          if (updatedNode.type !== node.type) {
+        update: (updatedNode) => {
+          if (updatedNode.type.name !== "customImage") {
             return false;
           }
 
-          // Update image attributes
           img.src = updatedNode.attrs.src;
           img.alt = updatedNode.attrs.alt || "";
 
-          // Update alignment class
-          img.className = img.className.replace(/float-(left|right)/g, "");
+          img.className = "rounded-lg shadow-md";
           const newAlignment = updatedNode.attrs.alignment || "center";
           if (newAlignment === "left") {
             img.className += " float-left mr-4";
@@ -271,14 +225,12 @@ export const CustomImage = Image.extend({
             img.className += " mx-auto block";
           }
 
-          // Update width
           if (updatedNode.attrs.width && updatedNode.attrs.width !== "100%") {
             img.style.width = updatedNode.attrs.width;
           } else {
             img.style.width = "";
           }
 
-          // Update caption
           const existingCaption = dom.querySelector("p");
           if (updatedNode.attrs.caption) {
             if (existingCaption) {
