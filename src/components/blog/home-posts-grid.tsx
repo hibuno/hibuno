@@ -36,7 +36,7 @@ const HeroSection = memo(() => (
         className="font-serif text-balance text-2xl sm:text-3xl font-semibold leading-tight md:text-4xl"
         variants={ANIMATION.item}
       >
-        Tempat singgah untuk memperdalam pemahaman Anda
+        Sekarang, belajar tentang dunia digital ngga perlu ribet.
       </motion.h1>
       <motion.p
         className="mt-2 max-w-prose text-sm sm:text-base text-muted-foreground"
