@@ -62,7 +62,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {process.env.NODE_ENV === "production" && (
+      {process.env.NEXT_PUBLIC_NODE_ENV === "production" && (
         <Head>
           <Script
             src="https://cloud.umami.is/script.js"
