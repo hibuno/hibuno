@@ -6,6 +6,7 @@ import type React from "react";
 import "./globals.css";
 import { Suspense } from "react";
 import { generateSiteMetadata } from "@/lib/seo-metadata";
+import Script from "next/script";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -72,11 +73,11 @@ export default function RootLayout({
         >
           {children}
           {process.env.NODE_ENV === "production" && (
-            <script
-              defer
+            <Script
               src="https://cloud.umami.is/script.js"
               data-website-id="e34a2aaa-fa37-4041-a1cb-416fa98a01f5"
-            ></script>
+              strategy="afterInteractive"
+            />
           )}
         </Suspense>
       </body>

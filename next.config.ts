@@ -5,56 +5,56 @@ const nextConfig: NextConfig = {
     // Local images only - no external domains needed
     unoptimized: false,
   },
-  async headers() {
-    return [
-      {
-        // Apply security headers to all routes
-        source: "/:path*",
-        headers: [
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cloud.umami.is",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev",
-              "frame-ancestors 'self'",
-            ].join("; "),
-          },
-        ],
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       // Apply security headers to all routes
+  //       source: "/:path*",
+  //       headers: [
+  //         {
+  //           key: "X-DNS-Prefetch-Control",
+  //           value: "on",
+  //         },
+  //         {
+  //           key: "Strict-Transport-Security",
+  //           value: "max-age=63072000; includeSubDomains; preload",
+  //         },
+  //         {
+  //           key: "X-Frame-Options",
+  //           value: "SAMEORIGIN",
+  //         },
+  //         {
+  //           key: "X-Content-Type-Options",
+  //           value: "nosniff",
+  //         },
+  //         {
+  //           key: "X-XSS-Protection",
+  //           value: "1; mode=block",
+  //         },
+  //         {
+  //           key: "Referrer-Policy",
+  //           value: "strict-origin-when-cross-origin",
+  //         },
+  //         {
+  //           key: "Permissions-Policy",
+  //           value: "camera=(), microphone=(), geolocation=()",
+  //         },
+  //         {
+  //           key: "Content-Security-Policy",
+  //           value: [
+  //             "default-src 'self'",
+  //             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cloud.umami.is",
+  //             "style-src 'self' 'unsafe-inline'",
+  //             "img-src 'self' data: blob:",
+  //             "font-src 'self' data:",
+  //             "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev",
+  //             "frame-ancestors 'self'",
+  //           ].join("; "),
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
 };
 
 export default nextConfig;
