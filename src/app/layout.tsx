@@ -6,6 +6,7 @@ import type React from "react";
 import "./globals.css";
 import { Suspense } from "react";
 import { generateSiteMetadata } from "@/lib/seo-metadata";
+import { Analytics } from "@vercel/analytics/next";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -60,15 +61,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {process.env.NEXT_PUBLIC_NODE_ENV === "production" && (
-        <head>
-          <script
-            src="https://cloud.umami.is/script.js"
-            data-website-id="e34a2aaa-fa37-4041-a1cb-416fa98a01f5"
-            defer
-          ></script>
-        </head>
-      )}
+      {process.env.NEXT_PUBLIC_NODE_ENV === "production" && <Analytics />}
       <body
         className={`font-sans ${InterFont.variable} ${GeistMono.variable} ${SourceSerif.variable} ${GloriaHallelujah.variable} antialiased`}
       >
