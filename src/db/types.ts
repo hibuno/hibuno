@@ -1,3 +1,10 @@
+// Social media link interface
+export interface SocialMediaLink {
+  platform: "tiktok" | "youtube" | "instagram" | "twitter" | "facebook";
+  url: string;
+  caption?: string;
+}
+
 // Post interface for blog and product functionality
 export interface Post {
   id: string;
@@ -16,6 +23,8 @@ export interface Post {
   discount_percentage?: number | null | undefined;
   homepage?: string | null | undefined;
   product_description?: string | null | undefined;
+  // Social media fields
+  social_media_links?: SocialMediaLink[] | null | undefined;
 }
 
 // Type for creating a new post (optional fields that have defaults)

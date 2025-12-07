@@ -52,6 +52,7 @@
     "next": "15.5.7",
     "react": "19.1.2",
     "react-dom": "19.1.2",
+    "react-lite-youtube-embed": "^3.3.3",
     "react-medium-image-zoom": "^5.4.0",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",

@@ -17,6 +17,7 @@ interface SiteHeaderProps {
 
 const SOCIAL_LINKS: readonly SocialLink[] = [
   { name: "Beranda", href: "/", label: "Beranda" },
+  { name: "Codes", href: "/codes", label: "Video & Social Media" },
   {
     name: "YouTube",
     href: "https://youtube.com/@hibuno_id",

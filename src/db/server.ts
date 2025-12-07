@@ -94,6 +94,10 @@ export function updatePost(
       updates.product_description !== undefined
         ? updates.product_description
         : existingPost.product_description,
+    social_media_links:
+      updates.social_media_links !== undefined
+        ? updates.social_media_links
+        : existingPost.social_media_links,
   };
   posts[index] = updatedPost;
   savePosts(posts);
@@ -278,4 +282,82 @@ export function getSimilarPosts(
   }
 
   return posts.slice(0, limit);
+}
+
+// Get posts with social media links (for /codes page)
+export function getPostsWithSocialMedia(options: {
+  limit?: number;
+  offset?: number;
+  includeDrafts?: boolean;
+}): SelectPost[] {
+  let posts = getAllPosts();
+
+  // Filter by published status
+  if (!options.includeDrafts) {
+    posts = posts.filter((p) => p.published);
+  }
+
+  // Filter only posts with social media links
+  posts = posts.filter(
+    (p) => p.social_media_links && p.social_media_links.length > 0
+  );
+
+  // Sort by published_at descending
+  posts.sort((a, b) => {
+    const dateA = a.published_at
+      ? new Date(a.published_at).getTime()
+      : a.created_at
+      ? new Date(a.created_at).getTime()
+      : 0;
+    const dateB = b.published_at
+      ? new Date(b.published_at).getTime()
+      : b.created_at
+      ? new Date(b.created_at).getTime()
+      : 0;
+    return dateB - dateA;
+  });
+
+  // Apply pagination
+  const offset = options.offset || 0;
+  const limit = options.limit || posts.length;
+  return posts.slice(offset, offset + limit);
+}
+
+// Get posts without social media links (for homepage)
+export function getPostsWithoutSocialMedia(options: {
+  limit?: number;
+  offset?: number;
+  includeDrafts?: boolean;
+}): SelectPost[] {
+  let posts = getAllPosts();
+
+  // Filter by published status
+  if (!options.includeDrafts) {
+    posts = posts.filter((p) => p.published);
+  }
+
+  // Filter only posts WITHOUT social media links
+  posts = posts.filter(
+    (p) => !p.social_media_links || p.social_media_links.length === 0
+  );
+
+  // Sort by published_at descending
+  posts.sort((a, b) => {
+    const dateA = a.published_at
+      ? new Date(a.published_at).getTime()
+      : a.created_at
+      ? new Date(a.created_at).getTime()
+      : 0;
+    const dateB = b.published_at
+      ? new Date(b.published_at).getTime()
+      : b.created_at
+      ? new Date(b.created_at).getTime()
+      : 0;
+    return dateB - dateA;
+  });
+
+  // Apply pagination
+  const offset = options.offset || 0;
+  const limit = options.limit || posts.length;
+  return posts.slice(offset, offset + limit);
 }

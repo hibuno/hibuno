@@ -32,6 +32,7 @@ import { AlertDialog, MessageDialog } from "@/components/ui/alert-dialog";
 import { calculateStats } from "@/lib/content-utils";
 import { Textarea } from "@/components/ui/textarea";
 import { OCRDropZone } from "@/components/editor/ocr-dropzone";
+import SocialMediaEditor from "@/components/editor/social-media-editor";
 import {
   Select,
   SelectContent,
@@ -208,6 +209,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     discount_percentage: null,
     homepage: "",
     product_description: "",
+    social_media_links: [],
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
@@ -875,6 +877,19 @@ export default function EditorPage({ params }: EditorPageProps) {
                   </p>
                 </div>
               </div>
+            </SidebarSection>
+
+            <SidebarSection title="Social Media">
+              <SocialMediaEditor
+                links={
+                  Array.isArray(formData.social_media_links)
+                    ? formData.social_media_links
+                    : []
+                }
+                onChange={(links) =>
+                  handleInputChange("social_media_links", links)
+                }
+              />
             </SidebarSection>
 
             <SidebarSection title="Product Info">

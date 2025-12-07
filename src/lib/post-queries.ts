@@ -4,6 +4,8 @@ import {
   getPostBySlug as localGetPostBySlug,
   searchPosts as localSearchPosts,
   getAllTags,
+  getPostsWithSocialMedia as localGetPostsWithSocialMedia,
+  getPostsWithoutSocialMedia as localGetPostsWithoutSocialMedia,
 } from "@/db/server";
 
 // Extended types for query results
@@ -118,6 +120,30 @@ export class PostQueries {
    */
   async getTags() {
     return getAllTags();
+  }
+
+  /**
+   * Get posts with social media links (for /codes page)
+   */
+  async getPostsWithSocialMedia(limit = 20): Promise<PostSummary[]> {
+    const isDev = process.env.NODE_ENV === "development";
+    const posts = localGetPostsWithSocialMedia({
+      limit,
+      includeDrafts: isDev,
+    });
+    return posts as unknown as PostSummary[];
+  }
+
+  /**
+   * Get posts without social media links (for homepage)
+   */
+  async getPostsWithoutSocialMedia(limit = 20): Promise<PostSummary[]> {
+    const isDev = process.env.NODE_ENV === "development";
+    const posts = localGetPostsWithoutSocialMedia({
+      limit,
+      includeDrafts: isDev,
+    });
+    return posts as unknown as PostSummary[];
   }
 }
 

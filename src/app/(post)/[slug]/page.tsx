@@ -12,7 +12,8 @@ import { ReadingProgress } from "@/components/blog/reading-progress-bar";
 import SimilarPosts from "@/components/blog/similar-posts";
 import { SiteHeader } from "@/components/blog/site-header";
 import { StructuredData } from "@/components/blog/structured-data";
-import type { SelectPost } from "@/db/types";
+import SocialMediaHighlight from "@/components/blog/social-media-highlight";
+import type { SelectPost, SocialMediaLink } from "@/db/types";
 import { postQueries } from "@/lib/post-queries";
 import {
   generateBreadcrumbStructuredData,
@@ -344,28 +345,53 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Main Content Container */}
           <main
-            className={`max-w-4xl mx-auto px-4 relative z-10 ${
+            className={`max-w-6xl mx-auto px-4 relative z-10 ${
               isDevMode ? "pt-12 sm:pt-16" : "pt-6 sm:pt-8"
             } pb-12 sm:pb-20`}
           >
-            <article className="space-y-12">
-              {/* Header */}
-              <PostHeader post={post} />
+            <div className="flex gap-8">
+              {/* Main Article */}
+              <div className="flex-1 max-w-4xl">
+                <article className="space-y-12">
+                  {/* Header */}
+                  <PostHeader post={post} />
 
-              {/* Content */}
-              <PostContent post={post} />
+                  {/* Content */}
+                  <PostContent post={post} />
 
-              {/* Signature */}
-              <ArticleSignature />
-            </article>
+                  {/* Signature */}
+                  <ArticleSignature />
+                </article>
 
-            {/* Navigation & Related Content */}
-            <div className="mt-12 sm:mt-20 space-y-8 sm:space-y-12 divide-y divide-black/5 dark:divide-white/5">
-              <PostNavigation
-                published_at={(post.published_at || null) as string | null}
-              />
-              <SimilarPosts currentSlug={slug} tags={tags} />
+                {/* Navigation & Related Content */}
+                <div className="mt-12 sm:mt-20 space-y-8 sm:space-y-12 divide-y divide-black/5 dark:divide-white/5">
+                  <PostNavigation
+                    published_at={(post.published_at || null) as string | null}
+                  />
+                  <SimilarPosts currentSlug={slug} tags={tags} />
+                </div>
+              </div>
+
+              {/* Right Sidebar - Social Media Highlight (Desktop) */}
+              {post.social_media_links &&
+                (post.social_media_links as SocialMediaLink[]).length > 0 && (
+                  <aside className="hidden xl:block w-64 shrink-0">
+                    <SocialMediaHighlight
+                      links={post.social_media_links as SocialMediaLink[]}
+                    />
+                  </aside>
+                )}
             </div>
+
+            {/* Mobile Social Media Highlight */}
+            {post.social_media_links &&
+              (post.social_media_links as SocialMediaLink[]).length > 0 && (
+                <div className="xl:hidden mt-8 pt-8 border-t border-black/5 dark:border-white/5">
+                  <SocialMediaHighlight
+                    links={post.social_media_links as SocialMediaLink[]}
+                  />
+                </div>
+              )}
           </main>
         </div>
       </ErrorBoundary>

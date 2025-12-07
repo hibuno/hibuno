@@ -16,9 +16,9 @@ async function getHomepageData(): Promise<{
   isLoading?: boolean;
 }> {
   try {
-    // Get recent posts with retry mechanism
+    // Get recent posts WITHOUT social media links (those go to /codes)
     const recentPosts = await retryDatabaseOperation(() =>
-      postQueries.getRecentPosts(12)
+      postQueries.getPostsWithoutSocialMedia(12)
     );
 
     return {

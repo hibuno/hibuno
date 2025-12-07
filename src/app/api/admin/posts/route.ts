@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       discount_percentage: data.discount_percentage || null,
       homepage: data.homepage || null,
       product_description: data.product_description || null,
+      social_media_links: data.social_media_links || null,
     });
 
     return NextResponse.json(newPost, { status: 201 });

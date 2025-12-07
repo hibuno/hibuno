@@ -35,6 +35,7 @@ export async function GET(
       discount_percentage: data.discount_percentage,
       homepage: data.homepage,
       product_description: data.product_description,
+      social_media_links: data.social_media_links,
     };
 
     return NextResponse.json(formattedData as SelectPost, {
@@ -93,6 +94,7 @@ export async function PUT(
       discount_percentage: updateData.discount_percentage,
       homepage: updateData.homepage,
       product_description: updateData.product_description,
+      social_media_links: updateData.social_media_links,
     };
 
     // Only update created_at if explicitly provided and different
@@ -129,6 +131,7 @@ export async function PUT(
       discount_percentage: data.discount_percentage,
       homepage: data.homepage,
       product_description: data.product_description,
+      social_media_links: data.social_media_links,
     };
 
     return NextResponse.json(formattedData as SelectPost, {
