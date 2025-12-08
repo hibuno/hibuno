@@ -10,8 +10,6 @@ export async function GET(request: NextRequest) {
 
     const result = await listUploadedFiles(limit, offset);
 
-    console.log(result);
-
     // Filter by type if specified
     let files = result.files || [];
     if (type === "image") {

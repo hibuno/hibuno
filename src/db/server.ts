@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { SelectPost } from "./types";
+import type { SelectPost, PostLocale, PostTranslation } from "./types";
 
 const POSTS_DIR = path.join(process.cwd(), "content/posts");
 const POSTS_INDEX_FILE = path.join(POSTS_DIR, "index.json");
@@ -38,6 +38,91 @@ export function getPostBySlug(slug: string): SelectPost | null {
   return posts.find((p) => p.slug === slug) || null;
 }
 
+// Get a post by slug and locale (returns the localized version if available)
+export function getPostBySlugAndLocale(
+  slug: string,
+  locale: PostLocale
+): SelectPost | null {
+  const post = getPostBySlug(slug);
+  if (!post) return null;
+
+  // If post has no content_group_id, return as-is
+  if (!post.content_group_id) return post;
+
+  // If post matches requested locale, return it
+  if (post.locale === locale) return post;
+
+  // Try to find translation in the same content group
+  const posts = getAllPosts();
+  const translation = posts.find(
+    (p) => p.content_group_id === post.content_group_id && p.locale === locale
+  );
+
+  return translation || post;
+}
+
+// Get all translations for a post by content_group_id
+export function getPostTranslations(contentGroupId: string): PostTranslation[] {
+  const posts = getAllPosts();
+  const translations = posts.filter(
+    (p) => p.content_group_id === contentGroupId
+  );
+
+  const locales: PostLocale[] = ["en", "id"];
+  return locales.map((locale) => {
+    const post = translations.find((p) => p.locale === locale);
+    return {
+      locale,
+      slug: post?.slug || "",
+      title: post?.title || "",
+      exists: !!post,
+    };
+  });
+}
+
+// Get post by content_group_id and locale
+export function getPostByContentGroupAndLocale(
+  contentGroupId: string,
+  locale: PostLocale
+): SelectPost | null {
+  const posts = getAllPosts();
+  return (
+    posts.find(
+      (p) => p.content_group_id === contentGroupId && p.locale === locale
+    ) || null
+  );
+}
+
+// Link two posts as translations of each other
+export function linkPostTranslations(
+  postId1: string,
+  postId2: string
+): string | null {
+  const posts = getAllPosts();
+  const post1 = posts.find((p) => p.id === postId1);
+  const post2 = posts.find((p) => p.id === postId2);
+
+  if (!post1 || !post2) return null;
+
+  // Use existing content_group_id or create new one
+  const contentGroupId =
+    post1.content_group_id || post2.content_group_id || crypto.randomUUID();
+
+  // Update both posts
+  const idx1 = posts.findIndex((p) => p.id === postId1);
+  const idx2 = posts.findIndex((p) => p.id === postId2);
+
+  if (idx1 !== -1) {
+    posts[idx1] = { ...posts[idx1]!, content_group_id: contentGroupId };
+  }
+  if (idx2 !== -1) {
+    posts[idx2] = { ...posts[idx2]!, content_group_id: contentGroupId };
+  }
+
+  savePosts(posts);
+  return contentGroupId;
+}
+
 // Create a new post
 export function createPost(post: Omit<SelectPost, "id">): SelectPost {
   const posts = getAllPosts();
@@ -71,6 +156,11 @@ export function updatePost(
     excerpt:
       updates.excerpt !== undefined ? updates.excerpt : existingPost.excerpt,
     content: updates.content ?? existingPost.content,
+    content_group_id:
+      updates.content_group_id !== undefined
+        ? updates.content_group_id
+        : existingPost.content_group_id,
+    locale: updates.locale !== undefined ? updates.locale : existingPost.locale,
     cover_image_url:
       updates.cover_image_url !== undefined
         ? updates.cover_image_url
@@ -115,14 +205,64 @@ export function deletePost(slug: string): boolean {
   return true;
 }
 
-// Get published posts with filtering
+// Default locale for the site
+const DEFAULT_LOCALE: PostLocale = "id";
+
+// Helper function to deduplicate posts by content_group_id
+function deduplicateByLocale(
+  posts: SelectPost[],
+  preferredLocale: PostLocale = DEFAULT_LOCALE
+): SelectPost[] {
+  const postsByGroup = new Map<string, SelectPost[]>();
+  const standalonePosts: SelectPost[] = [];
+
+  for (const post of posts) {
+    if (post.content_group_id) {
+      const group = postsByGroup.get(post.content_group_id) || [];
+      group.push(post);
+      postsByGroup.set(post.content_group_id, group);
+    } else {
+      // Standalone posts (no content_group_id) are always included
+      // They don't have translations, so show them regardless of locale
+      standalonePosts.push(post);
+    }
+  }
+
+  const deduplicatedPosts: SelectPost[] = [];
+
+  for (const [groupId, groupPosts] of postsByGroup) {
+    // Try to find post matching preferred locale
+    let selectedPost = groupPosts.find((p) => p.locale === preferredLocale);
+
+    // If not found and preferred is not default, try default locale
+    if (!selectedPost && preferredLocale !== DEFAULT_LOCALE) {
+      selectedPost = groupPosts.find((p) => p.locale === DEFAULT_LOCALE);
+    }
+
+    // If still not found, take first available
+    if (!selectedPost) {
+      selectedPost = groupPosts[0];
+    }
+
+    if (selectedPost) {
+      deduplicatedPosts.push(selectedPost);
+    }
+  }
+
+  deduplicatedPosts.push(...standalonePosts);
+  return deduplicatedPosts;
+}
+
+// Get published posts with filtering - deduplicates translations
 export function getPublishedPosts(options: {
   limit?: number;
   offset?: number;
   tag?: string;
+  locale?: PostLocale;
   includeDrafts?: boolean;
 }): SelectPost[] {
   let posts = getAllPosts();
+  const preferredLocale = options.locale || DEFAULT_LOCALE;
 
   // Filter by published status
   if (!options.includeDrafts) {
@@ -134,8 +274,11 @@ export function getPublishedPosts(options: {
     posts = posts.filter((p) => p.tags?.includes(options.tag!));
   }
 
+  // Deduplicate posts with same content_group_id - prefer the requested locale
+  const deduplicatedPosts = deduplicateByLocale(posts, preferredLocale);
+
   // Sort by published_at descending (fallback to created_at)
-  posts.sort((a, b) => {
+  deduplicatedPosts.sort((a, b) => {
     const dateA = a.published_at
       ? new Date(a.published_at).getTime()
       : a.created_at
@@ -151,15 +294,16 @@ export function getPublishedPosts(options: {
 
   // Apply pagination
   const offset = options.offset || 0;
-  const limit = options.limit || posts.length;
-  return posts.slice(offset, offset + limit);
+  const limit = options.limit || deduplicatedPosts.length;
+  return deduplicatedPosts.slice(offset, offset + limit);
 }
 
 // Search posts
 export function searchPosts(
   query: string,
   limit = 20,
-  includeDrafts = false
+  includeDrafts = false,
+  locale: PostLocale = DEFAULT_LOCALE
 ): SelectPost[] {
   let posts = getAllPosts();
   const lowerQuery = query.toLowerCase();
@@ -174,6 +318,9 @@ export function searchPosts(
       p.content.toLowerCase().includes(lowerQuery) ||
       p.excerpt?.toLowerCase().includes(lowerQuery)
   );
+
+  // Deduplicate by locale
+  posts = deduplicateByLocale(posts, locale);
 
   posts.sort((a, b) => {
     const dateA = a.published_at
@@ -253,23 +400,29 @@ export function getAdjacentPosts(publishedAt: string | null): {
 export function getSimilarPosts(
   currentSlug: string,
   tags?: string[] | null,
-  limit = 4
+  limit = 4,
+  locale: PostLocale = DEFAULT_LOCALE
 ): SelectPost[] {
-  let posts = getAllPosts()
-    .filter((p) => p.published && p.slug !== currentSlug)
-    .sort((a, b) => {
-      const dateA = a.published_at
-        ? new Date(a.published_at).getTime()
-        : a.created_at
-        ? new Date(a.created_at).getTime()
-        : 0;
-      const dateB = b.published_at
-        ? new Date(b.published_at).getTime()
-        : b.created_at
-        ? new Date(b.created_at).getTime()
-        : 0;
-      return dateB - dateA;
-    });
+  let posts = getAllPosts().filter(
+    (p) => p.published && p.slug !== currentSlug
+  );
+
+  // Deduplicate by locale
+  posts = deduplicateByLocale(posts, locale);
+
+  posts.sort((a, b) => {
+    const dateA = a.published_at
+      ? new Date(a.published_at).getTime()
+      : a.created_at
+      ? new Date(a.created_at).getTime()
+      : 0;
+    const dateB = b.published_at
+      ? new Date(b.published_at).getTime()
+      : b.created_at
+      ? new Date(b.created_at).getTime()
+      : 0;
+    return dateB - dateA;
+  });
 
   // Try to find posts with matching tags first
   if (tags?.length) {
@@ -288,9 +441,11 @@ export function getSimilarPosts(
 export function getPostsWithSocialMedia(options: {
   limit?: number;
   offset?: number;
+  locale?: PostLocale;
   includeDrafts?: boolean;
 }): SelectPost[] {
   let posts = getAllPosts();
+  const preferredLocale = options.locale || DEFAULT_LOCALE;
 
   // Filter by published status
   if (!options.includeDrafts) {
@@ -301,6 +456,9 @@ export function getPostsWithSocialMedia(options: {
   posts = posts.filter(
     (p) => p.social_media_links && p.social_media_links.length > 0
   );
+
+  // Deduplicate by locale
+  posts = deduplicateByLocale(posts, preferredLocale);
 
   // Sort by published_at descending
   posts.sort((a, b) => {
@@ -327,9 +485,11 @@ export function getPostsWithSocialMedia(options: {
 export function getPostsWithoutSocialMedia(options: {
   limit?: number;
   offset?: number;
+  locale?: PostLocale;
   includeDrafts?: boolean;
 }): SelectPost[] {
   let posts = getAllPosts();
+  const preferredLocale = options.locale || DEFAULT_LOCALE;
 
   // Filter by published status
   if (!options.includeDrafts) {
@@ -340,6 +500,9 @@ export function getPostsWithoutSocialMedia(options: {
   posts = posts.filter(
     (p) => !p.social_media_links || p.social_media_links.length === 0
   );
+
+  // Deduplicate by locale
+  posts = deduplicateByLocale(posts, preferredLocale);
 
   // Sort by published_at descending
   posts.sort((a, b) => {

@@ -40,6 +40,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { getLocaleCookie } from "@/lib/locale-utils";
+import { defaultLocale, localeNames, type Locale } from "@/i18n/config";
+import type { PostTranslation } from "@/db/types";
+import { TranslationReference } from "@/components/editor/translation-helper";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -205,6 +210,8 @@ export default function EditorPage({ params }: EditorPageProps) {
     content: "",
     published: false,
     tags: [],
+    locale: null,
+    content_group_id: null,
     price: null,
     discount_percentage: null,
     homepage: "",
@@ -234,6 +241,14 @@ export default function EditorPage({ params }: EditorPageProps) {
   const editorContentRef = useRef<string>(formData.content || "");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
+  const [translations, setTranslations] = useState<PostTranslation[]>([]);
+  const [creatingTranslation, setCreatingTranslation] = useState(false);
+  const [sourceTranslation, setSourceTranslation] = useState<{
+    title: string;
+    excerpt: string;
+    content: string;
+    locale: Locale;
+  } | null>(null);
 
   const debouncedContent = useDebounce(formData.content || "", 1000);
 
@@ -275,6 +290,32 @@ export default function EditorPage({ params }: EditorPageProps) {
         setPost(postData);
         setFormData(postData);
         setCoverImagePreview(postData.cover_image_url || null);
+        // Set translations if available
+        if (postData.translations) {
+          setTranslations(postData.translations);
+
+          // Load source translation content for reference
+          const otherTranslation = postData.translations.find(
+            (t: PostTranslation) => t.exists && t.locale !== postData.locale
+          );
+
+          if (otherTranslation && otherTranslation.slug) {
+            // Fetch the source translation content
+            fetch(`/api/admin/posts/${otherTranslation.slug}?t=${Date.now()}`)
+              .then((res) => res.json())
+              .then((sourceData) => {
+                setSourceTranslation({
+                  title: sourceData.title,
+                  excerpt: sourceData.excerpt || "",
+                  content: sourceData.content,
+                  locale: sourceData.locale as Locale,
+                });
+              })
+              .catch((err) =>
+                console.error("Error loading source translation:", err)
+              );
+          }
+        }
       } catch (error) {
         console.error("Error loading post:", error);
       } finally {
@@ -412,7 +453,12 @@ export default function EditorPage({ params }: EditorPageProps) {
       if (!isEditMode) {
         window.location.href = `/editor/${savedPost.slug || formData.slug}`;
       } else {
-        setPost(savedPost);
+        // If slug changed, redirect to new URL
+        if (savedPost.slug !== slug && !isAutoSave) {
+          window.location.href = `/editor/${savedPost.slug}`;
+        } else {
+          setPost(savedPost);
+        }
       }
     } catch (error) {
       if (!isAutoSave) {
@@ -444,8 +490,57 @@ export default function EditorPage({ params }: EditorPageProps) {
     window.location.href = "/editor";
   };
 
+  const handleCreateTranslation = async (targetLocale: Locale) => {
+    if (!isEditMode || !slug) return;
+
+    setCreatingTranslation(true);
+    try {
+      const response = await fetch(`/api/admin/posts/${slug}/translations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locale: targetLocale,
+          title: `[${targetLocale.toUpperCase()}] ${formData.title}`,
+          slug: `${formData.slug}-${targetLocale}`,
+        }),
+      });
+
+      if (response.status === 409) {
+        const data = await response.json();
+        // Translation exists, navigate to it
+        window.location.href = `/editor/${data.slug}`;
+        return;
+      }
+
+      if (!response.ok) throw new Error("Failed to create translation");
+
+      const newPost = await response.json();
+      // Navigate to the new translation
+      window.location.href = `/editor/${newPost.slug}`;
+    } catch (error) {
+      setMessageDialog({
+        open: true,
+        title: "Error",
+        description: `Failed to create translation: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingTranslation(false);
+    }
+  };
+
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState<Locale>(defaultLocale);
+
+  useEffect(() => {
+    const locale = getLocaleCookie();
+    if (locale) {
+      setCurrentLocale(locale);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -620,7 +715,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               </button>
             </div>
 
-            <div className="p-3 border-b border-border">
+            <div className="p-3 border-b border-border space-y-2">
               <Button
                 onClick={handleNewDocumentClick}
                 size="sm"
@@ -630,7 +725,126 @@ export default function EditorPage({ params }: EditorPageProps) {
                 <Plus className="w-3 h-3 mr-1" aria-hidden="true" /> New
                 Document
               </Button>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                  UI Language
+                </span>
+                <LanguageSwitcher currentLocale={currentLocale} />
+              </div>
             </div>
+
+            {/* Translations Section */}
+            {isEditMode && (
+              <div className="p-3 border-b border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Globe
+                    className="w-3 h-3 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                    Post Language
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {/* Current post locale selector */}
+                  <Select
+                    value={formData.locale || ""}
+                    onValueChange={(value) =>
+                      handleInputChange("locale", value || null)
+                    }
+                  >
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="id">Bahasa Indonesia</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Translations list */}
+                  {translations.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-muted-foreground uppercase">
+                        Translations
+                      </span>
+                      {translations.map((t) => (
+                        <div
+                          key={t.locale}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <span
+                            className={t.exists ? "" : "text-muted-foreground"}
+                          >
+                            {localeNames[t.locale as Locale]}
+                          </span>
+                          {t.exists ? (
+                            t.slug !== slug ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-5 px-2 text-[10px]"
+                                onClick={() => {
+                                  window.location.href = `/editor/${t.slug}`;
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground">
+                                Current
+                              </span>
+                            )
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 px-2 text-[10px]"
+                              onClick={() =>
+                                handleCreateTranslation(t.locale as Locale)
+                              }
+                              disabled={creatingTranslation}
+                            >
+                              {creatingTranslation ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                "Create"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Create translation button when no translations exist */}
+                  {formData.locale && translations.length === 0 && (
+                    <div className="pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-7 text-xs"
+                        onClick={() =>
+                          handleCreateTranslation(
+                            formData.locale === "en" ? "id" : "en"
+                          )
+                        }
+                        disabled={creatingTranslation}
+                      >
+                        {creatingTranslation ? (
+                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : (
+                          <Plus className="w-3 h-3 mr-1" />
+                        )}
+                        Create{" "}
+                        {formData.locale === "en" ? "Indonesian" : "English"}{" "}
+                        Version
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="p-3 border-b border-border">
               <div className="flex items-center gap-2 mb-2">
@@ -726,6 +940,18 @@ export default function EditorPage({ params }: EditorPageProps) {
         >
           <div className="max-w-6xl mx-auto">
             <div className="bg-card min-h-[calc(100vh-2.75rem)]">
+              {/* Translation Reference - shown when editing a translation */}
+              {sourceTranslation && (
+                <div className="p-4 border-b border-border">
+                  <TranslationReference
+                    sourceContent={sourceTranslation.content}
+                    sourceTitle={sourceTranslation.title}
+                    sourceExcerpt={sourceTranslation.excerpt}
+                    sourceLocale={sourceTranslation.locale}
+                  />
+                </div>
+              )}
+
               <RichTextEditor
                 content={formData.content || ""}
                 onChange={(content) => handleInputChange("content", content)}

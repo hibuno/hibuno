@@ -13,8 +13,10 @@ import SimilarPosts from "@/components/blog/similar-posts";
 import { SiteHeader } from "@/components/blog/site-header";
 import { StructuredData } from "@/components/blog/structured-data";
 import SocialMediaHighlight from "@/components/blog/social-media-highlight";
-import type { SelectPost, SocialMediaLink } from "@/db/types";
+import type { SelectPost, SocialMediaLink, PostTranslation } from "@/db/types";
+import type { Locale } from "@/i18n/config";
 import { postQueries } from "@/lib/post-queries";
+import { PostLanguageSwitcher } from "@/components/blog/post-language-switcher";
 import {
   generateBreadcrumbStructuredData,
   generatePostMetadata,
@@ -192,7 +194,13 @@ function formatDate(date: Date): string {
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-function PostHeader({ post }: { post: SelectPost }) {
+function PostHeader({
+  post,
+  translations,
+}: {
+  post: SelectPost;
+  translations: PostTranslation[];
+}) {
   const publishedISO = post.published_at || Date.now();
   const readingTime = calculateStats(post.content)?.readingTime || 0;
   const date = new Date(publishedISO);
@@ -227,6 +235,17 @@ function PostHeader({ post }: { post: SelectPost }) {
         </time>
         <span>•</span>
         <span>{readingTime} menit baca</span>
+        {/* Language Switcher */}
+        {translations.length > 0 && (
+          <>
+            <span>•</span>
+            <PostLanguageSwitcher
+              currentLocale={(post.locale as Locale) || null}
+              translations={translations}
+              currentSlug={post.slug}
+            />
+          </>
+        )}
       </div>
 
       {/* Tags */}
@@ -316,12 +335,13 @@ export const revalidate = 0;
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   try {
     const { slug } = await params;
-    const post = await postQueries.getPostBySlug(slug);
+    const result = await postQueries.getPostWithTranslations(slug);
 
-    if (!post) {
+    if (!result) {
       return notFound();
     }
 
+    const { post, translations } = result;
     const tags = normalizeTags(post.tags);
     const structuredData = generatePostStructuredData(post);
     const breadcrumbData = generateBreadcrumbStructuredData([
@@ -354,7 +374,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex-1 max-w-4xl">
                 <article className="space-y-12">
                   {/* Header */}
-                  <PostHeader post={post} />
+                  <PostHeader post={post} translations={translations} />
 
                   {/* Content */}
                   <PostContent post={post} />

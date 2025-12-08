@@ -1,6 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { SelectPost } from "@/db/types";
-import { getPostBySlug, updatePost, deletePost } from "@/db/server";
+import {
+  getPostBySlug,
+  updatePost,
+  deletePost,
+  getPostTranslations,
+} from "@/db/server";
 import { checkAdminAuth } from "@/lib/admin-auth";
 
 // GET - Fetch post by slug for editing
@@ -19,6 +24,11 @@ export async function GET(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
+    // Get translations if content_group_id exists
+    const translations = data.content_group_id
+      ? getPostTranslations(data.content_group_id)
+      : [];
+
     // Format data for frontend
     const formattedData = {
       id: data.id,
@@ -26,6 +36,9 @@ export async function GET(
       title: data.title,
       excerpt: data.excerpt,
       content: data.content,
+      content_group_id: data.content_group_id,
+      locale: data.locale,
+      translations,
       cover_image_url: data.cover_image_url,
       tags: data.tags,
       published: data.published,
@@ -38,7 +51,7 @@ export async function GET(
       social_media_links: data.social_media_links,
     };
 
-    return NextResponse.json(formattedData as SelectPost, {
+    return NextResponse.json(formattedData, {
       headers: {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         Pragma: "no-cache",
@@ -86,6 +99,8 @@ export async function PUT(
       slug: updateData.slug,
       excerpt: updateData.excerpt,
       content: updateData.content,
+      content_group_id: updateData.content_group_id,
+      locale: updateData.locale,
       cover_image_url: updateData.cover_image_url,
       tags: updateData.tags,
       published: updateData.published,
@@ -115,6 +130,11 @@ export async function PUT(
       );
     }
 
+    // Get translations if content_group_id exists
+    const translations = data.content_group_id
+      ? getPostTranslations(data.content_group_id)
+      : [];
+
     // Format response
     const formattedData = {
       id: data.id,
@@ -122,6 +142,9 @@ export async function PUT(
       title: data.title,
       excerpt: data.excerpt,
       content: data.content,
+      content_group_id: data.content_group_id,
+      locale: data.locale,
+      translations,
       cover_image_url: data.cover_image_url,
       tags: data.tags,
       published: data.published,
@@ -134,7 +157,7 @@ export async function PUT(
       social_media_links: data.social_media_links,
     };
 
-    return NextResponse.json(formattedData as SelectPost, {
+    return NextResponse.json(formattedData, {
       headers: {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         Pragma: "no-cache",

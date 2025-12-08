@@ -1,4 +1,4 @@
-import type { SelectPost } from "@/db/types";
+import type { SelectPost, PostTranslation, PostLocale } from "@/db/types";
 import {
   getPublishedPosts as localGetPublishedPosts,
   getPostBySlug as localGetPostBySlug,
@@ -6,6 +6,7 @@ import {
   getAllTags,
   getPostsWithSocialMedia as localGetPostsWithSocialMedia,
   getPostsWithoutSocialMedia as localGetPostsWithoutSocialMedia,
+  getPostTranslations as localGetPostTranslations,
 } from "@/db/server";
 
 // Extended types for query results
@@ -80,6 +81,32 @@ export class PostQueries {
   }
 
   /**
+   * Get translations for a post
+   */
+  async getPostTranslations(
+    contentGroupId: string
+  ): Promise<PostTranslation[]> {
+    if (!contentGroupId) return [];
+    return localGetPostTranslations(contentGroupId);
+  }
+
+  /**
+   * Get a post with its translations
+   */
+  async getPostWithTranslations(
+    slug: string
+  ): Promise<{ post: SelectPost; translations: PostTranslation[] } | null> {
+    const post = await this.getPostBySlug(slug);
+    if (!post) return null;
+
+    const translations = post.content_group_id
+      ? await this.getPostTranslations(post.content_group_id)
+      : [];
+
+    return { post, translations };
+  }
+
+  /**
    * Get recent posts
    */
   async getRecentPosts(
@@ -102,9 +129,18 @@ export class PostQueries {
   /**
    * Search posts by title, content, or excerpt
    */
-  async searchPosts(query: string, limit = 20): Promise<PostSummary[]> {
+  async searchPosts(
+    query: string,
+    locale?: PostLocale,
+    limit = 20
+  ): Promise<PostSummary[]> {
     const isDev = process.env.NODE_ENV === "development";
-    const posts = localSearchPosts(query, limit, isDev);
+    const posts = localSearchPosts(
+      query,
+      limit,
+      isDev,
+      locale || ("id" as PostLocale)
+    );
     return posts as unknown as PostSummary[];
   }
 
@@ -125,24 +161,46 @@ export class PostQueries {
   /**
    * Get posts with social media links (for /codes page)
    */
-  async getPostsWithSocialMedia(limit = 20): Promise<PostSummary[]> {
+  async getPostsWithSocialMedia(
+    limit = 20,
+    locale?: PostLocale
+  ): Promise<PostSummary[]> {
     const isDev = process.env.NODE_ENV === "development";
-    const posts = localGetPostsWithSocialMedia({
+    const options: {
+      limit: number;
+      includeDrafts: boolean;
+      locale?: PostLocale;
+    } = {
       limit,
       includeDrafts: isDev,
-    });
+    };
+    if (locale) {
+      options.locale = locale;
+    }
+    const posts = localGetPostsWithSocialMedia(options);
     return posts as unknown as PostSummary[];
   }
 
   /**
    * Get posts without social media links (for homepage)
    */
-  async getPostsWithoutSocialMedia(limit = 20): Promise<PostSummary[]> {
+  async getPostsWithoutSocialMedia(
+    limit = 20,
+    locale?: PostLocale
+  ): Promise<PostSummary[]> {
     const isDev = process.env.NODE_ENV === "development";
-    const posts = localGetPostsWithoutSocialMedia({
+    const options: {
+      limit: number;
+      includeDrafts: boolean;
+      locale?: PostLocale;
+    } = {
       limit,
       includeDrafts: isDev,
-    });
+    };
+    if (locale) {
+      options.locale = locale;
+    }
+    const posts = localGetPostsWithoutSocialMedia(options);
     return posts as unknown as PostSummary[];
   }
 }

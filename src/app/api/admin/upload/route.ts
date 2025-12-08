@@ -59,12 +59,8 @@ export async function POST(request: NextRequest) {
     // Compress image if needed (only for raster images, not SVG)
     let fileToUpload = file;
     if (isImage && !isSVG && needsCompression(file, 1)) {
-      console.log(
-        `Compressing image: ${file.name} (${formatFileSize(file.size)})`
-      );
       try {
         fileToUpload = await compressForUpload(file, 1); // Target 1MB
-        console.log(`Compressed to: ${formatFileSize(fileToUpload.size)}`);
       } catch (error) {
         console.error("Image compression failed, using original:", error);
         // Continue with original file if compression fails
@@ -73,7 +69,6 @@ export async function POST(request: NextRequest) {
 
     // Sanitize SVG files to remove potentially malicious content
     if (isSVG) {
-      console.log(`Sanitizing SVG: ${file.name}`);
       try {
         const svgText = await file.text();
         const sanitizedSVG = sanitizeSVG(svgText);
@@ -88,7 +83,6 @@ export async function POST(request: NextRequest) {
         // Create a new File object with sanitized content
         const blob = new Blob([sanitizedSVG], { type: "image/svg+xml" });
         fileToUpload = new File([blob], file.name, { type: "image/svg+xml" });
-        console.log("SVG sanitized successfully");
       } catch (error) {
         console.error("SVG sanitization failed:", error);
         return NextResponse.json(

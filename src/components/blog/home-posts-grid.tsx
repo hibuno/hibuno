@@ -28,28 +28,81 @@ const ANIMATION = {
 
 const HeroSection = memo(() => (
   <motion.header
-    className="border-b border-border bg-card"
+    className="border-b border-border bg-card/30"
     variants={ANIMATION.item}
   >
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <motion.h1
-        className="font-serif text-balance text-2xl sm:text-3xl font-semibold leading-tight md:text-4xl"
+        className="font-serif text-balance text-2xl sm:text-3xl font-semibold leading-tight md:text-4xl mb-3"
         variants={ANIMATION.item}
       >
-        Sekarang, belajar tentang dunia digital ngga perlu ribet.
+        Belajar dunia digital, mudah dan menyenangkan
       </motion.h1>
       <motion.p
-        className="mt-2 max-w-prose text-sm sm:text-base text-muted-foreground"
+        className="max-w-prose text-sm sm:text-base text-muted-foreground"
         variants={ANIMATION.item}
       >
-        Dengan kalimat yang mudah dibaca dan gambar yang mudah dipahami,
-        menjadikan setiap artikel menjadi sumber pengetahuan yang bermanfaat.
+        Artikel yang ditulis dengan bahasa sederhana dan visual yang jelas. Dari
+        tutorial praktis hingga tips berguna, semua dirancang agar mudah
+        dipahami.
       </motion.p>
     </div>
   </motion.header>
 ));
 
 HeroSection.displayName = "HeroSection";
+
+const CallToAction = memo(() => (
+  <motion.section
+    className="border-t border-border bg-card/30"
+    variants={ANIMATION.item}
+  >
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:py-12 text-center">
+      <motion.h2
+        className="text-xl sm:text-2xl font-serif font-semibold mb-3"
+        variants={ANIMATION.item}
+      >
+        Ikuti kami di media sosial
+      </motion.h2>
+      <motion.p
+        className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto"
+        variants={ANIMATION.item}
+      >
+        Dapatkan update konten terbaru, tips singkat, dan video tutorial
+        langsung di platform favoritmu.
+      </motion.p>
+      <motion.div
+        className="flex flex-wrap justify-center gap-3"
+        variants={ANIMATION.item}
+      >
+        <a
+          href="https://youtube.com/@hibuno_id"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          YouTube
+        </a>
+        <a
+          href="https://tiktok.com/@hibuno_id"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          TikTok
+        </a>
+        <a
+          href="/codes"
+          className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          Lihat Semua Video
+        </a>
+      </motion.div>
+    </div>
+  </motion.section>
+));
+
+CallToAction.displayName = "CallToAction";
 
 const PostGridItem = memo(({ post, index }: { post: Post; index: number }) => (
   <motion.div
@@ -114,6 +167,7 @@ export const AnimatedHomepage = memo(
       >
         <HeroSection />
         <PostsGrid posts={recentPosts} />
+        <CallToAction />
       </motion.main>
     );
   }

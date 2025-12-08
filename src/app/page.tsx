@@ -2,13 +2,17 @@ import { AnimatedHomepage } from "@/components/blog/home-posts-grid";
 import { ErrorBoundary } from "@/components/blog/error-boundary";
 import type { Post } from "@/components/blog/post-card";
 import { SiteHeader } from "@/components/blog/site-header";
+import { SiteFooter } from "@/components/blog/site-footer";
 import { StructuredData } from "@/components/blog/structured-data";
 import { postQueries } from "@/lib/post-queries";
 import { retryDatabaseOperation } from "@/lib/retry-helper";
 import { generateWebsiteStructuredData } from "@/lib/seo-metadata";
+import { cookies } from "next/headers";
+import type { PostLocale } from "@/db/types";
 
 // Disable caching to always read fresh data from local files
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getHomepageData(): Promise<{
   recentPosts: Post[];
@@ -16,9 +20,14 @@ async function getHomepageData(): Promise<{
   isLoading?: boolean;
 }> {
   try {
+    // Get user's locale preference from cookies
+    const cookieStore = await cookies();
+    const localeCookie = cookieStore.get("NEXT_LOCALE");
+    const locale = (localeCookie?.value || "id") as PostLocale;
+
     // Get recent posts WITHOUT social media links (those go to /codes)
     const recentPosts = await retryDatabaseOperation(() =>
-      postQueries.getPostsWithoutSocialMedia(12)
+      postQueries.getPostsWithoutSocialMedia(12, locale)
     );
 
     return {
@@ -76,9 +85,10 @@ export default async function HomePage() {
   return (
     <ErrorBoundary>
       <StructuredData data={websiteStructuredData} />
-      <div>
+      <div className="min-h-screen flex flex-col">
         <SiteHeader />
         <AnimatedHomepage recentPosts={recentPosts} />
+        <SiteFooter />
       </div>
     </ErrorBoundary>
   );

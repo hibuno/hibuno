@@ -10,6 +10,9 @@ import { Analytics } from "@vercel/analytics/next";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { LocaleDetector } from "@/components/locale-detector";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -57,29 +60,34 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === "production";
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       {isProduction && <Analytics />}
       <body
         className={`font-sans ${InterFont.variable} ${GeistMono.variable} ${SourceSerif.variable} ${GloriaHallelujah.variable} antialiased`}
       >
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center min-h-screen">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900"></div>
-            </div>
-          }
-        >
-          {children}
-        </Suspense>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <LocaleDetector />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900"></div>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

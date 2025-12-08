@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { defaultLocale } from "./i18n/config";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,6 +21,15 @@ export function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
+
+  // Set default locale cookie if not present
+  if (!request.cookies.has("NEXT_LOCALE")) {
+    response.cookies.set("NEXT_LOCALE", defaultLocale, {
+      path: "/",
+      maxAge: 31536000, // 1 year
+      sameSite: "lax",
+    });
+  }
 
   // Content Security Policy configuration
   const cspDirectives = [

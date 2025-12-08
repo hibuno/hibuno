@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
       title: data.title,
       excerpt: data.excerpt || null,
       content: data.content || "",
+      content_group_id: data.content_group_id || null,
+      locale: data.locale || null,
       cover_image_url: data.cover_image_url || null,
       tags: data.tags || null,
       published: data.published || false,

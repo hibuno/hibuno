@@ -61,20 +61,8 @@ export async function compressImage(
 
     // If compressed file is larger than original, return original
     if (compressedFile.size >= file.size) {
-      console.log("Compressed file is larger than original, using original");
       return file;
     }
-
-    // Calculate compression ratio
-    const compressionRatio = (
-      (1 - compressedFile.size / file.size) *
-      100
-    ).toFixed(1);
-    console.log(
-      `Image compressed: ${formatFileSize(file.size)} → ${formatFileSize(
-        compressedFile.size
-      )} (${compressionRatio}% reduction)`
-    );
 
     return compressedFile;
   } catch (error) {

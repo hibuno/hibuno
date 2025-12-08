@@ -5,6 +5,9 @@ export interface SocialMediaLink {
   caption?: string;
 }
 
+// Supported locales
+export type PostLocale = "en" | "id";
+
 // Post interface for blog and product functionality
 export interface Post {
   id: string;
@@ -12,6 +15,9 @@ export interface Post {
   title: string;
   excerpt?: string | null | undefined;
   content: string;
+  // i18n fields - content_group_id links translations of the same post
+  content_group_id?: string | null | undefined; // UUID to group translations together
+  locale?: PostLocale | null | undefined; // Language of this specific post
   cover_image_url?: string | null | undefined;
   tags?: string[] | null | undefined;
   published: boolean;
@@ -25,6 +31,14 @@ export interface Post {
   product_description?: string | null | undefined;
   // Social media fields
   social_media_links?: SocialMediaLink[] | null | undefined;
+}
+
+// Translation info for a post
+export interface PostTranslation {
+  locale: PostLocale;
+  slug: string;
+  title: string;
+  exists: boolean;
 }
 
 // Type for creating a new post (optional fields that have defaults)
