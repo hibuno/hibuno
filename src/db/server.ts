@@ -230,7 +230,7 @@ function deduplicateByLocale(
 
   const deduplicatedPosts: SelectPost[] = [];
 
-  for (const [groupId, groupPosts] of postsByGroup) {
+  for (const [_groupId, groupPosts] of postsByGroup) {
     // Try to find post matching preferred locale
     let selectedPost = groupPosts.find((p) => p.locale === preferredLocale);
 

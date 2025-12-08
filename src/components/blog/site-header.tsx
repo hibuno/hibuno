@@ -5,7 +5,6 @@ import { memo, useState, useCallback, useEffect } from "react";
 import { Menu, X, Search, ArrowRight, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/content-utils";
-import { siYoutube, siTiktok } from "simple-icons";
 import {
   CommandDialog,
   CommandGroup,
@@ -32,18 +31,6 @@ const getNavLinks = (t: any): readonly NavLink[] =>
   [
     { name: t("common.home"), href: "/", label: t("common.home") },
     { name: t("common.codes"), href: "/codes", label: "Video & Social Media" },
-    {
-      name: "YouTube",
-      href: "https://youtube.com/@hibuno_id",
-      label: t("common.youtube"),
-      icon: siYoutube.path,
-    },
-    {
-      name: "TikTok",
-      href: "https://tiktok.com/@hibuno_id",
-      label: t("common.tiktok"),
-      icon: siTiktok.path,
-    },
   ] as const;
 
 const SearchBar = memo(({ onClose }: { onClose?: () => void }) => {

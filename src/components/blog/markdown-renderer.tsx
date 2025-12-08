@@ -14,6 +14,9 @@ const CalloutRenderer = lazy(
 const DetailsRenderer = lazy(
   () => import("@/components/renderers/details-renderer")
 );
+const CodeBlockRenderer = lazy(
+  () => import("@/components/renderers/code-block-renderer")
+);
 
 // Extend the Element interface to include cleanup function
 interface ElementWithCleanup extends Element {
@@ -119,10 +122,45 @@ export function InteractiveMarkdownRenderer({
       });
     };
 
+    // Render code blocks
+    const renderCodeBlocks = () => {
+      const codeBlocks = container.querySelectorAll("pre[data-language]");
+      codeBlocks.forEach((pre) => {
+        if (pre.hasAttribute("data-rendered")) return;
+
+        const language = pre.getAttribute("data-language") || "plaintext";
+        const codeElement = pre.querySelector("code");
+        const code = codeElement?.textContent || "";
+
+        // Create a wrapper div for React component
+        const wrapper = document.createElement("div");
+        pre.parentNode?.replaceChild(wrapper, pre);
+
+        // Render React component with error boundary
+        const root = createRoot(wrapper);
+        root.render(
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <div className="animate-pulse bg-muted/50 rounded-md p-4 text-sm text-muted-foreground">
+                  ...
+                </div>
+              }
+            >
+              <CodeBlockRenderer language={language} code={code} />
+            </Suspense>
+          </ErrorBoundary>
+        );
+
+        wrapper.setAttribute("data-rendered", "true");
+      });
+    };
+
     // Render all custom elements after a short delay to ensure content is loaded
     const renderTimeout = setTimeout(() => {
       renderCallouts();
       renderDetails();
+      renderCodeBlocks();
     }, 100);
 
     // Wrap images with react-medium-image-zoom

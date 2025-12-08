@@ -7,7 +7,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const posts = await postQueries.getPublishedPosts();
 
-    const postEntries: MetadataRoute.Sitemap = posts.map((p) => ({
+    // Filter to only include published posts in sitemap
+    const publishedPosts = posts.filter((p) => p.published);
+
+    const postEntries: MetadataRoute.Sitemap = publishedPosts.map((p) => ({
       url: `${baseUrl}/${p.slug}`,
       lastModified: (p.updated_at || p.published_at || new Date()) as
         | string

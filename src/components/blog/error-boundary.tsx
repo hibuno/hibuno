@@ -102,27 +102,27 @@ class ErrorBoundaryClass extends React.Component<
     this.props.onError?.(error, errorInfo);
 
     // Report error to monitoring service in production
-    if (process.env.NODE_ENV === "production") {
-      this.reportError(error, errorInfo);
-    }
+    // if (process.env.NODE_ENV === "production") {
+    //   this.reportError(error, errorInfo);
+    // }
   }
 
-  private reportError = (error: Error, errorInfo: React.ErrorInfo) => {
-    // In a real app, you would send this to an error monitoring service
-    // like Sentry, LogRocket, or Bugsnag
-    // const _errorReport = {
-    //   message: error.message,
-    //   stack: error.stack,
-    //   componentStack: errorInfo.componentStack,
-    //   timestamp: new Date().toISOString(),
-    //   userAgent:
-    //     typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
-    //   url: typeof window !== "undefined" ? window.location.href : "unknown",
-    //   errorId: this.state.errorId,
-    // };
-    // TODO: Send _errorReport to error monitoring service
-    // console.log("Error report prepared:", _errorReport);
-  };
+  // private reportError = (error: Error, errorInfo: React.ErrorInfo) => {
+  // In a real app, you would send this to an error monitoring service
+  // like Sentry, LogRocket, or Bugsnag
+  // const _errorReport = {
+  //   message: error.message,
+  //   stack: error.stack,
+  //   componentStack: errorInfo.componentStack,
+  //   timestamp: new Date().toISOString(),
+  //   userAgent:
+  //     typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+  //   url: typeof window !== "undefined" ? window.location.href : "unknown",
+  //   errorId: this.state.errorId,
+  // };
+  // TODO: Send _errorReport to error monitoring service
+  // console.log("Error report prepared:", _errorReport);
+  // };
 
   resetError = () => {
     if (this.retryCount < this.maxRetries) {

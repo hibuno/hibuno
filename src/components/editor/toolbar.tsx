@@ -5,6 +5,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  Code,
   FoldVertical,
   Heading1,
   Heading2,
@@ -254,6 +255,14 @@ export default function Toolbar({
           ariaLabel="Toggle blockquote"
         >
           <Quote size={14} aria-hidden="true" />
+        </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          isActive={editor.isActive("codeBlock")}
+          title="Code Block"
+          ariaLabel="Toggle code block"
+        >
+          <Code size={14} aria-hidden="true" />
         </Btn>
 
         <Divider />

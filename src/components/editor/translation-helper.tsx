@@ -25,8 +25,6 @@ export function TranslationHelper({
   translations,
   onLoadTranslation,
 }: TranslationHelperProps) {
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-
   // Find the other translation (not current)
   const otherTranslation = translations.find(
     (t) => t.exists && t.locale !== currentLocale
@@ -35,12 +33,6 @@ export function TranslationHelper({
   if (!otherTranslation) {
     return null;
   }
-
-  const handleCopy = async (text: string, field: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   return (
     <Sheet>
@@ -109,7 +101,7 @@ export function TranslationReference({
   sourceExcerpt,
   sourceLocale,
 }: TranslationReferenceProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const handleCopy = async (text: string, field: string) => {
@@ -124,7 +116,7 @@ export function TranslationReference({
         variant="outline"
         size="sm"
         onClick={() => setIsVisible(true)}
-        className="gap-2"
+        className="gap-2 w-full border-0 border-b py-4 rounded-none cursor-pointer"
       >
         <Eye className="h-4 w-4" />
         Show {localeNames[sourceLocale]} Reference
@@ -133,7 +125,7 @@ export function TranslationReference({
   }
 
   return (
-    <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+    <div className="p-4 border-b space-y-4 bg-muted/30">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium flex items-center gap-2">
           <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs">

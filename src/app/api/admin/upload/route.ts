@@ -1,10 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "@/lib/admin-auth";
-import {
-  compressForUpload,
-  needsCompression,
-  formatFileSize,
-} from "@/lib/image-compressor";
+import { compressForUpload, needsCompression } from "@/lib/image-compressor";
 import {
   validateFile,
   sanitizeFilename,

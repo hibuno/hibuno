@@ -21,6 +21,7 @@ import { CustomImage } from "./image-extension";
 import { CustomVideo } from "./video-extension";
 import { Callout } from "./callout-extension";
 import { Details } from "./details-extension";
+import { CodeBlock } from "./code-block-extension";
 import ImageDialog from "./image-dialog";
 import VideoDialog from "./video-dialog";
 import LinkDialog from "./link-dialog";
@@ -125,7 +126,11 @@ export default function RichTextEditor({
     immediatelyRender: false,
     extensions: [
       Gapcursor,
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+        codeBlock: false, // Disable default code block
+      }),
+      CodeBlock,
       Callout,
       Details,
       Placeholder.configure({
@@ -385,6 +390,9 @@ export default function RichTextEditor({
         break;
       case "divider":
         editor.chain().focus().setHorizontalRule().run();
+        break;
+      case "codeBlock":
+        editor.chain().focus().setCodeBlock({ language: "javascript" }).run();
         break;
       case "image":
         editorDialogActions.openImageDialog({

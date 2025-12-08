@@ -585,7 +585,16 @@ export default function EditorPage({ params }: EditorPageProps) {
             >
               <Menu className="w-4 h-4" aria-hidden="true" />
             </button>
-            <h1 className="text-sm font-medium">Editor</h1>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => (window.location.href = "/admin")}
+              className="text-xs h-7 -ml-2 hover:bg-muted"
+              aria-label="Go back to admin dashboard"
+            >
+              <ArrowLeft className="w-3 h-3 mr-1" aria-hidden="true" /> Back to
+              Dashboard
+            </Button>
             {isEditMode && (
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
@@ -761,13 +770,9 @@ export default function EditorPage({ params }: EditorPageProps) {
                       <SelectItem value="id">Bahasa Indonesia</SelectItem>
                     </SelectContent>
                   </Select>
-
                   {/* Translations list */}
                   {translations.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[9px] text-muted-foreground uppercase">
-                        Translations
-                      </span>
                       {translations.map((t) => (
                         <div
                           key={t.locale}
@@ -915,19 +920,6 @@ export default function EditorPage({ params }: EditorPageProps) {
                 </ul>
               </nav>
             </div>
-
-            <div className="p-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => (window.location.href = "/admin")}
-                className="w-full text-xs h-7 justify-start"
-                aria-label="Go back to admin dashboard"
-              >
-                <ArrowLeft className="w-3 h-3 mr-1" aria-hidden="true" /> Back
-                to Dashboard
-              </Button>
-            </div>
           </div>
         </aside>
 
@@ -942,14 +934,12 @@ export default function EditorPage({ params }: EditorPageProps) {
             <div className="bg-card min-h-[calc(100vh-2.75rem)]">
               {/* Translation Reference - shown when editing a translation */}
               {sourceTranslation && (
-                <div className="p-4 border-b border-border">
-                  <TranslationReference
-                    sourceContent={sourceTranslation.content}
-                    sourceTitle={sourceTranslation.title}
-                    sourceExcerpt={sourceTranslation.excerpt}
-                    sourceLocale={sourceTranslation.locale}
-                  />
-                </div>
+                <TranslationReference
+                  sourceContent={sourceTranslation.content}
+                  sourceTitle={sourceTranslation.title}
+                  sourceExcerpt={sourceTranslation.excerpt}
+                  sourceLocale={sourceTranslation.locale}
+                />
               )}
 
               <RichTextEditor

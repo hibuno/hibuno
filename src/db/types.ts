@@ -8,6 +8,13 @@ export interface SocialMediaLink {
 // Supported locales
 export type PostLocale = "en" | "id";
 
+// Localized content structure for editor
+export interface LocalizedContent {
+  title: string;
+  excerpt: string;
+  content: string;
+}
+
 // Post interface for blog and product functionality
 export interface Post {
   id: string;

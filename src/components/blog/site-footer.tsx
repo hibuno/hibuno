@@ -2,15 +2,11 @@
 
 import Link from "next/link";
 import { memo } from "react";
+import { useTranslations } from "next-intl";
 import { siYoutube, siTiktok, siInstagram } from "simple-icons";
 
-const FOOTER_LINKS = {
-  navigation: [
-    { name: "Beranda", href: "/" },
-    { name: "Codes", href: "/codes" },
-    { name: "Sitemap", href: "/sitemap.xml" },
-  ],
-  social: [
+const getSocialLinks = () =>
+  [
     {
       name: "YouTube",
       href: "https://youtube.com/@hibuno_id",
@@ -26,8 +22,7 @@ const FOOTER_LINKS = {
       href: "https://instagram.com/hibuno_id",
       icon: siInstagram.path,
     },
-  ],
-} as const;
+  ] as const;
 
 const FooterSection = memo(
   ({
@@ -75,7 +70,17 @@ const FooterSection = memo(
 FooterSection.displayName = "FooterSection";
 
 export const SiteFooter = memo(() => {
+  const t = useTranslations("footer");
+  const tCommon = useTranslations("common");
   const currentYear = new Date().getFullYear();
+
+  const navigationLinks = [
+    { name: tCommon("home"), href: "/" },
+    { name: tCommon("codes"), href: "/codes" },
+    { name: t("sitemap"), href: "/sitemap.xml" },
+  ];
+
+  const socialLinks = getSocialLinks();
 
   return (
     <footer className="border-t border-border bg-card/30 mt-16">
@@ -89,22 +94,20 @@ export const SiteFooter = memo(() => {
             >
               hibuno
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Belajar tentang dunia digital dengan mudah dan menyenangkan.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("tagline")}</p>
           </div>
 
           {/* Navigation */}
-          <FooterSection title="Navigasi" links={FOOTER_LINKS.navigation} />
+          <FooterSection title={t("navigation")} links={navigationLinks} />
 
           {/* Social */}
-          <FooterSection title="Sosial Media" links={FOOTER_LINKS.social} />
+          <FooterSection title={t("socialMedia")} links={socialLinks} />
         </div>
 
         {/* Bottom */}
         <div className="pt-8 border-t border-border/50">
           <p className="text-xs text-muted-foreground text-center">
-            © {currentYear} hibuno. Semua hak cipta dilindungi.
+            © {currentYear} hibuno. {t("allRightsReserved")}
           </p>
         </div>
       </div>

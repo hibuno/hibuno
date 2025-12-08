@@ -3,6 +3,7 @@ import {
   BookOpen,
   CheckCircle,
   ChevronRight,
+  Code,
   Heading1,
   Heading2,
   Heading3,
@@ -21,6 +22,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface CommandMenuProps {
   position: { top: number; left: number };
@@ -37,121 +39,137 @@ interface Command {
   shortcut?: string;
 }
 
-const commands: Command[] = [
+const getCommands = (t: any): Command[] => [
   {
     id: "chat",
-    label: "Ask AI anything",
-    description: "Custom instructions",
+    label: t("commands.askAI"),
+    description: t("commands.customInstructions"),
     icon: <Sparkles size={14} />,
-    group: "AI",
+    group: t("ai"),
     shortcut: "⌘K",
   },
   {
     id: "ai-improve",
-    label: "Improve Writing",
-    description: "Fix grammar & clarity",
+    label: t("commands.improveWriting"),
+    description: t("commands.fixGrammar"),
     icon: <Wand2 size={14} />,
-    group: "AI",
+    group: t("ai"),
   },
   {
     id: "ai-expand",
-    label: "Expand Content",
-    description: "Add more details",
+    label: t("commands.expandContent"),
+    description: t("commands.addDetails"),
     icon: <BookOpen size={14} />,
-    group: "AI",
+    group: t("ai"),
   },
   {
     id: "ai-continue",
-    label: "Continue Writing",
-    description: "AI writes next part",
+    label: t("commands.continueWriting"),
+    description: t("commands.aiWritesNext"),
     icon: <PenLine size={14} />,
-    group: "AI",
+    group: t("ai"),
   },
   {
     id: "heading1",
-    label: "Heading 1",
+    label: t("heading1"),
     icon: <Heading1 size={14} />,
-    group: "Text",
+    group: t("commands.text"),
   },
   {
     id: "heading2",
-    label: "Heading 2",
+    label: t("heading2"),
     icon: <Heading2 size={14} />,
-    group: "Text",
+    group: t("commands.text"),
   },
   {
     id: "heading3",
-    label: "Heading 3",
+    label: t("heading3"),
     icon: <Heading3 size={14} />,
-    group: "Text",
+    group: t("commands.text"),
   },
   {
     id: "bulletList",
-    label: "Bullet List",
+    label: t("commands.bulletList"),
     icon: <List size={14} />,
-    group: "Lists",
+    group: t("commands.lists"),
   },
   {
     id: "orderedList",
-    label: "Numbered List",
+    label: t("commands.numberedList"),
     icon: <ListOrdered size={14} />,
-    group: "Lists",
+    group: t("commands.lists"),
   },
   {
     id: "blockquote",
-    label: "Quote",
+    label: t("commands.quote"),
     icon: <Quote size={14} />,
-    group: "Blocks",
+    group: t("blocks"),
   },
   {
     id: "divider",
-    label: "Divider",
+    label: t("commands.divider"),
     icon: <Minus size={14} />,
-    group: "Blocks",
+    group: t("blocks"),
+  },
+  {
+    id: "codeBlock",
+    label: t("codeBlock"),
+    icon: <Code size={14} />,
+    group: t("blocks"),
   },
   {
     id: "image",
-    label: "Image",
+    label: t("commands.image"),
     icon: <ImageIcon size={14} />,
-    group: "Media",
+    group: t("commands.media"),
   },
   {
     id: "video",
-    label: "Video",
+    label: t("commands.video"),
     icon: <Video size={14} />,
-    group: "Media",
+    group: t("commands.media"),
   },
-  { id: "link", label: "Link", icon: <LinkIcon size={14} />, group: "Media" },
-  { id: "callout", label: "Info", icon: <Info size={14} />, group: "Callouts" },
+  {
+    id: "link",
+    label: t("commands.link"),
+    icon: <LinkIcon size={14} />,
+    group: t("commands.media"),
+  },
+  {
+    id: "callout",
+    label: t("commands.info"),
+    icon: <Info size={14} />,
+    group: t("commands.callouts"),
+  },
   {
     id: "callout-warning",
-    label: "Warning",
+    label: t("commands.warning"),
     icon: <AlertTriangle size={14} />,
-    group: "Callouts",
+    group: t("commands.callouts"),
   },
   {
     id: "callout-success",
-    label: "Success",
+    label: t("commands.success"),
     icon: <CheckCircle size={14} />,
-    group: "Callouts",
+    group: t("commands.callouts"),
   },
   {
     id: "callout-error",
-    label: "Error",
+    label: t("commands.error"),
     icon: <XCircle size={14} />,
-    group: "Callouts",
+    group: t("commands.callouts"),
   },
   {
     id: "callout-tip",
-    label: "Tip",
+    label: t("commands.tip"),
     icon: <Lightbulb size={14} />,
-    group: "Callouts",
+    group: t("commands.callouts"),
   },
   {
     id: "details",
-    label: "Collapsible",
+    label: t("commands.collapsible"),
     icon: <ChevronRight size={14} />,
-    group: "Blocks",
+    group: t("blocks"),
   },
 ];
 
@@ -160,12 +178,15 @@ export default function CommandMenu({
   onSelect,
   onClose,
 }: CommandMenuProps) {
+  const t = useTranslations("editor");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [search, setSearch] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const commands = getCommands(t);
 
   const filteredCommands = commands.filter(
     (cmd) =>

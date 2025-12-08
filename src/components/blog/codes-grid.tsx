@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { memo, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import type { SelectPost, SocialMediaLink } from "@/db/types";
+import type { Locale } from "@/i18n/config";
 
 interface CodesGridProps {
   posts: SelectPost[];
@@ -54,22 +56,12 @@ const PLATFORM_CONFIG = {
   facebook: { label: "Facebook", icon: siFacebook.path },
 };
 
-const formatDate = (date: Date): string => {
-  const months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+const formatDate = (date: Date, locale: Locale): string => {
+  return date.toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 };
 
 const PostImage = memo(
@@ -119,11 +111,17 @@ const PostImage = memo(
 
 PostImage.displayName = "PostImage";
 
-const PostMeta = memo(({ date }: { date: Date }) => (
-  <div className="text-xs text-muted-foreground mb-1" suppressHydrationWarning>
-    {formatDate(date)}
-  </div>
-));
+const PostMeta = memo(({ date }: { date: Date }) => {
+  const locale = useLocale() as Locale;
+  return (
+    <div
+      className="text-xs text-muted-foreground mb-1"
+      suppressHydrationWarning
+    >
+      {formatDate(date, locale)}
+    </div>
+  );
+});
 
 PostMeta.displayName = "PostMeta";
 
@@ -164,74 +162,27 @@ const CodeCard = memo(({ post }: { post: SelectPost }) => {
 
 CodeCard.displayName = "CodeCard";
 
-const HeroSection = memo(() => (
-  <motion.header className="mb-8 sm:mb-12" variants={ANIMATION.item}>
-    <motion.h1
-      className="text-2xl sm:text-3xl md:text-4xl font-serif font-semibold mb-3"
-      variants={ANIMATION.item}
-    >
-      Video & Konten Social Media
-    </motion.h1>
-    <motion.p
-      className="text-sm sm:text-base text-muted-foreground max-w-2xl"
-      variants={ANIMATION.item}
-    >
-      Tutorial singkat, tips praktis, dan konten menarik yang bisa langsung kamu
-      tonton. Tersedia di berbagai platform favoritmu.
-    </motion.p>
-  </motion.header>
-));
+const HeroSection = memo(() => {
+  const t = useTranslations("codes");
+  return (
+    <motion.header className="mb-8 sm:mb-12" variants={ANIMATION.item}>
+      <motion.h1
+        className="text-2xl sm:text-3xl md:text-4xl font-serif font-semibold mb-3"
+        variants={ANIMATION.item}
+      >
+        {t("title")}
+      </motion.h1>
+      <motion.p
+        className="text-sm sm:text-base text-muted-foreground max-w-2xl"
+        variants={ANIMATION.item}
+      >
+        {t("description")}
+      </motion.p>
+    </motion.header>
+  );
+});
 
 HeroSection.displayName = "HeroSection";
-
-const CallToAction = memo(() => (
-  <motion.section
-    className="mt-12 pt-8 border-t border-border text-center"
-    variants={ANIMATION.item}
-  >
-    <motion.h2
-      className="text-xl sm:text-2xl font-serif font-semibold mb-3"
-      variants={ANIMATION.item}
-    >
-      Suka dengan kontennya?
-    </motion.h2>
-    <motion.p
-      className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto"
-      variants={ANIMATION.item}
-    >
-      Subscribe dan follow untuk mendapatkan notifikasi konten terbaru.
-    </motion.p>
-    <motion.div
-      className="flex flex-wrap justify-center gap-3"
-      variants={ANIMATION.item}
-    >
-      <a
-        href="https://youtube.com/@hibuno_id"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-      >
-        YouTube
-      </a>
-      <a
-        href="https://tiktok.com/@hibuno_id"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-      >
-        TikTok
-      </a>
-      <a
-        href="/"
-        className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-      >
-        Baca Artikel
-      </a>
-    </motion.div>
-  </motion.section>
-));
-
-CallToAction.displayName = "CallToAction";
 
 const CodeGridItem = memo(
   ({ post, index }: { post: SelectPost; index: number }) => (
@@ -273,24 +224,31 @@ const CodesGridContent = memo(({ posts }: { posts: SelectPost[] }) => {
 
 CodesGridContent.displayName = "CodesGridContent";
 
+const EmptyState = memo(() => {
+  const t = useTranslations("codes");
+  return (
+    <main className="max-w-4xl mx-auto px-4 py-12">
+      <div className="text-center py-20">
+        <h2 className="text-xl font-semibold mb-2">{t("noContent")}</h2>
+        <p className="text-muted-foreground mb-6">
+          {t("noContentDescription")}
+        </p>
+        <a
+          href="/"
+          className="inline-block px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          {t("readArticles")}
+        </a>
+      </div>
+    </main>
+  );
+});
+
+EmptyState.displayName = "EmptyState";
+
 export const CodesGrid = memo(({ posts }: CodesGridProps) => {
   if (!posts?.length) {
-    return (
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="text-center py-20">
-          <h2 className="text-xl font-semibold mb-2">Belum ada konten</h2>
-          <p className="text-muted-foreground mb-6">
-            Konten video dan social media akan muncul di sini.
-          </p>
-          <a
-            href="/"
-            className="inline-block px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-          >
-            Baca Artikel
-          </a>
-        </div>
-      </main>
-    );
+    return <EmptyState />;
   }
 
   return (
@@ -302,7 +260,6 @@ export const CodesGrid = memo(({ posts }: CodesGridProps) => {
     >
       <HeroSection />
       <CodesGridContent posts={posts} />
-      <CallToAction />
     </motion.main>
   );
 });
