@@ -5,7 +5,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hibuno.com";
 
   try {
-    const posts = await postQueries.getPublishedPosts();
+    // Get all published posts without locale deduplication for sitemap
+    const posts = await postQueries.getPublishedPosts({
+      skipLocaleDeduplication: true,
+    });
 
     // Filter to only include published posts in sitemap
     const publishedPosts = posts.filter((p) => p.published);

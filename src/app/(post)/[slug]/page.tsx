@@ -23,6 +23,13 @@ import {
   generatePostStructuredData,
 } from "@/lib/seo-metadata";
 import { calculateStats } from "@/lib/content-utils";
+import { getSimilarPosts } from "@/db/server";
+
+// Shuffle array and pick n random items
+function getRandomPosts<T>(posts: T[], count: number): T[] {
+  const shuffled = [...posts].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 interface BlogPostPageProps {
   params: { slug: string };
@@ -379,6 +386,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
     const isDevMode = process.env.NODE_ENV === "development";
 
+    // Fetch similar posts and pick 2 random ones
+    const allSimilarPosts = getSimilarPosts(slug, tags, 4, locale);
+    const similarPosts = getRandomPosts(allSimilarPosts, 2);
+
     return (
       <ErrorBoundary>
         <StructuredData data={structuredData} />
@@ -421,7 +432,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   published_at={(post.published_at || null) as string | null}
                   locale={locale}
                 />
-                <SimilarPosts currentSlug={slug} tags={tags} locale={locale} />
+                <SimilarPosts posts={similarPosts} />
               </div>
             </div>
           </main>

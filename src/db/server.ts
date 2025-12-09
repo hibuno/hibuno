@@ -264,6 +264,7 @@ export function getPublishedPosts(options: {
   tag?: string;
   locale?: PostLocale;
   includeDrafts?: boolean;
+  skipLocaleDeduplication?: boolean;
 }): SelectPost[] {
   let posts = getPosts();
   const preferredLocale = options.locale || DEFAULT_LOCALE;
@@ -279,10 +280,13 @@ export function getPublishedPosts(options: {
   }
 
   // Deduplicate posts with same content_group_id - prefer the requested locale
-  const deduplicatedPosts = deduplicateByLocale(posts, preferredLocale);
+  // Skip deduplication for sitemap generation
+  const processedPosts = options.skipLocaleDeduplication
+    ? posts
+    : deduplicateByLocale(posts, preferredLocale);
 
   // Sort by published_at descending (fallback to created_at)
-  deduplicatedPosts.sort((a, b) => {
+  processedPosts.sort((a, b) => {
     const dateA = a.published_at
       ? new Date(a.published_at).getTime()
       : a.created_at
@@ -298,8 +302,8 @@ export function getPublishedPosts(options: {
 
   // Apply pagination
   const offset = options.offset || 0;
-  const limit = options.limit || deduplicatedPosts.length;
-  return deduplicatedPosts.slice(offset, offset + limit);
+  const limit = options.limit || processedPosts.length;
+  return processedPosts.slice(offset, offset + limit);
 }
 
 // Search posts

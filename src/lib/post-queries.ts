@@ -42,7 +42,12 @@ export class PostQueries {
    * Get published posts with optimized query
    */
   async getPublishedPosts(
-    options: { limit?: number; offset?: number; tag?: string } = {}
+    options: {
+      limit?: number;
+      offset?: number;
+      tag?: string;
+      skipLocaleDeduplication?: boolean;
+    } = {}
   ): Promise<PostListItem[]> {
     const isDev = process.env.NODE_ENV === "development";
 
@@ -51,12 +56,15 @@ export class PostQueries {
       offset?: number;
       tag?: string;
       includeDrafts?: boolean;
+      skipLocaleDeduplication?: boolean;
     } = {
       includeDrafts: isDev,
     };
     if (options.limit !== undefined) queryOptions.limit = options.limit;
     if (options.offset !== undefined) queryOptions.offset = options.offset;
     if (options.tag !== undefined) queryOptions.tag = options.tag;
+    if (options.skipLocaleDeduplication !== undefined)
+      queryOptions.skipLocaleDeduplication = options.skipLocaleDeduplication;
 
     const posts = localGetPublishedPosts(queryOptions);
 
