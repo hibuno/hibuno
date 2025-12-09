@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   if (authError) return authError;
 
   try {
-    const posts = getAllPosts();
+    const posts = getAllPosts({ includeDrafts: true });
     return NextResponse.json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
