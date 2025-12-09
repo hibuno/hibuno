@@ -30,7 +30,7 @@ interface SiteHeaderProps {
 const getNavLinks = (t: any): readonly NavLink[] =>
   [
     { name: t("common.home"), href: "/", label: t("common.home") },
-    { name: t("common.codes"), href: "/codes", label: "Video & Social Media" },
+    { name: t("common.codes"), href: "/codes", label: t("common.codes") },
   ] as const;
 
 const SearchBar = memo(({ onClose }: { onClose?: () => void }) => {

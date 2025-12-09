@@ -16,7 +16,7 @@ function ensureDirectories() {
 }
 
 // Read all posts from index
-export function getAllPosts(): SelectPost[] {
+export function getPosts(): SelectPost[] {
   ensureDirectories();
   try {
     const data = fs.readFileSync(POSTS_INDEX_FILE, "utf-8");
@@ -34,7 +34,7 @@ function savePosts(posts: SelectPost[]) {
 
 // Get a single post by slug
 export function getPostBySlug(slug: string): SelectPost | null {
-  const posts = getAllPosts();
+  const posts = getPosts();
   return posts.find((p) => p.slug === slug) || null;
 }
 
@@ -53,7 +53,7 @@ export function getPostBySlugAndLocale(
   if (post.locale === locale) return post;
 
   // Try to find translation in the same content group
-  const posts = getAllPosts();
+  const posts = getPosts();
   const translation = posts.find(
     (p) => p.content_group_id === post.content_group_id && p.locale === locale
   );
@@ -63,7 +63,7 @@ export function getPostBySlugAndLocale(
 
 // Get all translations for a post by content_group_id
 export function getPostTranslations(contentGroupId: string): PostTranslation[] {
-  const posts = getAllPosts();
+  const posts = getPosts();
   const translations = posts.filter(
     (p) => p.content_group_id === contentGroupId
   );
@@ -85,7 +85,7 @@ export function getPostByContentGroupAndLocale(
   contentGroupId: string,
   locale: PostLocale
 ): SelectPost | null {
-  const posts = getAllPosts();
+  const posts = getPosts();
   return (
     posts.find(
       (p) => p.content_group_id === contentGroupId && p.locale === locale
@@ -98,7 +98,7 @@ export function linkPostTranslations(
   postId1: string,
   postId2: string
 ): string | null {
-  const posts = getAllPosts();
+  const posts = getPosts();
   const post1 = posts.find((p) => p.id === postId1);
   const post2 = posts.find((p) => p.id === postId2);
 
@@ -125,7 +125,7 @@ export function linkPostTranslations(
 
 // Create a new post
 export function createPost(post: Omit<SelectPost, "id">): SelectPost {
-  const posts = getAllPosts();
+  const posts = getPosts();
   const newPost: SelectPost = {
     ...post,
     id: crypto.randomUUID(),
@@ -142,7 +142,7 @@ export function updatePost(
   slug: string,
   updates: Partial<SelectPost>
 ): SelectPost | null {
-  const posts = getAllPosts();
+  const posts = getPosts();
   const index = posts.findIndex((p) => p.slug === slug);
   if (index === -1) return null;
 
@@ -196,7 +196,7 @@ export function updatePost(
 
 // Delete a post
 export function deletePost(slug: string): boolean {
-  const posts = getAllPosts();
+  const posts = getPosts();
   const index = posts.findIndex((p) => p.slug === slug);
   if (index === -1) return false;
 
@@ -261,7 +261,7 @@ export function getPublishedPosts(options: {
   locale?: PostLocale;
   includeDrafts?: boolean;
 }): SelectPost[] {
-  let posts = getAllPosts();
+  let posts = getPosts();
   const preferredLocale = options.locale || DEFAULT_LOCALE;
 
   // Filter by published status
@@ -305,7 +305,7 @@ export function searchPosts(
   includeDrafts = false,
   locale: PostLocale = DEFAULT_LOCALE
 ): SelectPost[] {
-  let posts = getAllPosts();
+  let posts = getPosts();
   const lowerQuery = query.toLowerCase();
 
   if (!includeDrafts) {
@@ -341,7 +341,7 @@ export function searchPosts(
 
 // Get all unique tags
 export function getAllTags(): string[] {
-  const posts = getAllPosts().filter((p) => p.published);
+  const posts = getPosts().filter((p) => p.published);
   const tags = new Set<string>();
   for (const post of posts) {
     if (post.tags) {
@@ -354,17 +354,23 @@ export function getAllTags(): string[] {
 }
 
 // Get posts for navigation (newer/older)
-export function getAdjacentPosts(publishedAt: string | null): {
+export function getAdjacentPosts(
+  publishedAt: string | null,
+  locale: PostLocale = DEFAULT_LOCALE
+): {
   newer: SelectPost | null;
   older: SelectPost | null;
 } {
-  const posts = getAllPosts()
-    .filter((p) => p.published)
-    .sort((a, b) => {
-      const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
-      const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
-      return dateA - dateB;
-    });
+  let posts = getPosts().filter((p) => p.published);
+
+  // Deduplicate by locale
+  posts = deduplicateByLocale(posts, locale);
+
+  posts.sort((a, b) => {
+    const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
+    const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
+    return dateA - dateB;
+  });
 
   if (!publishedAt) return { newer: null, older: null };
 
@@ -403,9 +409,7 @@ export function getSimilarPosts(
   limit = 4,
   locale: PostLocale = DEFAULT_LOCALE
 ): SelectPost[] {
-  let posts = getAllPosts().filter(
-    (p) => p.published && p.slug !== currentSlug
-  );
+  let posts = getPosts().filter((p) => p.published && p.slug !== currentSlug);
 
   // Deduplicate by locale
   posts = deduplicateByLocale(posts, locale);
@@ -438,68 +442,19 @@ export function getSimilarPosts(
 }
 
 // Get posts with social media links (for /codes page)
-export function getPostsWithSocialMedia(options: {
+export function getAllPosts(options: {
   limit?: number;
   offset?: number;
   locale?: PostLocale;
   includeDrafts?: boolean;
 }): SelectPost[] {
-  let posts = getAllPosts();
+  let posts = getPosts();
   const preferredLocale = options.locale || DEFAULT_LOCALE;
 
   // Filter by published status
   if (!options.includeDrafts) {
     posts = posts.filter((p) => p.published);
   }
-
-  // Filter only posts with social media links
-  posts = posts.filter(
-    (p) => p.social_media_links && p.social_media_links.length > 0
-  );
-
-  // Deduplicate by locale
-  posts = deduplicateByLocale(posts, preferredLocale);
-
-  // Sort by published_at descending
-  posts.sort((a, b) => {
-    const dateA = a.published_at
-      ? new Date(a.published_at).getTime()
-      : a.created_at
-      ? new Date(a.created_at).getTime()
-      : 0;
-    const dateB = b.published_at
-      ? new Date(b.published_at).getTime()
-      : b.created_at
-      ? new Date(b.created_at).getTime()
-      : 0;
-    return dateB - dateA;
-  });
-
-  // Apply pagination
-  const offset = options.offset || 0;
-  const limit = options.limit || posts.length;
-  return posts.slice(offset, offset + limit);
-}
-
-// Get posts without social media links (for homepage)
-export function getPostsWithoutSocialMedia(options: {
-  limit?: number;
-  offset?: number;
-  locale?: PostLocale;
-  includeDrafts?: boolean;
-}): SelectPost[] {
-  let posts = getAllPosts();
-  const preferredLocale = options.locale || DEFAULT_LOCALE;
-
-  // Filter by published status
-  if (!options.includeDrafts) {
-    posts = posts.filter((p) => p.published);
-  }
-
-  // Filter only posts WITHOUT social media links
-  posts = posts.filter(
-    (p) => !p.social_media_links || p.social_media_links.length === 0
-  );
 
   // Deduplicate by locale
   posts = deduplicateByLocale(posts, preferredLocale);

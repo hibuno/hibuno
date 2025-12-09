@@ -124,13 +124,28 @@ export function InteractiveMarkdownRenderer({
 
     // Render code blocks
     const renderCodeBlocks = () => {
-      const codeBlocks = container.querySelectorAll("pre[data-language]");
+      // Find all pre elements that contain code
+      const codeBlocks = container.querySelectorAll("pre");
       codeBlocks.forEach((pre) => {
         if (pre.hasAttribute("data-rendered")) return;
 
-        const language = pre.getAttribute("data-language") || "plaintext";
+        // Skip if already inside a code-block-wrapper
+        if (pre.closest(".code-block-wrapper")) return;
+
         const codeElement = pre.querySelector("code");
-        const code = codeElement?.textContent || "";
+        if (!codeElement) return;
+
+        // Get language from data-language attribute or class
+        let language =
+          pre.getAttribute("data-language") ||
+          codeElement.getAttribute("data-language") ||
+          codeElement.className.match(/language-(\w+)/)?.[1] ||
+          "plaintext";
+
+        const code = codeElement.textContent || "";
+
+        // Skip empty code blocks
+        if (!code.trim()) return;
 
         // Create a wrapper div for React component
         const wrapper = document.createElement("div");

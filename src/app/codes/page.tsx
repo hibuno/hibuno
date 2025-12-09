@@ -10,9 +10,9 @@ import type { SelectPost, PostLocale } from "@/db/types";
 import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "Codes - Video & Social Media Content",
+  title: "Codes",
   description:
-    "Kumpulan konten video dan social media dari hibuno. Tutorial, tips, dan berbagai konten menarik lainnya.",
+    "Kumpulan konten tentang coding dari hibuno. Tutorial, tips, dan berbagai konten menarik lainnya.",
 };
 
 export const dynamic = "force-dynamic";
@@ -28,8 +28,10 @@ export default async function CodesPage() {
       "id") as PostLocale;
 
     posts = (await retryDatabaseOperation(() =>
-      postQueries.getPostsWithSocialMedia(50, locale)
+      postQueries.getAllPosts(50, locale)
     )) as unknown as SelectPost[];
+
+    posts = posts.filter((p) => p.content.includes("language-"));
   } catch (err) {
     error = err instanceof Error ? err.message : "Gagal memuat konten";
   }
@@ -37,8 +39,8 @@ export default async function CodesPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Codes - Video & Social Media Content",
-    description: "Kumpulan konten video dan social media dari hibuno",
+    name: "Codes",
+    description: "Kumpulan konten tentang coding dari hibuno",
     url: "https://hibuno.com/codes",
   };
 

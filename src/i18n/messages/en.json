@@ -1,7 +1,7 @@
 {
   "common": {
     "home": "Home",
-    "codes": "Codes",
+    "codes": "Source Codes",
     "search": "Search articles...",
     "searchPlaceholder": "Search articles, tutorials, tips...",
     "searching": "Searching...",
@@ -14,8 +14,8 @@
     "popularArticles": "Popular Articles",
     "keyboardShortcuts": "Keyboard Shortcuts",
     "openSearch": "Open search",
-    "goHome": "Go to home",
-    "goCodes": "Go to video & codes",
+    "goHome": "Go to home page",
+    "goCodes": "Go to codes page",
     "startTyping": "Start typing to search articles",
     "youtube": "YouTube Channel",
     "tiktok": "TikTok Channel"
@@ -35,10 +35,10 @@
     "sitemap": "Sitemap"
   },
   "codes": {
-    "title": "Video & Social Media Content",
+    "title": "Article about codes",
     "description": "Short tutorials, practical tips, and engaging content you can watch right away. Available on your favorite platforms.",
     "noContent": "No content yet",
-    "noContentDescription": "Video and social media content will appear here.",
+    "noContentDescription": "Article about codes will appear here.",
     "readArticles": "Read Articles"
   },
   "admin": {
@@ -68,6 +68,15 @@
     "error": "Error",
     "errorDescription": "An error occurred while deleting the post."
   },
+  "post": {
+    "thanksTitle": "Thanks for reading!",
+    "thanksDescription": "If you found this article helpful, maybe you could help share it.",
+    "writtenBy": "Written by hibuno",
+    "previous": "Previous",
+    "next": "Next",
+    "relatedArticles": "Related Articles",
+    "readingTime": "{minutes} min read"
+  },
   "editor": {
     "placeholder": "Type '/' for commands, use → for autocomplete...",
     "headingPlaceholder": "Heading",
@@ -78,7 +87,7 @@
     "bold": "Bold",
     "italic": "Italic",
     "underline": "Underline",
-    "code": "Code",
+    "code": "Source Code",
     "strikethrough": "Strikethrough",
     "highlight": "Highlight",
     "insertLink": "Insert link",

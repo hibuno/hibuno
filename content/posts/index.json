@@ -48,5 +48,31 @@
     "discount_percentage": null,
     "homepage": null,
     "product_description": null
+  },
+  {
+    "id": "858b21eb-1fa3-40da-b3a9-6593d2e13fbb",
+    "slug": "hello-world-php",
+    "title": "Hello World Example in PHP",
+    "excerpt": "Learn how to display 'hello world' using PHP code.",
+    "content": "<pre data-language=\"php\" class=\"language-php\"><code data-language=\"php\" class=\"language-php\">&lt;?php\n\necho \"hello world\";</code></pre><p></p>",
+    "content_group_id": null,
+    "locale": null,
+    "cover_image_url": null,
+    "tags": [
+      "php",
+      "hello world",
+      "programming",
+      "coding",
+      "tutorial"
+    ],
+    "published": false,
+    "published_at": null,
+    "created_at": "2025-12-08T10:23:56.336Z",
+    "updated_at": "2025-12-09T02:48:13.447Z",
+    "price": null,
+    "discount_percentage": null,
+    "homepage": null,
+    "product_description": null,
+    "social_media_links": []
   }
 ]

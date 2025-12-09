@@ -1,5 +1,7 @@
+"use client";
+
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,37 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
-import Prism from "prismjs";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-java";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-cpp";
-import "prismjs/components/prism-csharp";
-import "prismjs/components/prism-php";
-import "prismjs/components/prism-ruby";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-rust";
-import "prismjs/components/prism-swift";
-import "prismjs/components/prism-kotlin";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-scss";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-yaml";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-sql";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-powershell";
-import "prismjs/components/prism-docker";
-import "prismjs/components/prism-graphql";
 
-// Popular programming languages (labels are language-agnostic)
-const getLanguages = (t: any) => [
-  { value: "plaintext", label: t("plainText") },
+// Popular programming languages
+const LANGUAGES = [
+  { value: "plaintext", label: "Plain Text" },
   { value: "javascript", label: "JavaScript" },
   { value: "typescript", label: "TypeScript" },
   { value: "jsx", label: "JSX" },
@@ -75,8 +50,6 @@ export default function CodeBlockComponent({ node, updateAttributes }: any) {
   const t = useTranslations("editor");
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const LANGUAGES = getLanguages(t);
 
   const handleCopy = async () => {
     const text = node.textContent;
@@ -89,33 +62,23 @@ export default function CodeBlockComponent({ node, updateAttributes }: any) {
     updateAttributes({ language });
   };
 
-  // Apply syntax highlighting when content changes
-  useEffect(() => {
-    if (contentRef.current) {
-      const codeElement = contentRef.current.querySelector("code");
-      if (codeElement) {
-        Prism.highlightElement(codeElement);
-      }
-    }
-  }, [node.textContent, node.attrs.language]);
-
   return (
     <NodeViewWrapper
-      className="code-block-wrapper relative group"
+      className="code-block-wrapper relative group my-4 rounded-lg overflow-hidden border border-black/10 dark:border-white/10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Toolbar */}
       <div
-        className={`flex items-center justify-between px-3 py-2 bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10 transition-opacity ${
-          isHovered ? "opacity-100" : "opacity-60"
+        className={`flex items-center justify-between px-3 py-2 bg-[#282c34] border-b border-white/10 transition-opacity ${
+          isHovered ? "opacity-100" : "opacity-80"
         }`}
       >
         <Select
           value={node.attrs.language}
           onValueChange={handleLanguageChange}
         >
-          <SelectTrigger className="w-[180px] h-7 text-xs">
+          <SelectTrigger className="w-[180px] h-7 text-xs bg-white/10 border-white/20 text-white/80">
             <SelectValue placeholder={t("selectLanguage")} />
           </SelectTrigger>
           <SelectContent>
@@ -131,7 +94,7 @@ export default function CodeBlockComponent({ node, updateAttributes }: any) {
           variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-7 px-2 text-xs"
+          className="h-7 px-2 text-xs text-white/60 hover:text-white hover:bg-white/10"
         >
           {copied ? (
             <>
@@ -149,13 +112,10 @@ export default function CodeBlockComponent({ node, updateAttributes }: any) {
 
       {/* Code Content */}
       <pre
-        className="relative overflow-x-auto bg-black/2 dark:bg-white/2 p-4 rounded-b-lg"
+        className={`overflow-x-auto bg-[#282c34] p-4 m-0 language-${node.attrs.language}`}
         data-language={node.attrs.language}
       >
-        <code
-          ref={contentRef}
-          className={`language-${node.attrs.language} text-sm font-mono`}
-        >
+        <code className={`text-sm font-mono language-${node.attrs.language}`}>
           <NodeViewContent />
         </code>
       </pre>

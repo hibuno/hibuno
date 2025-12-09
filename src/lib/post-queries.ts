@@ -4,8 +4,7 @@ import {
   getPostBySlug as localGetPostBySlug,
   searchPosts as localSearchPosts,
   getAllTags,
-  getPostsWithSocialMedia as localGetPostsWithSocialMedia,
-  getPostsWithoutSocialMedia as localGetPostsWithoutSocialMedia,
+  getAllPosts as localgetAllPosts,
   getPostTranslations as localGetPostTranslations,
 } from "@/db/server";
 
@@ -29,6 +28,7 @@ export type PostSummary = Pick<
   | "id"
   | "slug"
   | "title"
+  | "content"
   | "excerpt"
   | "cover_image_url"
   | "tags"
@@ -161,10 +161,7 @@ export class PostQueries {
   /**
    * Get posts with social media links (for /codes page)
    */
-  async getPostsWithSocialMedia(
-    limit = 20,
-    locale?: PostLocale
-  ): Promise<PostSummary[]> {
+  async getAllPosts(limit = 20, locale?: PostLocale): Promise<PostSummary[]> {
     const isDev = process.env.NODE_ENV === "development";
     const options: {
       limit: number;
@@ -177,30 +174,7 @@ export class PostQueries {
     if (locale) {
       options.locale = locale;
     }
-    const posts = localGetPostsWithSocialMedia(options);
-    return posts as unknown as PostSummary[];
-  }
-
-  /**
-   * Get posts without social media links (for homepage)
-   */
-  async getPostsWithoutSocialMedia(
-    limit = 20,
-    locale?: PostLocale
-  ): Promise<PostSummary[]> {
-    const isDev = process.env.NODE_ENV === "development";
-    const options: {
-      limit: number;
-      includeDrafts: boolean;
-      locale?: PostLocale;
-    } = {
-      limit,
-      includeDrafts: isDev,
-    };
-    if (locale) {
-      options.locale = locale;
-    }
-    const posts = localGetPostsWithoutSocialMedia(options);
+    const posts = localgetAllPosts(options);
     return posts as unknown as PostSummary[];
   }
 }

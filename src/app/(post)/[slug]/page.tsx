@@ -12,8 +12,7 @@ import { ReadingProgress } from "@/components/blog/reading-progress-bar";
 import SimilarPosts from "@/components/blog/similar-posts";
 import { SiteHeader } from "@/components/blog/site-header";
 import { StructuredData } from "@/components/blog/structured-data";
-import SocialMediaHighlight from "@/components/blog/social-media-highlight";
-import type { SelectPost, SocialMediaLink, PostTranslation } from "@/db/types";
+import type { SelectPost, PostTranslation } from "@/db/types";
 import type { Locale } from "@/i18n/config";
 import { postQueries } from "@/lib/post-queries";
 import { PostLanguageSwitcher } from "@/components/blog/post-language-switcher";
@@ -176,8 +175,8 @@ function ProductInfo({ post }: { post: SelectPost }) {
 }
 
 // Format date consistently to avoid hydration mismatch
-function formatDate(date: Date): string {
-  const months = [
+function formatDate(date: Date, locale: Locale): string {
+  const monthsId = [
     "Januari",
     "Februari",
     "Maret",
@@ -191,15 +190,36 @@ function formatDate(date: Date): string {
     "November",
     "Desember",
   ];
+
+  const monthsEn = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const months = locale === "id" ? monthsId : monthsEn;
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function PostHeader({
   post,
   translations,
+  locale,
+  t,
 }: {
   post: SelectPost;
   translations: PostTranslation[];
+  locale: Locale;
+  t: any;
 }) {
   const publishedISO = post.published_at || Date.now();
   const readingTime = calculateStats(post.content)?.readingTime || 0;
@@ -231,10 +251,10 @@ function PostHeader({
         </div>
         <span className="hidden sm:inline">•</span>
         <time className="font-medium text-neutral-500 dark:text-neutral-400">
-          {formatDate(date)}
+          {formatDate(date, locale)}
         </time>
         <span>•</span>
-        <span>{readingTime} menit baca</span>
+        <span>{t("readingTime", { minutes: readingTime })}</span>
         {/* Language Switcher */}
         {translations.length > 0 && (
           <>
@@ -342,6 +362,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     }
 
     const { post, translations } = result;
+    const locale = (post.locale as Locale) || "id";
+    const t = await import("next-intl/server").then((mod) =>
+      mod.getTranslations({ locale, namespace: "post" })
+    );
     const tags = normalizeTags(post.tags);
     const structuredData = generatePostStructuredData(post);
     const breadcrumbData = generateBreadcrumbStructuredData([
@@ -369,49 +393,33 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               isDevMode ? "pt-12 sm:pt-16" : "pt-6 sm:pt-8"
             } pb-12 sm:pb-20`}
           >
-            <div className="flex gap-8">
-              {/* Main Article */}
-              <div className="flex-1 max-w-4xl">
-                <article className="space-y-12">
-                  {/* Header */}
-                  <PostHeader post={post} translations={translations} />
+            {/* Main Article */}
+            <div className="flex-1 max-w-4xl mx-auto px-4">
+              <article className="space-y-12">
+                {/* Header */}
+                <PostHeader
+                  post={post}
+                  translations={translations}
+                  locale={locale}
+                  t={t}
+                />
 
-                  {/* Content */}
-                  <PostContent post={post} />
+                {/* Content */}
+                <PostContent post={post} />
 
-                  {/* Signature */}
-                  <ArticleSignature />
-                </article>
+                {/* Signature */}
+                <ArticleSignature />
+              </article>
 
-                {/* Navigation & Related Content */}
-                <div className="mt-12 sm:mt-20 space-y-8 sm:space-y-12 divide-y divide-black/5 dark:divide-white/5">
-                  <PostNavigation
-                    published_at={(post.published_at || null) as string | null}
-                  />
-                  <SimilarPosts currentSlug={slug} tags={tags} />
-                </div>
+              {/* Navigation & Related Content */}
+              <div className="mt-12 sm:mt-20 space-y-8 sm:space-y-12 divide-y divide-black/5 dark:divide-white/5">
+                <PostNavigation
+                  published_at={(post.published_at || null) as string | null}
+                  locale={locale}
+                />
+                <SimilarPosts currentSlug={slug} tags={tags} locale={locale} />
               </div>
-
-              {/* Right Sidebar - Social Media Highlight (Desktop) */}
-              {post.social_media_links &&
-                (post.social_media_links as SocialMediaLink[]).length > 0 && (
-                  <aside className="hidden xl:block w-64 shrink-0">
-                    <SocialMediaHighlight
-                      links={post.social_media_links as SocialMediaLink[]}
-                    />
-                  </aside>
-                )}
             </div>
-
-            {/* Mobile Social Media Highlight */}
-            {post.social_media_links &&
-              (post.social_media_links as SocialMediaLink[]).length > 0 && (
-                <div className="xl:hidden mt-8 pt-8 border-t border-black/5 dark:border-white/5">
-                  <SocialMediaHighlight
-                    links={post.social_media_links as SocialMediaLink[]}
-                  />
-                </div>
-              )}
           </main>
         </div>
       </ErrorBoundary>

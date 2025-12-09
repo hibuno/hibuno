@@ -208,10 +208,7 @@ const CodesGridContent = memo(({ posts }: { posts: SelectPost[] }) => {
   );
 
   return (
-    <motion.section
-      aria-label="Video and social media content"
-      variants={ANIMATION.item}
-    >
+    <motion.section aria-label="Content grid" variants={ANIMATION.item}>
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         variants={ANIMATION.container}

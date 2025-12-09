@@ -1,14 +1,19 @@
 import "server-only";
 import Link from "next/link";
 import { getAdjacentPosts } from "@/db/server";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/config";
 
 export default async function PostNavigation({
   published_at,
+  locale,
 }: {
   published_at: string | null;
+  locale: Locale;
 }) {
   try {
-    const { newer, older } = getAdjacentPosts(published_at);
+    const t = await getTranslations({ locale, namespace: "post" });
+    const { newer, older } = getAdjacentPosts(published_at, locale);
 
     if (!newer && !older) return null;
 
@@ -20,7 +25,9 @@ export default async function PostNavigation({
               href={`/${older.slug}`}
               className="block rounded-lg bg-muted/40 p-3 sm:p-4 hover:bg-muted transition-colors"
             >
-              <div className="text-xs text-muted-foreground">Previous</div>
+              <div className="text-xs text-muted-foreground">
+                {t("previous")}
+              </div>
               <div className="line-clamp-2 text-sm sm:text-base font-medium">
                 {older.title}
               </div>
@@ -33,7 +40,7 @@ export default async function PostNavigation({
               href={`/${newer.slug}`}
               className="block rounded-lg bg-muted/40 p-3 sm:p-4 hover:bg-muted transition-colors"
             >
-              <div className="text-xs text-muted-foreground">Next</div>
+              <div className="text-xs text-muted-foreground">{t("next")}</div>
               <div className="line-clamp-2 text-sm sm:text-base font-medium">
                 {newer.title}
               </div>

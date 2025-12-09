@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 import { getSimilarPosts } from "@/db/server";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/config";
 
 interface Post {
   slug: string;
@@ -15,6 +17,7 @@ interface Post {
 interface SimilarPostsProps {
   currentSlug: string;
   tags?: string[] | null;
+  locale: Locale;
 }
 
 // Memoized post item component
@@ -63,9 +66,11 @@ PostsGrid.displayName = "PostsGrid";
 export default async function SimilarPosts({
   currentSlug,
   tags,
+  locale,
 }: SimilarPostsProps) {
   try {
-    const posts = getSimilarPosts(currentSlug, tags, 4);
+    const t = await getTranslations({ locale, namespace: "post" });
+    const posts = getSimilarPosts(currentSlug, tags, 4, locale);
 
     if (!posts?.length) {
       return null;
@@ -73,7 +78,7 @@ export default async function SimilarPosts({
 
     return (
       <section aria-label="Similar posts" className="mt-12">
-        <h3 className="mb-4 text-lg font-semibold">Artikel Lainnya</h3>
+        <h3 className="mb-4 text-lg font-semibold">{t("relatedArticles")}</h3>
         <PostsGrid posts={posts as Post[]} />
       </section>
     );

@@ -1,44 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
-import Prism from "prismjs";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-java";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-cpp";
-import "prismjs/components/prism-csharp";
-import "prismjs/components/prism-php";
-import "prismjs/components/prism-ruby";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-rust";
-import "prismjs/components/prism-swift";
-import "prismjs/components/prism-kotlin";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-scss";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-yaml";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-sql";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-powershell";
-import "prismjs/components/prism-docker";
-import "prismjs/components/prism-graphql";
+import { Highlight, themes } from "prism-react-renderer";
 
 interface CodeBlockRendererProps {
   language: string;
   code: string;
 }
 
-// Language display names (most are language-agnostic)
-const getLanguageNames = (t: any): Record<string, string> => ({
+// Language display names
+const LANGUAGE_NAMES: Record<string, string> = {
   javascript: "JavaScript",
   typescript: "TypeScript",
   jsx: "JSX",
@@ -67,17 +40,28 @@ const getLanguageNames = (t: any): Record<string, string> => ({
   powershell: "PowerShell",
   dockerfile: "Dockerfile",
   graphql: "GraphQL",
-  plaintext: t("plainText"),
-});
+  plaintext: "Plain Text",
+};
+
+// Map language aliases to prism-react-renderer supported languages
+const LANGUAGE_MAP: Record<string, string> = {
+  js: "javascript",
+  ts: "typescript",
+  py: "python",
+  rb: "ruby",
+  sh: "bash",
+  shell: "bash",
+  yml: "yaml",
+  html: "markup",
+  xml: "markup",
+  plaintext: "plain",
+};
 
 export default function CodeBlockRenderer({
   language,
   code,
 }: CodeBlockRendererProps) {
-  const t = useTranslations("editor");
   const [copied, setCopied] = useState(false);
-  const codeRef = useRef<HTMLElement>(null);
-  const LANGUAGE_NAMES = getLanguageNames(t);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -85,20 +69,14 @@ export default function CodeBlockRenderer({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const displayLanguage = LANGUAGE_NAMES[language] || language;
-
-  // Apply syntax highlighting
-  useEffect(() => {
-    if (codeRef.current) {
-      Prism.highlightElement(codeRef.current);
-    }
-  }, [code, language]);
+  const displayLanguage = LANGUAGE_NAMES[language] || language || "Plain Text";
+  const normalizedLang = LANGUAGE_MAP[language] || language || "plain";
 
   return (
     <div className="code-block-wrapper relative group my-6 rounded-lg overflow-hidden border border-black/10 dark:border-white/10">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10">
-        <span className="text-xs font-medium text-black/60 dark:text-white/60">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#1e1e1e] border-b border-white/10">
+        <span className="text-xs font-medium text-white/60">
           {displayLanguage}
         </span>
 
@@ -106,31 +84,46 @@ export default function CodeBlockRenderer({
           variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-7 px-2 text-xs text-white/60 hover:text-white hover:bg-white/10"
         >
           {copied ? (
             <>
               <Check className="h-3 w-3 mr-1" />
-              {t("copied")}
+              Copied
             </>
           ) : (
             <>
               <Copy className="h-3 w-3 mr-1" />
-              {t("copy")}
+              Copy
             </>
           )}
         </Button>
       </div>
 
       {/* Code Content */}
-      <pre className="overflow-x-auto bg-black/2 dark:bg-white/2 p-4 m-0">
-        <code
-          ref={codeRef}
-          className={`language-${language} text-sm font-mono block`}
-        >
-          {code}
-        </code>
-      </pre>
+      <Highlight
+        theme={themes.oneDark}
+        code={code.trim()}
+        language={normalizedLang as any}
+      >
+        {({ className, style, tokens, getLineProps, getTokenProps }) => (
+          <pre
+            className={`${className} overflow-x-auto p-4 m-0 text-sm`}
+            style={{ ...style, margin: 0 }}
+          >
+            {tokens.map((line, i) => (
+              <div key={i} {...getLineProps({ line })}>
+                <span className="inline-block w-8 text-white/30 select-none text-right mr-4">
+                  {i + 1}
+                </span>
+                {line.map((token, key) => (
+                  <span key={key} {...getTokenProps({ token })} />
+                ))}
+              </div>
+            ))}
+          </pre>
+        )}
+      </Highlight>
     </div>
   );
 }

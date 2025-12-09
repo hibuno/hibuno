@@ -25,21 +25,23 @@ async function getHomepageData(): Promise<{
     const localeCookie = cookieStore.get("NEXT_LOCALE");
     const locale = (localeCookie?.value || "id") as PostLocale;
 
-    // Get recent posts WITHOUT social media links (those go to /codes)
     const recentPosts = await retryDatabaseOperation(() =>
-      postQueries.getPostsWithoutSocialMedia(12, locale)
+      postQueries.getAllPosts(12, locale)
     );
 
     return {
-      recentPosts: recentPosts.map((post) => ({
-        id: post.id,
-        slug: post.slug,
-        title: post.title,
-        excerpt: post.excerpt ?? null,
-        cover_image_url: post.cover_image_url ?? null,
-        published: "published" in post ? post.published ?? true : true,
-        published_at: (post.published_at || new Date().toISOString()) as string,
-      })),
+      recentPosts: recentPosts
+        .filter((post) => !post.content.includes("language-"))
+        .map((post) => ({
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt ?? null,
+          cover_image_url: post.cover_image_url ?? null,
+          published: "published" in post ? post.published ?? true : true,
+          published_at: (post.published_at ||
+            new Date().toISOString()) as string,
+        })),
     };
   } catch (err: unknown) {
     const message =

@@ -1,7 +1,7 @@
 {
   "common": {
     "home": "Beranda",
-    "codes": "Codes",
+    "codes": "Kode Sumber",
     "search": "Cari artikel...",
     "searchPlaceholder": "Cari artikel, tutorial, tips...",
     "searching": "Mencari...",
@@ -14,8 +14,8 @@
     "popularArticles": "Artikel Populer",
     "keyboardShortcuts": "Pintasan Keyboard",
     "openSearch": "Buka pencarian",
-    "goHome": "Ke beranda",
-    "goCodes": "Ke video & codes",
+    "goHome": "Ke halaman beranda",
+    "goCodes": "Ke halaman kode",
     "startTyping": "Mulai ketik untuk mencari artikel",
     "youtube": "Kanal YouTube",
     "tiktok": "Kanal TikTok"
@@ -35,10 +35,10 @@
     "sitemap": "Sitemap"
   },
   "codes": {
-    "title": "Video & Konten Social Media",
+    "title": "Artikel tentang kode",
     "description": "Tutorial singkat, tips praktis, dan konten menarik yang bisa langsung kamu tonton. Tersedia di berbagai platform favoritmu.",
     "noContent": "Belum ada konten",
-    "noContentDescription": "Konten video dan social media akan muncul di sini.",
+    "noContentDescription": "Artikel tentang kode akan muncul di sini.",
     "readArticles": "Baca Artikel"
   },
   "admin": {
@@ -68,6 +68,15 @@
     "error": "Error",
     "errorDescription": "Terjadi kesalahan saat menghapus postingan."
   },
+  "post": {
+    "thanksTitle": "Terima kasih telah membaca!",
+    "thanksDescription": "Jika kamu merasa artikel ini bermanfaat, mungkin kamu bisa bantu membagikannya.",
+    "writtenBy": "Ditulis oleh hibuno",
+    "previous": "Sebelumnya",
+    "next": "Selanjutnya",
+    "relatedArticles": "Artikel Lainnya",
+    "readingTime": "{minutes} menit baca"
+  },
   "editor": {
     "placeholder": "Ketik '/' untuk perintah, gunakan → untuk pelengkapan otomatis...",
     "headingPlaceholder": "Judul",
@@ -78,7 +87,7 @@
     "bold": "Tebal",
     "italic": "Miring",
     "underline": "Garis bawah",
-    "code": "Kode",
+    "code": "Kode Sumber",
     "strikethrough": "Coret",
     "highlight": "Sorot",
     "insertLink": "Sisipkan tautan",

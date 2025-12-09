@@ -1,9 +1,11 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import CodeBlockComponent from "./code-block-component";
+import { PrismPlugin } from "./prism-plugin";
 
 export interface CodeBlockOptions {
   HTMLAttributes: Record<string, any>;
+  defaultLanguage: string;
 }
 
 declare module "@tiptap/core" {
@@ -26,6 +28,7 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
   addOptions() {
     return {
       HTMLAttributes: {},
+      defaultLanguage: "javascript",
     };
   },
 
@@ -63,7 +66,10 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
   renderHTML({ node, HTMLAttributes }) {
     return [
       "pre",
-      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+        "data-language": node.attrs.language,
+        class: `language-${node.attrs.language}`,
+      }),
       [
         "code",
         {
@@ -112,5 +118,15 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
 
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlockComponent);
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      ...(this.parent?.() || []),
+      PrismPlugin({
+        name: this.name,
+        defaultLanguage: this.options.defaultLanguage,
+      }),
+    ];
   },
 });
