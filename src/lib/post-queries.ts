@@ -46,6 +46,7 @@ export class PostQueries {
       limit?: number;
       offset?: number;
       tag?: string;
+      locale?: PostLocale;
       skipLocaleDeduplication?: boolean;
     } = {}
   ): Promise<PostListItem[]> {
@@ -55,6 +56,7 @@ export class PostQueries {
       limit?: number;
       offset?: number;
       tag?: string;
+      locale?: PostLocale;
       includeDrafts?: boolean;
       skipLocaleDeduplication?: boolean;
     } = {
@@ -63,6 +65,7 @@ export class PostQueries {
     if (options.limit !== undefined) queryOptions.limit = options.limit;
     if (options.offset !== undefined) queryOptions.offset = options.offset;
     if (options.tag !== undefined) queryOptions.tag = options.tag;
+    if (options.locale !== undefined) queryOptions.locale = options.locale;
     if (options.skipLocaleDeduplication !== undefined)
       queryOptions.skipLocaleDeduplication = options.skipLocaleDeduplication;
 
