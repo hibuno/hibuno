@@ -2,12 +2,14 @@
 
 import { FileText, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface OCRDropZoneProps {
   onTextExtracted: (text: string) => void;
 }
 
 export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
+  const t = useTranslations("editor");
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,10 +122,8 @@ export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
               className="w-5 h-5 animate-spin text-muted-foreground"
               aria-hidden="true"
             />
-            <p className="text-xs text-muted-foreground">Processing...</p>
-            <span className="sr-only">
-              Extracting text from document, please wait
-            </span>
+            <p className="text-xs text-muted-foreground">{t("processing")}</p>
+            <span className="sr-only">{t("processing")}</span>
           </div>
         ) : (
           <>
@@ -131,9 +131,9 @@ export function OCRDropZone({ onTextExtracted }: OCRDropZoneProps) {
               className="w-5 h-5 mx-auto mb-1 text-muted-foreground"
               aria-hidden="true"
             />
-            <p className="text-xs font-medium">Upload Document</p>
+            <p className="text-xs font-medium">{t("uploadDocument")}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Drop or click here
+              {t("dropOrClick")}
             </p>
           </>
         )}

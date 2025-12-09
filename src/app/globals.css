@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./prism-theme.css";
 
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";

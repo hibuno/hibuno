@@ -2,6 +2,7 @@
 
 import { Check, Copy, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useTranslations } from "next-intl";
 import { generateMetadata, generateContent } from "@/lib/ai-service";
 
 interface AIMetadataPanelProps {
@@ -41,6 +42,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
     },
     ref
   ) => {
+    const t = useTranslations("editor.metadataPanel");
     const [loading, setLoading] = useState(false);
     const [loadingField, setLoadingField] = useState<string | null>(null);
     const [suggestions, setSuggestions] = useState<{
@@ -72,7 +74,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
 
     const generateAll = async () => {
       if (!content || content.length < 50) {
-        setError("Add more content first");
+        setError(t("addMoreContent"));
         return;
       }
 
@@ -100,7 +102,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
           setLocalTags(result.tags.join(", "));
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to generate");
+        setError(err instanceof Error ? err.message : t("generating"));
       } finally {
         setLoading(false);
       }
@@ -110,7 +112,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
       field: "title" | "excerpt" | "tags" | "slug"
     ) => {
       if (!content || content.length < 50) {
-        setError("Add more content first");
+        setError(t("addMoreContent"));
         return;
       }
 
@@ -220,7 +222,7 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
             ) : (
               <Sparkles className="w-3.5 h-3.5" />
             )}
-            {isLoading ? "Generating..." : "Generate"}
+            {isLoading ? t("generating") : t("generate")}
           </button>
         )}
 
@@ -234,10 +236,10 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
         <div className="space-y-3">
           {/* Title */}
           <CompactField
-            label="Title"
+            label={t("title")}
             value={localTitle}
             onChange={handleTitleChange}
-            placeholder="Post title"
+            placeholder={t("title")}
             loading={loadingField === "title"}
             onGenerate={() => generateField("title")}
             onCopy={() => copyToClipboard(localTitle, "title")}
@@ -247,11 +249,14 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
               setLocalTitle(v);
               onApplyTitle?.(v);
             }}
+            copyLabel={t("copy")}
+            generateLabel={t("generateWithAI")}
+            altLabel={t("alt")}
           />
 
           {/* Slug */}
           <CompactField
-            label="Slug"
+            label={t("slug")}
             value={localSlug}
             onChange={handleSlugChange}
             placeholder="url-slug"
@@ -260,11 +265,14 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
             onCopy={() => copyToClipboard(localSlug, "slug")}
             copied={copiedField === "slug"}
             mono
+            copyLabel={t("copy")}
+            generateLabel={t("generateWithAI")}
+            altLabel={t("alt")}
           />
 
           {/* Tags */}
           <CompactField
-            label="Tags"
+            label={t("tags")}
             value={localTags}
             onChange={handleTagsChange}
             placeholder="tag1, tag2, tag3"
@@ -272,20 +280,26 @@ const AIMetadataPanel = forwardRef<AIMetadataPanelRef, AIMetadataPanelProps>(
             onGenerate={() => generateField("tags")}
             onCopy={() => copyToClipboard(localTags, "tags")}
             copied={copiedField === "tags"}
+            copyLabel={t("copy")}
+            generateLabel={t("generateWithAI")}
+            altLabel={t("alt")}
           />
 
           {/* Excerpt */}
           <CompactField
-            label="Excerpt"
+            label={t("excerpt")}
             value={localExcerpt}
             onChange={handleExcerptChange}
-            placeholder="Brief description..."
+            placeholder={t("excerpt")}
             loading={loadingField === "excerpt"}
             onGenerate={() => generateField("excerpt")}
             onCopy={() => copyToClipboard(localExcerpt, "excerpt")}
             copied={copiedField === "excerpt"}
             multiline
             maxLength={160}
+            copyLabel={t("copy")}
+            generateLabel={t("generateWithAI")}
+            altLabel={t("alt")}
           />
         </div>
       </div>
@@ -307,6 +321,9 @@ interface CompactFieldProps {
   onCopy: () => void;
   copied: boolean;
   mono?: boolean;
+  copyLabel?: string;
+  generateLabel?: string;
+  altLabel?: string;
   multiline?: boolean;
   maxLength?: number;
   alternatives?: string[] | undefined;
@@ -327,6 +344,9 @@ function CompactField({
   maxLength,
   alternatives,
   onSelectAlternative,
+  copyLabel = "Copy",
+  generateLabel = "Generate with AI",
+  altLabel = "Alt",
 }: CompactFieldProps) {
   const [selectedAlt, setSelectedAlt] = useState(0);
 
@@ -340,7 +360,7 @@ function CompactField({
           <button
             onClick={onCopy}
             className="p-1 hover:bg-muted rounded transition-colors"
-            title="Copy"
+            title={copyLabel}
           >
             {copied ? (
               <Check className="w-3 h-3 text-foreground" />
@@ -352,7 +372,7 @@ function CompactField({
             onClick={onGenerate}
             disabled={loading}
             className="p-1 hover:bg-muted rounded transition-colors"
-            title="Generate with AI"
+            title={generateLabel}
           >
             {loading ? (
               <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
@@ -399,7 +419,7 @@ function CompactField({
 
       {alternatives && alternatives.length > 1 && (
         <div className="flex items-center gap-1 mt-1.5">
-          <span className="text-[10px] text-muted-foreground">Alt:</span>
+          <span className="text-[10px] text-muted-foreground">{altLabel}:</span>
           {alternatives.slice(0, 5).map((alt, i) => (
             <button
               key={i}

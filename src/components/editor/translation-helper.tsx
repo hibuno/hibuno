@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Copy, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -101,6 +102,7 @@ export function TranslationReference({
   sourceExcerpt,
   sourceLocale,
 }: TranslationReferenceProps) {
+  const t = useTranslations("editor");
   const [isVisible, setIsVisible] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -119,7 +121,7 @@ export function TranslationReference({
         className="gap-2 w-full border-0 border-b py-4 rounded-none cursor-pointer"
       >
         <Eye className="h-4 w-4" />
-        Show {localeNames[sourceLocale]} Reference
+        {t("showReference", { language: localeNames[sourceLocale] })}
       </Button>
     );
   }
@@ -131,7 +133,7 @@ export function TranslationReference({
           <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs">
             {localeNames[sourceLocale]}
           </span>
-          Reference Content
+          {t("translationReference")}
         </h3>
         <Button variant="ghost" size="sm" onClick={() => setIsVisible(false)}>
           <EyeOff className="h-4 w-4" />
@@ -142,7 +144,7 @@ export function TranslationReference({
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-muted-foreground">
-            Title
+            {t("title")}
           </label>
           <Button
             variant="ghost"
@@ -165,7 +167,7 @@ export function TranslationReference({
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <label className="text-xs font-medium text-muted-foreground">
-              Excerpt
+              {t("excerpt")}
             </label>
             <Button
               variant="ghost"
@@ -188,7 +190,7 @@ export function TranslationReference({
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-muted-foreground">
-            Content Preview
+            {t("contentPreview")}
           </label>
           <Button
             variant="ghost"

@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,7 @@ export default function SocialMediaEditor({
   links,
   onChange,
 }: SocialMediaEditorProps) {
+  const t = useTranslations("editor");
   const addLink = () => {
     onChange([...links, { platform: "tiktok", url: "", caption: "" }]);
   };
@@ -131,7 +133,7 @@ export default function SocialMediaEditor({
         className="w-full h-7 text-xs"
       >
         <Plus className="w-3 h-3 mr-1" />
-        Add Social Media Link
+        {t("addSocialMediaLink")}
       </Button>
     </div>
   );

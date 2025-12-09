@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Lock, KeyRound } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -10,6 +11,8 @@ interface AccessGateProps {
 }
 
 export function AccessGate({ children }: AccessGateProps) {
+  const t = useTranslations("accessGate");
+  const tCommon = useTranslations("common");
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [accessKey, setAccessKey] = useState("");
   const [error, setError] = useState("");
@@ -48,10 +51,10 @@ export function AccessGate({ children }: AccessGateProps) {
         setIsAuthorized(true);
       } else {
         const data = await response.json();
-        setError(data.error || "Invalid access key");
+        setError(data.error || t("invalidKey"));
       }
     } catch {
-      setError("Failed to verify access key");
+      setError(t("verifyFailed"));
     } finally {
       setLoading(false);
     }
@@ -80,9 +83,9 @@ export function AccessGate({ children }: AccessGateProps) {
             <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
               <Lock className="w-6 h-6 text-muted-foreground" />
             </div>
-            <h1 className="text-lg font-semibold">Admin Access</h1>
+            <h1 className="text-lg font-semibold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground text-center mt-1">
-              Enter your access key to continue
+              {t("description")}
             </p>
           </div>
 
@@ -93,7 +96,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 type="password"
                 value={accessKey}
                 onChange={(e) => setAccessKey(e.target.value)}
-                placeholder="Access key"
+                placeholder={t("placeholder")}
                 className="pl-10"
                 autoFocus
                 disabled={loading}
@@ -112,10 +115,10 @@ export function AccessGate({ children }: AccessGateProps) {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Verifying...
+                  {tCommon("verifying")}
                 </>
               ) : (
-                "Continue"
+                tCommon("continue")
               )}
             </Button>
           </form>

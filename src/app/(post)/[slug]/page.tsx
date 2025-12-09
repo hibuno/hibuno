@@ -12,6 +12,7 @@ import { ReadingProgress } from "@/components/blog/reading-progress-bar";
 import SimilarPosts from "@/components/blog/similar-posts";
 import { SiteHeader } from "@/components/blog/site-header";
 import { StructuredData } from "@/components/blog/structured-data";
+import CodePreview from "@/components/blog/code-preview";
 import type { SelectPost, PostTranslation } from "@/db/types";
 import type { Locale } from "@/i18n/config";
 import { postQueries } from "@/lib/post-queries";
@@ -299,6 +300,9 @@ function PostContent({ post }: { post: SelectPost }) {
   if (post.content) {
     return (
       <div className="space-y-8">
+        {/* Code Preview iframe - shows combined HTML/CSS/JS */}
+        {post.preview_enabled && <CodePreview content={post.content} />}
+
         {/* Main content with dynamic TOC insertion */}
         <DynamicTOCPostContent post={post} />
       </div>

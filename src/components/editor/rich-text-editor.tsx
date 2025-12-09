@@ -22,6 +22,7 @@ import { CustomVideo } from "./video-extension";
 import { Callout } from "./callout-extension";
 import { Details } from "./details-extension";
 import { CodeBlock } from "./code-block-extension";
+import { NodeInserter } from "./node-inserter-extension";
 import ImageDialog from "./image-dialog";
 import VideoDialog from "./video-dialog";
 import LinkDialog from "./link-dialog";
@@ -155,6 +156,7 @@ export default function RichTextEditor({
       Dropcursor.configure({ color: "var(--gold)", width: 2 }),
       CustomImage,
       CustomVideo,
+      NodeInserter,
       InlineSuggestion.configure({
         fetchAutocompletion: async (query: string) => {
           // Cancel any pending request
@@ -299,13 +301,21 @@ export default function RichTextEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      const { from } = editor.state.selection;
+      const { from, $from } = editor.state.selection;
       const textBeforeCursor = editor.state.doc.textBetween(0, from);
       const lines = textBeforeCursor.split("\n");
       const currentLine = lines[lines.length - 1];
 
-      if (currentLine?.endsWith("/")) {
-        const { $from } = editor.state.selection;
+      // Check if cursor is inside a node that shouldn't trigger slash commands
+      const parentNode = $from.parent;
+      const isInsideCodeBlock = parentNode.type.name === "codeBlock";
+      const isInsideInlineCode = editor.isActive("code");
+
+      if (
+        currentLine?.endsWith("/") &&
+        !isInsideCodeBlock &&
+        !isInsideInlineCode
+      ) {
         const coords = editor.view.coordsAtPos($from.pos);
         editorDialogActions.openCommandMenu({
           position: { top: coords.top + 24, left: coords.left },

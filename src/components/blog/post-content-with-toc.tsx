@@ -1,6 +1,7 @@
 import "server-only";
 import { extractHeadingsFromHtml } from "./table-of-contents";
 import GithubSlugger from "github-slugger";
+import { getTranslations } from "next-intl/server";
 
 interface DynamicTOCPostContentProps {
   post: {
@@ -68,19 +69,19 @@ async function HtmlRendererWithTOC({
   }
 
   // Insert TOC after first paragraph in HTML
-  const htmlWithTOC = insertTOCAfterFirstParagraph(html, tocItems);
+  const htmlWithTOC = await insertTOCAfterFirstParagraph(html, tocItems);
 
   return <InteractiveMarkdownRenderer html={htmlWithTOC} />;
 }
 
-function insertTOCAfterFirstParagraph(
+async function insertTOCAfterFirstParagraph(
   html: string,
   tocItems: Array<{ depth: number; text: string; id: string }>
-): string {
+): Promise<string> {
   // Pattern to match first paragraph
   const firstParagraphRegex = /<p[^>]*>(.*?)<\/p>/i;
 
-  const tocHtml = generateTOCHTML(tocItems);
+  const tocHtml = await generateTOCHTML(tocItems);
 
   if (firstParagraphRegex.test(html)) {
     // Insert TOC after first paragraph
@@ -91,9 +92,10 @@ function insertTOCAfterFirstParagraph(
   }
 }
 
-function generateTOCHTML(
+async function generateTOCHTML(
   tocItems: Array<{ depth: number; text: string; id: string }>
-): string {
+): Promise<string> {
+  const t = await getTranslations("common");
   const tocListItems = tocItems
     .map((item) => {
       // Use data attributes for handling clicks in the InteractiveMarkdownRenderer
@@ -107,7 +109,7 @@ function generateTOCHTML(
     <nav aria-label="In this article">
       <div class="rounded-xl border bg-background/40 p-4 prose-custom prose max-w-none">
         <h3 class="mb-2 text-sm font-semibold text-muted-foreground">
-          Dalam artikel ini
+          ${t("toc")}
         </h3>
         <ol class="space-y-2">
 ${tocListItems}

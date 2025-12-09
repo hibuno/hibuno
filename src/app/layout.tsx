@@ -4,7 +4,6 @@ import { Gloria_Hallelujah, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import type React from "react";
 import "./globals.css";
-import "./prism-theme.css";
 import { Suspense } from "react";
 import { generateSiteMetadata } from "@/lib/seo-metadata";
 import { Analytics } from "@vercel/analytics/next";

@@ -12,9 +12,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, MessageDialog } from "@/components/ui/alert-dialog";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { getLocaleCookie } from "@/lib/locale-utils";
+import { defaultLocale, type Locale } from "@/i18n/config";
 
 interface Post {
   id: string;
@@ -28,10 +32,12 @@ interface Post {
 }
 
 export default function AdminDashboard() {
+  const t = useTranslations("admin");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [currentLocale, setCurrentLocale] = useState<Locale>(defaultLocale);
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     slug: string | null;
@@ -49,6 +55,13 @@ export default function AdminDashboard() {
     title: "",
     description: "",
   });
+
+  useEffect(() => {
+    const locale = getLocaleCookie();
+    if (locale) {
+      setCurrentLocale(locale);
+    }
+  }, []);
 
   useEffect(() => {
     fetchPosts();
@@ -86,8 +99,8 @@ export default function AdminDashboard() {
         setDeleteDialog({ open: false, slug: null });
         setMessageDialog({
           open: true,
-          title: "Delete Failed",
-          description: "Failed to delete the post. Please try again.",
+          title: t("deleteFailed"),
+          description: t("deleteFailedDescription"),
           variant: "destructive",
         });
       }
@@ -95,8 +108,8 @@ export default function AdminDashboard() {
       setDeleteDialog({ open: false, slug: null });
       setMessageDialog({
         open: true,
-        title: "Error",
-        description: "An error occurred while deleting the post.",
+        title: t("error"),
+        description: t("errorDescription"),
         variant: "destructive",
       });
     }
@@ -127,19 +140,22 @@ export default function AdminDashboard() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
             <div>
-              <h1 className="text-lg font-semibold font-serif">hibuno</h1>
+              <h1 className="text-lg font-semibold font-serif">{t("title")}</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Content Dashboard
+                {t("subtitle")}
               </p>
             </div>
-            <Button
-              onClick={() => (window.location.href = "/editor")}
-              size="sm"
-              className="text-xs h-8 bg-foreground text-background"
-            >
-              <Plus className="w-3 h-3 sm:mr-1" />
-              <span className="hidden sm:inline">New Post</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher currentLocale={currentLocale} />
+              <Button
+                onClick={() => (window.location.href = "/editor")}
+                size="sm"
+                className="text-xs h-8 bg-foreground text-background"
+              >
+                <Plus className="w-3 h-3 sm:mr-1" />
+                <span className="hidden sm:inline">{t("newPost")}</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -153,7 +169,7 @@ export default function AdminDashboard() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search posts..."
+              placeholder={t("searchPlaceholder")}
               className="pl-8 h-9"
             />
           </div>
@@ -166,7 +182,7 @@ export default function AdminDashboard() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              All ({posts.length})
+              {t("all")} ({posts.length})
             </button>
             <button
               onClick={() => setFilter("published")}
@@ -176,7 +192,7 @@ export default function AdminDashboard() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Published ({posts.filter((p) => p.published).length})
+              {t("published")} ({posts.filter((p) => p.published).length})
             </button>
             <button
               onClick={() => setFilter("draft")}
@@ -186,7 +202,7 @@ export default function AdminDashboard() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Drafts ({posts.filter((p) => !p.published).length})
+              {t("drafts")} ({posts.filter((p) => !p.published).length})
             </button>
           </div>
         </div>
@@ -195,11 +211,9 @@ export default function AdminDashboard() {
         {filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-            <h2 className="text-lg font-medium mb-1">No posts found</h2>
+            <h2 className="text-lg font-medium mb-1">{t("noPostsFound")}</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {search
-                ? "Try a different search term"
-                : "Get started by creating your first post"}
+              {search ? t("tryAdjusting") : t("getStarted")}
             </p>
             {!search && (
               <Button
@@ -207,7 +221,7 @@ export default function AdminDashboard() {
                 size="sm"
                 className="text-xs h-8"
               >
-                <Plus className="w-3 h-3 mr-1" /> Create Post
+                <Plus className="w-3 h-3 mr-1" /> {t("createPost")}
               </Button>
             )}
           </div>
@@ -228,7 +242,7 @@ export default function AdminDashboard() {
                     />
                     {!post.published && (
                       <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neutral-500/90 text-white text-[10px] font-medium rounded">
-                        Draft
+                        {t("draft")}
                       </span>
                     )}
                   </div>
@@ -237,7 +251,7 @@ export default function AdminDashboard() {
                     <FileText className="w-8 h-8 text-muted-foreground" />
                     {!post.published && (
                       <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neutral-500/90 text-white text-[10px] font-medium rounded">
-                        Draft
+                        {t("draft")}
                       </span>
                     )}
                   </div>
@@ -260,19 +274,19 @@ export default function AdminDashboard() {
                           }
                           className="w-full px-3 py-1.5 text-left text-xs hover:bg-muted flex items-center gap-2"
                         >
-                          <Pencil className="w-3 h-3" /> Edit
+                          <Pencil className="w-3 h-3" /> {t("edit")}
                         </button>
                         <button
                           onClick={() => window.open(`/${post.slug}`, "_blank")}
                           className="w-full px-3 py-1.5 text-left text-xs hover:bg-muted flex items-center gap-2"
                         >
-                          <Eye className="w-3 h-3" /> View
+                          <Eye className="w-3 h-3" /> {t("view")}
                         </button>
                         <button
                           onClick={() => handleDeleteClick(post.slug)}
                           className="w-full px-3 py-1.5 text-left text-xs hover:bg-destructive/10 text-destructive flex items-center gap-2"
                         >
-                          <Trash2 className="w-3 h-3" /> Delete
+                          <Trash2 className="w-3 h-3" /> {t("delete")}
                         </button>
                       </div>
                     </div>
@@ -298,7 +312,7 @@ export default function AdminDashboard() {
                           : "bg-neutral-100 text-neutral-700"
                       }`}
                     >
-                      {post.published ? "Published" : "Draft"}
+                      {post.published ? t("published") : t("draft")}
                     </span>
                   </div>
                 </div>
@@ -313,7 +327,7 @@ export default function AdminDashboard() {
                     }
                     className="flex-1 text-xs h-7"
                   >
-                    <Pencil className="w-3 h-3 mr-1" /> Edit
+                    <Pencil className="w-3 h-3 mr-1" /> {t("edit")}
                   </Button>
                   <Button
                     variant="ghost"
@@ -321,7 +335,7 @@ export default function AdminDashboard() {
                     onClick={() => window.open(`/${post.slug}`, "_blank")}
                     className="flex-1 text-xs h-7"
                   >
-                    <Eye className="w-3 h-3 mr-1" /> View
+                    <Eye className="w-3 h-3 mr-1" /> {t("view")}
                   </Button>
                 </div>
               </div>
@@ -334,10 +348,10 @@ export default function AdminDashboard() {
       <AlertDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, slug: null })}
-        title="Delete Post"
-        description="Are you sure you want to delete this post? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t("deleteTitle")}
+        description={t("deleteDescription")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
         onConfirm={handleDeleteConfirm}
         variant="destructive"
       />

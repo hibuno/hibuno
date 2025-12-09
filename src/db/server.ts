@@ -188,6 +188,10 @@ export function updatePost(
       updates.social_media_links !== undefined
         ? updates.social_media_links
         : existingPost.social_media_links,
+    preview_enabled:
+      updates.preview_enabled !== undefined
+        ? updates.preview_enabled
+        : existingPost.preview_enabled,
   };
   posts[index] = updatedPost;
   savePosts(posts);

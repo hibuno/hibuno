@@ -38,6 +38,8 @@ export interface Post {
   product_description?: string | null | undefined;
   // Social media fields
   social_media_links?: SocialMediaLink[] | null | undefined;
+  // Code preview - combines HTML/CSS/JS code blocks into iframe preview
+  preview_enabled?: boolean | null | undefined;
 }
 
 // Translation info for a post

@@ -45,6 +45,7 @@ import { getLocaleCookie } from "@/lib/locale-utils";
 import { defaultLocale, localeNames, type Locale } from "@/i18n/config";
 import type { PostTranslation } from "@/db/types";
 import { TranslationReference } from "@/components/editor/translation-helper";
+import { useTranslations } from "next-intl";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -196,6 +197,8 @@ export type EditorPageProps = {
 };
 
 export default function EditorPage({ params }: EditorPageProps) {
+  const t = useTranslations("editor");
+  const tCommon = useTranslations("common");
   const { slug: slugArray } = use(params);
   const slug = slugArray?.[0];
   const isEditMode = !!slug;
@@ -217,6 +220,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     homepage: "",
     product_description: "",
     social_media_links: [],
+    preview_enabled: false,
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
@@ -417,8 +421,8 @@ export default function EditorPage({ params }: EditorPageProps) {
       if (!isAutoSave) {
         setMessageDialog({
           open: true,
-          title: "Validation Error",
-          description: "Title and slug are required to save the post.",
+          title: t("validationError"),
+          description: t("titleSlugRequired"),
           variant: "destructive",
         });
       }
@@ -464,8 +468,8 @@ export default function EditorPage({ params }: EditorPageProps) {
       if (!isAutoSave) {
         setMessageDialog({
           open: true,
-          title: "Save Failed",
-          description: `Failed to save the post: ${
+          title: t("saveFailed"),
+          description: `${t("saveFailedDesc")}: ${
             error instanceof Error ? error.message : "Unknown error"
           }`,
           variant: "destructive",
@@ -520,8 +524,8 @@ export default function EditorPage({ params }: EditorPageProps) {
     } catch (error) {
       setMessageDialog({
         open: true,
-        title: "Error",
-        description: `Failed to create translation: ${
+        title: tCommon("error"),
+        description: `${
           error instanceof Error ? error.message : "Unknown error"
         }`,
         variant: "destructive",
@@ -590,10 +594,10 @@ export default function EditorPage({ params }: EditorPageProps) {
               size="sm"
               onClick={() => (window.location.href = "/admin")}
               className="text-xs h-7 -ml-2 hover:bg-muted"
-              aria-label="Go back to admin dashboard"
+              aria-label={t("backToDashboard")}
             >
-              <ArrowLeft className="w-3 h-3 mr-1" aria-hidden="true" /> Back to
-              Dashboard
+              <ArrowLeft className="w-3 h-3 mr-1" aria-hidden="true" />{" "}
+              {t("backToDashboard")}
             </Button>
             {isEditMode && (
               <span
@@ -603,11 +607,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                     : "bg-muted text-muted-foreground"
                 }`}
                 role="status"
-                aria-label={`Post status: ${
-                  formData.published ? "Published" : "Draft"
-                }`}
               >
-                {formData.published ? "Published" : "Draft"}
+                {formData.published ? tCommon("published") : tCommon("draft")}
               </span>
             )}
           </div>
@@ -619,7 +620,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                 aria-live="polite"
               >
                 <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />{" "}
-                Auto-saving...
+                {t("autoSaving")}
               </span>
             )}
             {!autoSaving && lastSaved && (
@@ -628,7 +629,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                 role="status"
                 aria-live="polite"
               >
-                <Check className="w-3 h-3" aria-hidden="true" /> Saved
+                <Check className="w-3 h-3" aria-hidden="true" />{" "}
+                {tCommon("saved")}
               </span>
             )}
             {isEditMode && (
@@ -639,10 +641,10 @@ export default function EditorPage({ params }: EditorPageProps) {
                   window.open(`/${slug}?t=${Date.now()}`, "_blank")
                 }
                 className="hidden sm:flex text-xs h-7"
-                aria-label="Preview post in new tab"
+                aria-label={tCommon("preview")}
               >
                 <ExternalLink className="w-3 h-3 mr-1" aria-hidden="true" />{" "}
-                Preview
+                {tCommon("preview")}
               </Button>
             )}
             <Button
@@ -651,7 +653,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               aria-disabled={saving || autoSaving}
               size="sm"
               className="text-xs h-7 bg-foreground text-background hover:bg-foreground/90"
-              aria-label={saving ? "Saving post" : "Save post"}
+              aria-label={saving ? tCommon("saving") : tCommon("save")}
             >
               {saving ? (
                 <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
@@ -659,7 +661,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                 <Save className="w-3 h-3 sm:mr-1" aria-hidden="true" />
               )}
               <span className="hidden sm:inline">
-                {saving ? "Saving" : "Save"}
+                {saving ? tCommon("saving") : tCommon("save")}
               </span>
             </Button>
             {/* Mobile right sidebar toggle */}
@@ -729,14 +731,14 @@ export default function EditorPage({ params }: EditorPageProps) {
                 onClick={handleNewDocumentClick}
                 size="sm"
                 className="w-full text-xs h-7 bg-foreground text-background"
-                aria-label="Create new document"
+                aria-label={t("newDocument")}
               >
-                <Plus className="w-3 h-3 mr-1" aria-hidden="true" /> New
-                Document
+                <Plus className="w-3 h-3 mr-1" aria-hidden="true" />{" "}
+                {t("newDocument")}
               </Button>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                  UI Language
+                  {t("uiLanguage")}
                 </span>
                 <LanguageSwitcher currentLocale={currentLocale} />
               </div>
@@ -751,7 +753,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                     aria-hidden="true"
                   />
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                    Post Language
+                    {t("postLanguage")}
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -763,41 +765,43 @@ export default function EditorPage({ params }: EditorPageProps) {
                     }
                   >
                     <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Select language" />
+                      <SelectValue placeholder={t("selectLanguage")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="id">Bahasa Indonesia</SelectItem>
+                      <SelectItem value="en">{t("english")}</SelectItem>
+                      <SelectItem value="id">{t("indonesian")}</SelectItem>
                     </SelectContent>
                   </Select>
                   {/* Translations list */}
                   {translations.length > 0 && (
                     <div className="space-y-1">
-                      {translations.map((t) => (
+                      {translations.map((trans) => (
                         <div
-                          key={t.locale}
+                          key={trans.locale}
                           className="flex items-center justify-between text-xs"
                         >
                           <span
-                            className={t.exists ? "" : "text-muted-foreground"}
+                            className={
+                              trans.exists ? "" : "text-muted-foreground"
+                            }
                           >
-                            {localeNames[t.locale as Locale]}
+                            {localeNames[trans.locale as Locale]}
                           </span>
-                          {t.exists ? (
-                            t.slug !== slug ? (
+                          {trans.exists ? (
+                            trans.slug !== slug ? (
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="h-5 px-2 text-[10px]"
                                 onClick={() => {
-                                  window.location.href = `/editor/${t.slug}`;
+                                  window.location.href = `/editor/${trans.slug}`;
                                 }}
                               >
-                                Edit
+                                {tCommon("edit")}
                               </Button>
                             ) : (
                               <span className="text-[10px] text-muted-foreground">
-                                Current
+                                {t("current")}
                               </span>
                             )
                           ) : (
@@ -806,14 +810,14 @@ export default function EditorPage({ params }: EditorPageProps) {
                               size="sm"
                               className="h-5 px-2 text-[10px]"
                               onClick={() =>
-                                handleCreateTranslation(t.locale as Locale)
+                                handleCreateTranslation(trans.locale as Locale)
                               }
                               disabled={creatingTranslation}
                             >
                               {creatingTranslation ? (
                                 <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
-                                "Create"
+                                tCommon("create")
                               )}
                             </Button>
                           )}
@@ -841,9 +845,12 @@ export default function EditorPage({ params }: EditorPageProps) {
                         ) : (
                           <Plus className="w-3 h-3 mr-1" />
                         )}
-                        Create{" "}
-                        {formData.locale === "en" ? "Indonesian" : "English"}{" "}
-                        Version
+                        {t("createTranslation", {
+                          language:
+                            formData.locale === "en"
+                              ? t("indonesian")
+                              : t("english"),
+                        })}
                       </Button>
                     </div>
                   )}
@@ -855,7 +862,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               <div className="flex items-center gap-2 mb-2">
                 <Upload className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Insert Text from Document
+                  {t("insertTextFromDocument")}
                 </span>
               </div>
               <OCRDropZone onTextExtracted={handleOCRTextExtracted} />
@@ -871,14 +878,14 @@ export default function EditorPage({ params }: EditorPageProps) {
                   id="recent-posts-heading"
                   className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide"
                 >
-                  Recent Posts
+                  {t("recentPosts")}
                 </h2>
               </div>
               <nav aria-labelledby="recent-posts-heading">
                 <ul className="space-y-1" role="list">
                   {recentPosts.length === 0 ? (
                     <li className="text-[10px] text-muted-foreground py-2">
-                      No recent posts
+                      {t("noRecentPosts")}
                     </li>
                   ) : (
                     recentPosts.map((recentPost) => (
@@ -968,10 +975,10 @@ export default function EditorPage({ params }: EditorPageProps) {
           <div className="sticky top-0 lg:top-11 max-h-screen lg:max-h-[calc(100vh-2.75rem)] overflow-y-auto">
             {/* Mobile close button */}
             <div className="lg:hidden flex items-center justify-between p-3 border-b border-border">
-              <span className="text-sm font-medium">Settings</span>
+              <span className="text-sm font-medium">{tCommon("settings")}</span>
               <button
                 onClick={() => setRightSidebarOpen(false)}
-                aria-label="Close settings sidebar"
+                aria-label={tCommon("settings")}
                 className="p-1.5 hover:bg-muted rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
@@ -979,7 +986,7 @@ export default function EditorPage({ params }: EditorPageProps) {
             </div>
 
             <SidebarSection
-              title="Metadata"
+              title={t("metadata")}
               action={
                 <button
                   onClick={async () => {
@@ -994,9 +1001,9 @@ export default function EditorPage({ params }: EditorPageProps) {
                   }}
                   disabled={generatingMetadata}
                   aria-disabled={generatingMetadata}
-                  aria-label="Generate metadata with AI"
+                  aria-label={t("generateMetadata")}
                   className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  title="Generate metadata with AI"
+                  title={t("generateMetadata")}
                 >
                   {generatingMetadata ? (
                     <Loader2
@@ -1011,8 +1018,8 @@ export default function EditorPage({ params }: EditorPageProps) {
                   )}
                   <span className="sr-only">
                     {generatingMetadata
-                      ? "Generating metadata..."
-                      : "Generate metadata with AI"}
+                      ? t("generatingMetadata")
+                      : t("generateMetadata")}
                   </span>
                 </button>
               }
@@ -1035,7 +1042,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               />
             </SidebarSection>
 
-            <SidebarSection title="Cover">
+            <SidebarSection title={t("cover")}>
               <ImageDropZone
                 currentImage={coverImagePreview}
                 onImageSelect={handleCoverImageSelect}
@@ -1048,7 +1055,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               <div className="space-y-2">
                 <div>
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium block mb-1">
-                    Status
+                    {t("status")}
                   </label>
                   <Select
                     value={formData.published ? "published" : "draft"}
@@ -1057,17 +1064,19 @@ export default function EditorPage({ params }: EditorPageProps) {
                     }
                   >
                     <SelectTrigger className="h-8 w-full text-xs">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t("selectStatus")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                      <SelectItem value="published">
+                        {tCommon("published")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
-                    <Calendar className="w-3 h-3" /> Date & Time
+                    <Calendar className="w-3 h-3" /> {t("dateTime")}
                   </label>
                   <Input
                     type="datetime-local"
@@ -1089,13 +1098,39 @@ export default function EditorPage({ params }: EditorPageProps) {
                     className="h-8 text-xs"
                   />
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    Leave empty to use current time
+                    {t("leaveEmptyCurrentTime")}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium block mb-1">
+                    {t("codePreview")}
+                  </label>
+                  <Select
+                    value={formData.preview_enabled ? "enabled" : "disabled"}
+                    onValueChange={(value) =>
+                      handleInputChange("preview_enabled", value === "enabled")
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-full text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="disabled">
+                        {tCommon("disabled")}
+                      </SelectItem>
+                      <SelectItem value="enabled">
+                        {tCommon("enabled")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {t("codePreviewDesc")}
                   </p>
                 </div>
               </div>
             </SidebarSection>
 
-            <SidebarSection title="Social Media">
+            <SidebarSection title={t("socialMedia")}>
               <SocialMediaEditor
                 links={
                   Array.isArray(formData.social_media_links)
@@ -1108,10 +1143,10 @@ export default function EditorPage({ params }: EditorPageProps) {
               />
             </SidebarSection>
 
-            <SidebarSection title="Product Info">
+            <SidebarSection title={t("productInfo")}>
               <div>
                 <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
-                  <DollarSign className="w-3 h-3" /> Price
+                  <DollarSign className="w-3 h-3" /> {t("price")}
                 </label>
                 <Input
                   type="text"
@@ -1130,7 +1165,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               </div>
               <div>
                 <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
-                  <Percent className="w-3 h-3" /> Discount
+                  <Percent className="w-3 h-3" /> {t("discount")}
                 </label>
                 <Input
                   type="number"
@@ -1150,7 +1185,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               </div>
               <div>
                 <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1 font-medium">
-                  <Globe className="w-3 h-3" /> Homepage
+                  <Globe className="w-3 h-3" /> {t("homepage")}
                 </label>
                 <Input
                   type="url"
@@ -1165,7 +1200,7 @@ export default function EditorPage({ params }: EditorPageProps) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center gap-1 font-medium">
-                    <Info className="w-3 h-3" /> Description
+                    <Info className="w-3 h-3" /> {t("description")}
                   </label>
                   <button
                     onClick={async () => {
@@ -1209,7 +1244,7 @@ Remember: Match the language of the content EXACTLY!`,
                     }}
                     disabled={generatingProductDesc}
                     className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50"
-                    title="Generate with AI"
+                    title={t("generateWithAI")}
                   >
                     {generatingProductDesc ? (
                       <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
@@ -1237,10 +1272,10 @@ Remember: Match the language of the content EXACTLY!`,
       <AlertDialog
         open={newDocDialog}
         onOpenChange={setNewDocDialog}
-        title="Create New Document"
-        description="Create a new document? Any unsaved changes will be lost."
-        confirmText="Create New"
-        cancelText="Cancel"
+        title={t("createNewDocument")}
+        description={t("createNewDocumentDesc")}
+        confirmText={t("createNew")}
+        cancelText={tCommon("cancel")}
         onConfirm={handleNewDocumentConfirm}
         variant="default"
       />
