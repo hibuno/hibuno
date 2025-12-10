@@ -13,6 +13,7 @@ import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { LocaleDetector } from "@/components/locale-detector";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Load custom local serif font and expose CSS variable
 const SourceSerif = localFont({
@@ -72,6 +73,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       {isProduction && <Analytics />}
+      {isProduction && <SpeedInsights />}
       <body
         className={`font-sans ${InterFont.variable} ${GeistMono.variable} ${SourceSerif.variable} ${GloriaHallelujah.variable} antialiased`}
       >
