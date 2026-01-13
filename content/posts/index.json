@@ -200,5 +200,32 @@
     "product_description": null,
     "social_media_links": [],
     "preview_enabled": true
+  },
+  {
+    "slug": "pemahaman-web-development",
+    "title": "Mengerti Web Development: Sederhana dan Komprehensif",
+    "excerpt": "Baca pembahasan tentang web development yang mudah dipahami, sederhana, namun komprehensif. Temukan bagaimana pengembang web membuat situs yang menarik dan praktis.",
+    "content": "<p>Halo,</p><p>Selamat datang di pembahasan pertama dari seri <strong><em>Coding with Hibuno</em></strong>, pada seri ini kita akan mempelajari bagaimana proses <em>web development</em> bekerja dengan bahasa yang mudah dipahami, sederhana, namun tetap komprehensif.</p><h3>Apa itu Web Development?</h3><p>Secara sederhana, <em>web development</em> adalah proses pembuatan situs yang nantinya akan dibuka melalui <em>browser</em> entah itu melalui <em>handphone</em>, <em>laptop</em>,<em> </em>maupun <em>personal computer</em>.</p><p></p><p><strong>Web Development</strong> adalah proses membangun sebuah <em>website</em> atau aplikasi yang bisa kamu buka lewat internet.</p><p>Bayangkan ini seperti membangun sebuah rumah digital. Ada tukang yang menyusun batu bata, mengecat dinding, dan memastikan listrik menyala. Dalam dunia web, \"tukang\" ini menggunakan bahasa pemrograman (kode-kode khusus) untuk membuat, mendesain, dan merawat website agar bisa kamu akses.</p><h3>Browser sebagai Kanvas</h3><p>Coba bayangkan <strong>Web Browser</strong> (seperti Google Chrome, Firefox, atau Safari) sebagai sebuah <strong>kanvas kosong</strong> atau kertas gambar.</p><ul><li><p>Browser adalah aplikasi yang menjadi \"jendela\" kamu ke internet.</p></li><li><p>Tugas browser adalah membaca kode-kode rumit yang ditulis oleh pembuat web, lalu menerjemahkannya menjadi tampilan gambar, tulisan, dan video yang rapi di layarmu.</p></li></ul><h3>HTML dan CSS sebagai Kuas dan Cat</h3><p>Untuk \"melukis\" di atas kanvas (browser) tadi, pengembang web menggunakan dua alat utama: <strong>HTML</strong> dan <strong>CSS</strong>.</p><p>1. HTML (Kerangka &amp; Isi)</p><p><strong>HTML</strong> adalah singkatan dari <em>HyperText Markup Language</em>.</p><ul><li><p><strong>Fungsinya:</strong> Membangun struktur dasar.</p></li><li><p><strong>Analogi:</strong> Bayangkan HTML seperti <strong>sketsa pensil</strong> atau <strong>kerangka tulang</strong>. HTML memberi tahu browser <em>apa saja isinya</em>.</p><ul><li><p>\"Ini adalah Judul.\"</p></li><li><p>\"Ini adalah Paragraf.\"</p></li><li><p>\"Taruh Gambar di sini.\"</p></li></ul></li><li><p>Tanpa HTML, tidak ada konten yang muncul.</p></li></ul><p>2. CSS (Gaya &amp; Hiasan)</p><p><strong>CSS</strong> adalah singkatan dari <em>Cascading Style Sheets</em>.</p><ul><li><p><strong>Fungsinya:</strong> Menghias dan merapikan.</p></li><li><p><strong>Analogi:</strong> Bayangkan CSS sebagai <strong>cat warna, baju, dan tata letak</strong>. CSS mengatur <em>bagaimana penampilannya</em>.</p><ul><li><p>\"Ubah warna judul jadi merah.\"</p></li><li><p>\"Gunakan jenis huruf yang cantik.\"</p></li><li><p>\"Beri jarak antar paragraf supaya tidak berdempetan.\"</p></li></ul></li></ul><h3>Kesimpulan</h3><p>Jadi, pengembang web menggunakan <strong>HTML</strong> untuk menyusun isinya, dan <strong>CSS</strong> untuk membuatnya terlihat indah. Keduanya bekerja sama di dalam <strong>Browser</strong> untuk menyajikan website yang keren dan enak dilihat di HP maupun laptopmu.</p>",
+    "content_group_id": null,
+    "locale": null,
+    "cover_image_url": null,
+    "tags": [
+      "web development",
+      "pemrograman web",
+      "browser",
+      "html",
+      "css",
+      "pembuatan website"
+    ],
+    "published": false,
+    "published_at": null,
+    "created_at": "2026-01-11T16:05:04.867Z",
+    "updated_at": "2026-01-11T16:05:04.885Z",
+    "price": null,
+    "discount_percentage": null,
+    "homepage": null,
+    "product_description": null,
+    "social_media_links": [],
+    "id": "9b7dafbd-c367-4b42-8b76-00b095123519"
   }
 ]

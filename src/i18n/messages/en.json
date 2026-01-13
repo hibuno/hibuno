@@ -2,6 +2,7 @@
   "common": {
     "home": "Home",
     "codes": "Source Codes",
+    "about": "About",
     "search": "Search articles...",
     "searchPlaceholder": "Search articles, tutorials, tips...",
     "searching": "Searching...",
@@ -16,6 +17,7 @@
     "openSearch": "Open search",
     "goHome": "Go to home page",
     "goCodes": "Go to codes page",
+    "goAbout": "Go to about page",
     "startTyping": "Start typing to search articles",
     "youtube": "YouTube Channel",
     "tiktok": "TikTok Channel",
@@ -47,6 +49,19 @@
     "recentPosts": "Recent Posts",
     "noPosts": "No posts yet",
     "postsWillAppear": "Posts will appear here after being published."
+  },
+  "products": {
+    "title": "Hibuno Products",
+    "subtitle": "Explore our suite of digital tools designed to enhance your workflow and creativity.",
+    "spy": {
+      "description": "Advanced monitoring and analytics platform for tracking digital performance and insights."
+    },
+    "studio": {
+      "description": "Creative design workspace with powerful tools for building beautiful digital experiences."
+    },
+    "playground": {
+      "description": "Interactive development environment for experimenting with code and testing ideas."
+    }
   },
   "footer": {
     "tagline": "Learn about the digital world easily and fun.",

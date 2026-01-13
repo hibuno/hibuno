@@ -3,6 +3,7 @@ import { ErrorBoundary } from "@/components/blog/error-boundary";
 import type { Post } from "@/components/blog/post-card";
 import { SiteHeader } from "@/components/blog/site-header";
 import { SiteFooter } from "@/components/blog/site-footer";
+import { ProductShortcuts } from "@/components/blog/product-shortcuts";
 import { StructuredData } from "@/components/blog/structured-data";
 import { postQueries } from "@/lib/post-queries";
 import { retryDatabaseOperation } from "@/lib/retry-helper";
@@ -71,6 +72,7 @@ function ErrorState({ error }: { error: string }) {
           <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
+      <ProductShortcuts />
     </main>
   );
 }
@@ -90,6 +92,7 @@ export default async function HomePage() {
       <div className="min-h-screen flex flex-col">
         <SiteHeader />
         <AnimatedHomepage recentPosts={recentPosts} />
+        <ProductShortcuts />
         <SiteFooter />
       </div>
     </ErrorBoundary>

@@ -27,11 +27,16 @@ interface SiteHeaderProps {
   className?: string;
 }
 
-const getNavLinks = (t: any): readonly NavLink[] =>
-  [
+const getNavLinks = (t: any, locale: string): readonly NavLink[] => {
+  const aboutSlug =
+    locale === "en" ? "/what-is-hibuno-com" : "/apa-itu-hibuno-com";
+
+  return [
     { name: t("common.home"), href: "/", label: t("common.home") },
     { name: t("common.codes"), href: "/codes", label: t("common.codes") },
+    { name: t("common.about"), href: aboutSlug, label: t("common.about") },
   ] as const;
+};
 
 const SearchBar = memo(({ onClose }: { onClose?: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -339,6 +344,12 @@ const SearchDialog = memo(
                       G C
                     </kbd>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <span>{t("common.goAbout")}</span>
+                    <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium">
+                      G A
+                    </kbd>
+                  </div>
                 </div>
               </CommandGroup>
 
@@ -416,7 +427,7 @@ export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
   const router = useRouter();
   const t = useTranslations();
   const locale = useLocale() as Locale;
-  const NAV_LINKS = getNavLinks(t);
+  const NAV_LINKS = getNavLinks(t, locale);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -444,6 +455,22 @@ export const SiteHeader = memo(({ className }: SiteHeaderProps) => {
         if (lastKey === "g") {
           e.preventDefault();
           router.push("/codes");
+          (window as any).__lastKey = null;
+          return;
+        }
+      }
+
+      // G + A: Go to About
+      if (e.key === "a" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+
+        const lastKey = (window as any).__lastKey;
+        if (lastKey === "g") {
+          e.preventDefault();
+          const aboutSlug =
+            locale === "en" ? "/what-is-hibuno-com" : "/apa-itu-hibuno-com";
+          router.push(aboutSlug);
           (window as any).__lastKey = null;
           return;
         }

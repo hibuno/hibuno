@@ -11,6 +11,8 @@ import PostNavigation from "@/components/blog/post-navigation";
 import { ReadingProgress } from "@/components/blog/reading-progress-bar";
 import SimilarPosts from "@/components/blog/similar-posts";
 import { SiteHeader } from "@/components/blog/site-header";
+import { SiteFooter } from "@/components/blog/site-footer";
+import { ProductShortcuts } from "@/components/blog/product-shortcuts";
 import { StructuredData } from "@/components/blog/structured-data";
 import CodePreview from "@/components/blog/code-preview";
 import type { SelectPost, PostTranslation } from "@/db/types";
@@ -298,7 +300,7 @@ function PostImage({ post }: { post: SelectPost }) {
         alt={post.title}
         className="absolute top-0 left-0 w-full h-[60vh] object-cover z-0 opacity-20"
       />
-      <div className="absolute top-0 left-0 w-full h-[60vh] object-cover z-1 bg-gradient-to-b from-transparent via-85% via-white to-white"></div>
+      <div className="absolute top-0 left-0 w-full h-[60vh] object-cover z-1 bg-linear-to-b from-transparent via-85% via-white to-white"></div>
     </>
   );
 }
@@ -436,6 +438,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
             </div>
           </main>
+
+          <ProductShortcuts />
+          <SiteFooter />
         </div>
       </ErrorBoundary>
     );

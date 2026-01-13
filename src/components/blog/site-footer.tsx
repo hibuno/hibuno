@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { memo } from "react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { siYoutube, siTiktok, siInstagram } from "simple-icons";
 
 const getSocialLinks = () =>
@@ -72,20 +73,31 @@ FooterSection.displayName = "FooterSection";
 export const SiteFooter = memo(() => {
   const t = useTranslations("footer");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const currentYear = new Date().getFullYear();
+
+  const aboutSlug =
+    locale === "en" ? "/what-is-hibuno-com" : "/apa-itu-hibuno-com";
 
   const navigationLinks = [
     { name: tCommon("home"), href: "/" },
     { name: tCommon("codes"), href: "/codes" },
+    { name: tCommon("about"), href: aboutSlug },
     { name: t("sitemap"), href: "/sitemap.xml" },
+  ];
+
+  const productLinks = [
+    { name: "Spy", href: "https://spy.hibuno.com" },
+    { name: "Studio", href: "https://studio.hibuno.com" },
+    { name: "Playground", href: "https://playground.hibuno.com" },
   ];
 
   const socialLinks = getSocialLinks();
 
   return (
-    <footer className="border-t border-border bg-card/30 mt-16">
+    <footer className="border-t border-border bg-card/30">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
             <Link
@@ -99,6 +111,9 @@ export const SiteFooter = memo(() => {
 
           {/* Navigation */}
           <FooterSection title={t("navigation")} links={navigationLinks} />
+
+          {/* Products */}
+          <FooterSection title="Products" links={productLinks} />
 
           {/* Social */}
           <FooterSection title={t("socialMedia")} links={socialLinks} />

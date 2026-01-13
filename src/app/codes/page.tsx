@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ErrorBoundary } from "@/components/blog/error-boundary";
 import { SiteHeader } from "@/components/blog/site-header";
 import { SiteFooter } from "@/components/blog/site-footer";
+import { ProductShortcuts } from "@/components/blog/product-shortcuts";
 import { StructuredData } from "@/components/blog/structured-data";
 import { CodesGrid } from "@/components/blog/codes-grid";
 import { postQueries } from "@/lib/post-queries";
@@ -60,6 +61,7 @@ export default async function CodesPage() {
           <CodesGrid posts={posts} />
         )}
 
+        <ProductShortcuts />
         <SiteFooter />
       </div>
     </ErrorBoundary>

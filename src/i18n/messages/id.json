@@ -2,6 +2,7 @@
   "common": {
     "home": "Beranda",
     "codes": "Kode Sumber",
+    "about": "Tentang",
     "search": "Cari artikel...",
     "searchPlaceholder": "Cari artikel, tutorial, tips...",
     "searching": "Mencari...",
@@ -16,6 +17,7 @@
     "openSearch": "Buka pencarian",
     "goHome": "Ke halaman beranda",
     "goCodes": "Ke halaman kode",
+    "goAbout": "Ke halaman tentang",
     "startTyping": "Mulai ketik untuk mencari artikel",
     "youtube": "Kanal YouTube",
     "tiktok": "Kanal TikTok",
@@ -47,6 +49,19 @@
     "recentPosts": "Postingan Terbaru",
     "noPosts": "Belum ada postingan",
     "postsWillAppear": "Postingan akan muncul di sini setelah dipublikasikan."
+  },
+  "products": {
+    "title": "Produk Hibuno",
+    "subtitle": "Jelajahi rangkaian alat digital kami yang dirancang untuk meningkatkan alur kerja dan kreativitas Anda.",
+    "spy": {
+      "description": "Platform monitoring dan analitik canggih untuk melacak performa digital dan wawasan."
+    },
+    "studio": {
+      "description": "Ruang kerja desain kreatif dengan alat yang powerful untuk membangun pengalaman digital yang indah."
+    },
+    "playground": {
+      "description": "Lingkungan pengembangan interaktif untuk bereksperimen dengan kode dan menguji ide."
+    }
   },
   "footer": {
     "tagline": "Belajar tentang dunia digital dengan mudah dan menyenangkan.",

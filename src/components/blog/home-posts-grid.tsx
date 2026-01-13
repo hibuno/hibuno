@@ -102,14 +102,21 @@ export const AnimatedHomepage = memo(
 
     if (!recentPosts?.length) {
       return (
-        <main className="mx-auto max-w-4xl px-4 py-12">
-          <div className="text-center">
-            <h2 className="text-lg font-medium mb-1">{t("noPosts")}</h2>
-            <p className="text-muted-foreground text-sm">
-              {t("postsWillAppear")}
-            </p>
+        <motion.main
+          variants={ANIMATION.container}
+          initial="hidden"
+          animate="visible"
+        >
+          <HeroSection />
+          <div className="mx-auto max-w-4xl px-4 py-12">
+            <div className="text-center">
+              <h2 className="text-lg font-medium mb-1">{t("noPosts")}</h2>
+              <p className="text-muted-foreground text-sm">
+                {t("postsWillAppear")}
+              </p>
+            </div>
           </div>
-        </main>
+        </motion.main>
       );
     }
 
